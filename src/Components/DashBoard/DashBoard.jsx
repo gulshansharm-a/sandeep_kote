@@ -1,5 +1,4 @@
 import { auth } from "../../Authentication/firebase";
-import { signOut } from "firebase/auth";
 import { useState, useEffect } from "react";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import SideBar from "./DashBoardComponents/SideBar";
@@ -17,7 +16,7 @@ export default function Dashboard() {
       if (user) {
         // If the user is authenticated, fetch additional information from Firestore
         const firestore = getFirestore();
-        const adminDocRef = doc(firestore, "Admin", user.uid);
+        const adminDocRef = doc(firestore, "User", user.uid);
 
         console.log(user.uid);
 
@@ -26,7 +25,7 @@ export default function Dashboard() {
 
           if (adminDocSnapshot.exists()) {
             // If the document exists, set the adminName state
-            setAdminName(adminDocSnapshot.data().name);
+            setAdminName(adminDocSnapshot.data().email);
           } else {
             // Handle the case where the document doesn't exist
             console.log("Admin document not found");
@@ -41,15 +40,7 @@ export default function Dashboard() {
     return () => unsubscribe();
   }, []);
 
-  const handleLogOut = async () => {
-    try {
-      // Sign out the user
-      await signOut(auth);
-      // Redirect or perform other actions after logout
-    } catch (error) {
-      console.error("Error during logout:", error.message);
-    }
-  };
+  
 
   return (
     <>
@@ -57,7 +48,7 @@ export default function Dashboard() {
         {/* Display a welcome message with the user's UID or "Guest" */}
         <p>Welcome, {user ? adminName : 'Guest'}</p>
         {/* Logout button */}
-        <button onClick={handleLogOut}>Logout</button>
+        {/* <button onClick={handleLogOut}>Logout</button> */}
 
         <SideBar/>
       </div>

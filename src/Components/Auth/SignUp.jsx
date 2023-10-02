@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { auth } from "../../Authentication/firebase"; // Update the path based on your project structure
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { Link } from "react-router-dom";
+import { createUserWithEmailAndPassword} from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 
@@ -58,7 +57,7 @@ export default function SignUp() {
             const firestore = getFirestore();
             // Assuming your role is stored in a state variable, adjust as needed
             const userRole = currentRole; // Replace with your logic to determine the user's role
-            const userDocRef = doc(firestore, userRole , uid);
+            const userDocRef = doc(firestore, "User" , uid);
 
             // Set the document data (you can add more data as needed)
             await setDoc(userDocRef, {
@@ -76,6 +75,8 @@ export default function SignUp() {
         }
     };
 
+
+    
     return (
         <div className="h-screen w-screen p-3 bg-gray-800">
             <div className={`${currentIndex === 1 ? 'lg:flex-row-reverse' : 'lg:flex-row'} lg:flex lg:flex-row flex-col-reverse h-full w-full flex items-center justify-center bg-gray-900 rounded-[20px]`}>

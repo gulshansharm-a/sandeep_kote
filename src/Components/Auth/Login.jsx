@@ -1,6 +1,23 @@
 import { useState, useEffect } from "react";
+import { auth } from "../../Authentication/firebase"; // Update the path based on your project structure
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { Link } from "react-router-dom";
 
 export default function Login() {
+
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState(null);
+
+    const handleLogin = async () => {
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            // Login successful, you can redirect to the dashboard or do other actions
+        } catch (error) {
+            setError(error.message);
+        }
+    };
+
 
     const roles = ["Admin", "Distributor", "Agent"];
 
@@ -58,6 +75,7 @@ export default function Login() {
                                                 className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                 placeholder="name@company.com"
                                                 required=""
+                                                onChange={(e) => setEmail(e.target.value)}
                                             />
                                         </div>
                                         <div>
@@ -69,6 +87,7 @@ export default function Login() {
                                                 placeholder="••••••••"
                                                 className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                 required=""
+                                                onChange={(e) => setPassword(e.target.value)}
                                             />
                                         </div>
                                         <div className="flex items-center justify-between">
@@ -91,15 +110,17 @@ export default function Login() {
                                         <button
                                             type="submit"
                                             className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                                            onClick={handleLogin}
                                         >
                                             Login
                                         </button>
+                                        {error && <p style={{ color: "red" }}>{error}</p>}
                                         <p className="flex flex-row gap-10">
                                             {roles.map((role, index) => (
                                                 <a onClick={() => roleChangeInLogin(index)} key={index} className={`flex flex-row ${currentIndex === index ? 'hidden' : 'font-bold text-blue-500'}`}>
-                                                {role} ?
-                                            </a>
-                                            
+                                                    {role} ?
+                                                </a>
+
                                             ))}
                                         </p>
                                         <p className="text-sm font-light text-gray-500">

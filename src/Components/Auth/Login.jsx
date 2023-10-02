@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { auth } from "../../Authentication/firebase"; // Update the path based on your project structure
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
@@ -19,7 +18,7 @@ export default function Login() {
             setIsLoading(true); // Set loading state before making the asynchronous call
             await signInWithEmailAndPassword(auth, email, password);
             navigate('/dashboard');
-            // Login successful, you can redirect to the dashboard or do other actions
+
         } catch (error) {
             setError(error.message);
             console.log("error");

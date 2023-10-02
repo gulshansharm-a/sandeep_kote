@@ -1,4 +1,9 @@
 import { useState, useEffect } from "react";
+import { auth } from "../../Authentication/firebase"; // Update the path based on your project structure
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 
 export default function SignUp() {
 
@@ -12,6 +17,12 @@ export default function SignUp() {
         "https://res.cloudinary.com/dzhdarh4q/image/upload/v1696254768/Project2_coin/COIN1_u5yrcs.png"
     ];
 
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+
     useEffect(() => {
         setCurrentRole(roles[currentIndex]);
     }, [currentIndex]);
@@ -21,6 +32,49 @@ export default function SignUp() {
     function roleChangeInLogin(index) {
         setCurrentIndex(index);
     }
+
+    const navigate = useNavigate();
+
+    const handleSignUp = async () => {
+        try {
+            setIsLoading(true);
+
+            // Check if passwords match
+            if (password !== confirmPassword) {
+                setError("Passwords do not match");
+                console.log("notttt");
+                return;
+            }
+            const userCredential = await createUserWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
+
+            // Access the user's UID
+            const uid = userCredential.user.uid;
+
+            // Set user role in Firestore under the corresponding collection
+            const firestore = getFirestore();
+            // Assuming your role is stored in a state variable, adjust as needed
+            const userRole = currentRole; // Replace with your logic to determine the user's role
+            const userDocRef = doc(firestore, userRole , uid);
+
+            // Set the document data (you can add more data as needed)
+            await setDoc(userDocRef, {
+                email: email,
+                role: userRole
+            });
+
+            // Signup successful, you can redirect to the dashboard or do other actions
+            navigate('/dashboard');
+
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <div className="h-screen w-screen p-3 bg-gray-800">
@@ -46,9 +100,13 @@ export default function SignUp() {
                                 <div className="p-6 space-y-4 lg:space-y-6 sm:p-8">
                                     {/* <h1 className="text-[25px] text-white">{currentRole}</h1> */}
                                     <h1 className="text-xl font-bold leading-tight tracking-tight text-white lg:text-2xl">
-                                        {currentRole} Login
+                                        {currentRole} Sign up
                                     </h1>
-                                    <form className="space-y-4 lg:space-y-6" action="#">
+                                    <form className="space-y-4 lg:space-y-6" action="#"
+                                        onSubmit={(e) => {
+                                            e.preventDefault(); // Prevent the default form submission behavior
+                                            handleSignUp(e); // Pass the event object to handleSignUp
+                                        }}>
                                         <div>
                                             <label htmlFor="email" className="block mb-2 text-sm font-medium text-white">Your email</label>
                                             <input
@@ -58,6 +116,7 @@ export default function SignUp() {
                                                 className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                 placeholder="name@company.com"
                                                 required=""
+                                                onChange={(e) => setEmail(e.target.value)}
                                             />
                                         </div>
                                         <div>
@@ -69,25 +128,22 @@ export default function SignUp() {
                                                 placeholder="••••••••"
                                                 className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                 required=""
+                                                onChange={(e) => setPassword(e.target.value)}
                                             />
                                         </div>
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-start">
-                                                <div className="flex items-center h-5">
-                                                    <input
-                                                        id="remember"
-                                                        aria-describedby="remember"
-                                                        type="checkbox"
-                                                        className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300"
-                                                        required=""
-                                                    />
-                                                </div>
-                                                <div className="ml-3 text-sm">
-                                                    <label htmlFor="remember" className="text-gray-500">Remember me</label>
-                                                </div>
-                                            </div>
-                                            <a href="#" className="text-sm font-medium text-primary-600 hover:underline">Forgot password?</a>
+                                        <div>
+                                            <label htmlFor="password" className="block mb-2 text-sm font-medium text-white">Password</label>
+                                            <input
+                                                type="password"
+                                                name="password"
+                                                id="password"
+                                                placeholder="••••••••"
+                                                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                required=""
+                                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                            />
                                         </div>
+
                                         <button
                                             type="submit"
                                             className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
@@ -97,13 +153,13 @@ export default function SignUp() {
                                         <p className="flex flex-row gap-10">
                                             {roles.map((role, index) => (
                                                 <a onClick={() => roleChangeInLogin(index)} key={index} className={`flex flex-row ${currentIndex === index ? 'hidden' : 'font-bold text-blue-500'}`}>
-                                                {role} ?
-                                            </a>
-                                            
+                                                    {role} ?
+                                                </a>
+
                                             ))}
                                         </p>
                                         <p className="text-sm font-light text-gray-500">
-                                            Don’t have an account yet? <a href="#" className="font-medium text-primary-600 hover:underline">Sign up</a>
+                                            Already have an account? <a href="/login" className="font-medium text-primary-600 hover:underline">Log in</a>
                                         </p>
                                     </form>
                                 </div>

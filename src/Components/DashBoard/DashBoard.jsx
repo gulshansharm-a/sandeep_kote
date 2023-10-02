@@ -2,7 +2,7 @@ import { auth } from "../../Authentication/firebase";
 import { signOut } from "firebase/auth";
 import { useState, useEffect } from "react";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
-import DashBoardUI from "./DashBoardComponents/DashBoardUI";
+import SideBar from "./DashBoardComponents/SideBar";
 
 
 export default function Dashboard() {
@@ -59,7 +59,7 @@ export default function Dashboard() {
         {/* Logout button */}
         <button onClick={handleLogOut}>Logout</button>
 
-        <DashBoardUI/>
+        <SideBar/>
       </div>
     </>
   );

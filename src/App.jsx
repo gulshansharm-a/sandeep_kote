@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { auth } from './Authentication/firebase';
 import { useState, useEffect } from 'react';
 
-function App() {
+function App() {  
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 

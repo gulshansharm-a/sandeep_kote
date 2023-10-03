@@ -57,7 +57,7 @@ export default function Login() {
                 <div className="lg:h-screen h-[1000px] w-screen p-3 bg-gray-800">
                     <div className={`${currentIndex === 1 ? 'lg:flex-row-reverse' : 'lg:flex-row'} overflow-hidden lg:flex lg:flex-row flex-col-reverse h-full w-full flex items-center justify-center bg-gray-900 rounded-[20px]`}>
                         {/* left */}
-                        <div className="lg:w-3/5 h-full flex justify-center place-items-top lg:place-items-center bg-gray-900 rounded-[20px]">
+                        <div className="overflow-hidden lg:w-3/5 h-full flex justify-center place-items-top lg:place-items-center bg-gray-900 rounded-[20px]">
                             <img
                                 src={homeImgSrc}
                                 alt="left"

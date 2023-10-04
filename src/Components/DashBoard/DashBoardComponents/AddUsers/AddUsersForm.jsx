@@ -13,7 +13,7 @@ export default function AddUsersForm() {
                 handleCodeInApp: true,
             };
 
-            await auth.sendSignInLinkToEmail(email, actionCodeSettings);
+            await auth().sendSignInLinkToEmail(email, actionCodeSettings);
 
             // Save the email to local storage
             window.localStorage.setItem('emailForSignIn', email);

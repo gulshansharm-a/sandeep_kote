@@ -8,8 +8,8 @@ export default function AddUsers() {
                 <AddUsersForm />
             </div>
 
-            <div className="h-screen w-full lg:w-[50%] border-2 border-black">
-                <iframe className="opacity-50 md:h-[80%] h-[40%] w-full border-2 border-black" src="https://lottie.host/?file=bb538d96-bfe2-4d23-8d21-6c81eb29673b/xMsiF3QWJn.json"></iframe>
+            <div className="h-screen w-full lg:w-[50%]">
+                <iframe className="opacity-50 md:h-[80%] h-[40%] w-full" src="https://lottie.host/?file=bb538d96-bfe2-4d23-8d21-6c81eb29673b/xMsiF3QWJn.json"></iframe>
             </div>
         </div>
     )

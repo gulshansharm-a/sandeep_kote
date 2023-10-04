@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { auth } from './Authentication/firebase';
 import { useState, useEffect } from 'react';
 import AddUsers from './Components/DashBoard/DashBoardComponents/AddUsers/AddUsers';
+import Users from './Components/DashBoard/DashBoardComponents/Users/Users';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -51,7 +52,7 @@ function App() {
                 {/* Add other nested routes based on user's choice */}
                 <Route path="coin" element={<CoinCount />} />
                 <Route path="addusers" element={<AddUsers />} />
-                <Route path="user" element={<AddUsers />} />
+                <Route path="users" element={<Users />} />
                 {/* Add more routes for other choices */}
               </Route>
             ) : (

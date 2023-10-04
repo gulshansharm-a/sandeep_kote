@@ -1,47 +1,71 @@
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref, set } from 'firebase/database';
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { auth, database } from "../../../../Authentication/firebase";
 
 export default function AddUsersForm() {
+    const navigate = useNavigate();
 
+    // the role of the user
     const [user, setUser] = useState(null);
 
+    const [distributerID, setDistributorID] = useState("null")
+
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
+        // Set up an observer to listen for changes in authentication state
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
             setUser(user);
-            setIsLoading(false); // Set loading to false once authentication state is determined
+
+            if (user.displayName === null) {
+                setUser("Admin");
+                console.log("done");
+            }
+            else if (user.displayName === "Distributor") {
+                setDistributorID((user.uid))
+                console.log(user.uid);
+                console.log("triggerd");
+                setUser("Distributer");
+                console.log("done");
+            }
+            else if (user.displayName === "Agent") {
+                navigate('/dashboard');
+            }
         });
 
-        return () => unsubscribe(); // Cleanup on component unmount
+        // Cleanup the observer on component unmount
+        return () => unsubscribe();
     }, []);
 
+    console.log(distributerID);
+
+    let roles = [];
+
+    if (user === "Admin") {
+        roles = ["Distributor"];
+    }
+    else if (user === "Distributor") {
+        roles = ["Agent"];
+    }
+    else {
+        roles = ["Agent"]
+    }
+
+    console.log(roles);
 
     const [email, setEmail] = useState(null);
     const [error, setError] = useState(null);
     const [password, setPassword] = useState("sandeepKote");
     const [username, setUsername] = useState("sandeepKote");
 
-
     const [openModal, setOpenModal] = useState(false);
 
-    const roles = ["Distributor", "Agent"];
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedRole, setselectedRole] = useState(roles[currentIndex])
 
 
-    const [isLoading, setIsLoading] = useState(true);
-
-    const handleRoleChange = (event) => {
-        const selectedRole = event.target.value;
-        const roleIndex = roles.indexOf(selectedRole);
-
-        if (roleIndex !== -1) {
-            setCurrentIndex(roleIndex);
-            // setselectedRole(selectedRole); // Set the selected role here
-        }
-    };
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         setselectedRole(roles[currentIndex])
@@ -66,9 +90,13 @@ export default function AddUsersForm() {
 
             const userId = userCredential.user.uid;
 
-            const userData = {
-                uid: userId,
+            if (user === "admin") {
+                const userData = {
+                    uid: userId,
+                    distributer: user.uid
+                }
             }
+
 
             const userRef = ref(database, `${selectedRole}/${username}`);
             await set(userRef, userData);
@@ -84,21 +112,6 @@ export default function AddUsersForm() {
             setIsLoading(false);
         }
 
-        // try {
-        //     const userId = "test2"; // Replace with the actual user ID
-        //     const userRef = ref(database, `${selectedRole}` + userId);
-
-        //     const userData = {
-        //         name: "John Doe",
-        // Add other user-related data
-        //     };
-
-        //     await set(userRef, userData);
-
-        //     console.log("User data set successfully");
-        // } catch (error) {
-        //     console.error("Error setting user data:", error.message);
-        // }
     };
 
     const [success, setSuccess] = useState(false);
@@ -159,7 +172,7 @@ export default function AddUsersForm() {
                         <label htmlFor="countires" className="mt-7 block mb-2 text-sm font-medium text-gray-900 dark:text-gray-900">
                             Role
                         </label>
-                        <select
+                        {/* <select
                             onChange={handleRoleChange}
                             value={roles[currentIndex]}
                             id="countries"
@@ -168,7 +181,7 @@ export default function AddUsersForm() {
                             {roles.map((role) => (
                                 <option key={role}>{role}</option>
                             ))}
-                        </select>
+                        </select> */}
 
 
                         <button

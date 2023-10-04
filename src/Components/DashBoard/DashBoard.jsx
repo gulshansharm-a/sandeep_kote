@@ -1,12 +1,14 @@
-import { auth } from "../../Authentication/firebase";
+import { auth, database } from "../../Authentication/firebase";
 import { useState, useEffect } from "react";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import SideBar from "./DashBoardComponents/SideBar";
 import CoinCount from "./DashBoardComponents/CoinsCount";
 import { Outlet } from 'react-router-dom';
 
-export default function Dashboard() {
+import { getDatabase, ref, query, orderByChild, equalTo, get } from 'firebase/database';
 
+
+export default function Dashboard() {
 
   return (
     <>
@@ -17,10 +19,8 @@ export default function Dashboard() {
         {/* <button onClick={handleLogOut}>Logout</button> */}
 
         <SideBar />
-
         <div className="lg:ml-80 mt-14">
           <Outlet />
-          {/* <CoinCount /> */}
         </div>
       </div>
     </>

@@ -15,6 +15,7 @@ function App() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
+      console.log(user);
       setLoading(false); // Set loading to false once authentication state is determined
     });
 
@@ -34,6 +35,7 @@ function App() {
             <Route path="/" element={<Login />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
+            
             {user ? (
               <Route path="/dashboard" element={<DashBoard />} />
             ) : (
@@ -49,6 +51,7 @@ function App() {
                 {/* Add other nested routes based on user's choice */}
                 <Route path="coin" element={<CoinCount />} />
                 <Route path="addusers" element={<AddUsers />} />
+                <Route path="user" element={<AddUsers />} />
                 {/* Add more routes for other choices */}
               </Route>
             ) : (

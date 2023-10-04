@@ -1,19 +1,27 @@
-import { useDebugValue, useEffect, useState } from "react";
-import { auth, database } from "../../../../Authentication/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { setLogLevel } from "firebase/app";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref, set } from 'firebase/database';
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { auth, database } from "../../../../Authentication/firebase";
 
 export default function AddUsersForm() {
+
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            setUser(user);
+            setIsLoading(false); // Set loading to false once authentication state is determined
+        });
+
+        return () => unsubscribe(); // Cleanup on component unmount
+    }, []);
+
+
     const [email, setEmail] = useState(null);
     const [error, setError] = useState(null);
     const [password, setPassword] = useState("sandeepKote");
     const [username, setUsername] = useState("sandeepKote");
 
-    // for the purpose of assigning distributer
-    const [assignDistributer, setAssignDistributer] = useState(false);
-    const [isAgent, setAgent] = useState(false);
 
     const [openModal, setOpenModal] = useState(false);
 
@@ -23,7 +31,7 @@ export default function AddUsersForm() {
     const [selectedRole, setselectedRole] = useState(roles[currentIndex])
 
 
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const handleRoleChange = (event) => {
         const selectedRole = event.target.value;
@@ -52,37 +60,18 @@ export default function AddUsersForm() {
                 password
             );
 
+            await updateProfile(userCredential.user, {
+                displayName: selectedRole, // Replace with the desired display name
+            });
+
             const userId = userCredential.user.uid;
 
-            // Construct the user data object
-
-            // Reference to the Firebase Realtime Database
-            // const databaseRef = database.ref("Agent/test");
-
-            if (selectedRole === "Agent") {
-
-                const userData = {
-                    uid: userId,
-                    distributer : distributer
-                    // Add other user-related data as needed
-                };
+            const userData = {
+                uid: userId,
             }
-            else if(selectedRole === "Distributor")
-            {
-                const userData = {
-                    uid: userId,
-                    // Add other user-related data as needed
-                };
-            }
-
 
             const userRef = ref(database, `${selectedRole}/${username}`);
             await set(userRef, userData);
-
-
-
-            // Set the user data in the database
-            // await databaseRef.set(userData);
 
             setOpenModal(true);
 
@@ -180,12 +169,6 @@ export default function AddUsersForm() {
                                 <option key={role}>{role}</option>
                             ))}
                         </select>
-
-                        {isAgent && !assignDistributer ? <div>
-            
-                        </div>
-                        : 
-                        <div></div>}
 
 
                         <button

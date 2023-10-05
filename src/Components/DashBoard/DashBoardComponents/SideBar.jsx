@@ -34,6 +34,7 @@ export default function SideBar() {
     // data
 
     const [user, setUser] = useState(null);
+    const [userEmail, setUserEmail] = useState(null);
     const [role, setRole] = useState(null);
 
 
@@ -56,12 +57,16 @@ export default function SideBar() {
         // Set up an observer to listen for changes in authentication state
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
             setUser(user);
+            setUserEmail(user.email);
 
             if (user.displayName === null) {
                 setUser("Admin");
             }
-            else {
-                setUser("idk");
+            if (user.displayName === "Distributer") {
+                setUser("Distributer");
+            }
+            if (user.displayName === "Agent") {
+                setUser("Agent");
             }
         });
 
@@ -153,7 +158,9 @@ export default function SideBar() {
             <aside id="logo-sidebar" className="hidden md:block fixed top-0 left-0 z-40 w-80 h-screen pt-20 transition-transform -translate-x-full border-r sm:translate-x-0 bg-gray-800 border-gray-700" aria-label="Sidebar">
                 <div className="h-full px-3 pb-4 overflow-y-auto bg-gray-800">
                     <ul className="space-y-2 font-medium">
-                        <li className="text-white"><p>Welcome, {user ? user : 'Guest'}</p></li>
+                        <li className="text-white"><p>Welcome, {user ? user : 'Guest'}</p>
+                            <br></br> {userEmail}
+                        </li>
                         <li>
                             <a href="#" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
                                 <span className="ml-3 text-[30px]">{role}</span>

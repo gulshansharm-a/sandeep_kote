@@ -1,5 +1,5 @@
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { ref, set } from 'firebase/database';
+import { ref, set, get } from 'firebase/database';
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, database } from "../../../../Authentication/firebase";
@@ -9,6 +9,7 @@ export default function AddUsersForm() {
 
     // the role of the user
     const [user, setUser] = useState(null);
+    const [currentUser, setCurrentUser] = useState(null);
 
     const [distributerID, setDistributorID] = useState("null")
 
@@ -29,6 +30,7 @@ export default function AddUsersForm() {
                 console.log("done");
             }
             else if (user.displayName === "Agent") {
+                alert("No accesss");
                 navigate('/dashboard');
             }
         });
@@ -37,7 +39,7 @@ export default function AddUsersForm() {
         return () => unsubscribe();
     }, []);
 
-    console.log(distributerID);
+    // console.log(distributerID);
 
     let roles = [];
 
@@ -51,7 +53,7 @@ export default function AddUsersForm() {
         roles = ["Agent"]
     }
 
-    console.log(roles);
+    // console.log(roles);
 
     const [email, setEmail] = useState(null);
     const [error, setError] = useState(null);
@@ -71,10 +73,19 @@ export default function AddUsersForm() {
         setselectedRole(roles[currentIndex])
     }, [currentIndex])
 
+    // to get the uid of the current authenticated user
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            setCurrentUser(user.uid);
+        });
+
+        return () => unsubscribe(); // Cleanup on component unmount
+    }, []);
+
+
 
     const handleSignUp = async () => {
         try {
-
             setIsLoading(true);
 
             // Use the auth object directly from your imported configuration
@@ -90,28 +101,49 @@ export default function AddUsersForm() {
 
             const userId = userCredential.user.uid;
 
-            if (user === "admin") {
-                const userData = {
-                    uid: userId,
-                    distributer: user.uid
-                }
+            let userData = {
+                uid: userId,
             }
 
+            if (selectedRole === "Agent") {
+
+                console.log("selectedRole === Agent");
+                // Fetch the distributor's name from the database using the UID
+                const distributorRef = ref(database, `Distributor/${currentUser}`);
+                const distributorSnapshot = await get(distributorRef);
+
+                if (distributorSnapshot.exists()) {
+                    const distributorData = distributorSnapshot.val();
+                    userData = {
+                        uid: userId,
+                        distributor: currentUser, // Use the current user's UID
+                        distributorName: Object.keys(distributorData), // Replace 'name' with the actual field name in your database
+                    };
+                }
+            }
 
             const userRef = ref(database, `${selectedRole}/${username}`);
             await set(userRef, userData);
 
+
+            let userdbdata = {
+                uid: userId,
+                email: userCredential.user.email,
+                balance: 1000,
+                role: selectedRole
+            }
+
+            const userdb = ref(database, `users/${user.uid}`);
+            await set(userdb, userdbdata);
+
             setOpenModal(true);
-
             setSuccess(true);
-
 
         } catch (error) {
             setError(error.message);
         } finally {
             setIsLoading(false);
         }
-
     };
 
     const [success, setSuccess] = useState(false);

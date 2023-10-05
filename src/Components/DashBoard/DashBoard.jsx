@@ -22,7 +22,7 @@ export default function Dashboard() {
         <SideBar />
         <div className="lg:ml-80 mt-14 bg-green">
         {/* <Auth/> */}
-        <Auth />
+        {/* <Auth /> */}
           <Outlet />
           
          

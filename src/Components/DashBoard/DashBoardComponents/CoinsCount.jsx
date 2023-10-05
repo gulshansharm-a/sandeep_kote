@@ -1,8 +1,6 @@
-// CoinTransfer.js
-
 import React, { useState, useEffect } from 'react';
-import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { auth, db } from '../../../Authentication/firebase';
+import { ref, get, set } from 'firebase/database';
+import { auth, database } from '../../../Authentication/firebase';
 
 const CoinTransfer = () => {
   const [recipientUid, setRecipientUid] = useState('');
@@ -16,11 +14,11 @@ const CoinTransfer = () => {
         const user = auth.currentUser;
 
         if (user) {
-          const userDoc = doc(db, 'users', user.uid);
-          const userDocSnapshot = await getDoc(userDoc);
+          const userRef = ref(database, `users/${user.uid}`);
+          const userSnapshot = await get(userRef);
 
-          if (userDocSnapshot.exists()) {
-            const balance = userDocSnapshot.data().balance;
+          if (userSnapshot.exists()) {
+            const balance = userSnapshot.val().balance;
             setUserBalance(balance);
           } else {
             console.warn('User document not found');
@@ -38,10 +36,10 @@ const CoinTransfer = () => {
 
   const fetchRecipientDetails = async () => {
     try {
-      const recipientQuery = await getDoc(doc(db, 'users', recipientUid));
+      const recipientQuery = await get(ref(database, `users/${recipientUid}`));
 
       if (recipientQuery.exists()) {
-        const recipientData = recipientQuery.data();
+        const recipientData = recipientQuery.val();
         setRecipient(recipientData);
       } else {
         console.warn('Recipient document not found for UID:', recipientUid);
@@ -92,10 +90,10 @@ const CoinTransfer = () => {
       const updatedUserBalance = userBalance - transferAmount;
 
       // Update the recipient's balance by adding the transferred amount
-      await updateDoc(doc(db, 'users', recipientUid), { balance: recipientBalance });
+      await set(ref(database, `users/${recipientUid}`), { balance: recipientBalance });
 
       // Update the user's balance by subtracting the transferred amount
-      await updateDoc(doc(db, 'users', auth.currentUser.uid), { balance: updatedUserBalance });
+      await set(ref(database, `users/${auth.currentUser.uid}`), { balance: updatedUserBalance });
 
       setUserBalance(updatedUserBalance);
 
@@ -117,13 +115,9 @@ const CoinTransfer = () => {
         <label>Amount: </label>
         <input type="number" className="border-2 border-amber-500" value={amount} onChange={(e) => setAmount(e.target.value)} />
       </div><br></br>
-      {/* {auth.currentUser ? ( */}
-        <div>
-          {/* <p>Your Balance: {userBalance !== null ? userBalance : 'Loading...'}</p> */}
-          <p>Balence left -{userBalance}</p>
-          
-        </div>
-      {/* // ) : null} */}
+      <div>
+        <p>Balence left -{userBalance}</p>
+      </div>
       <div>
         <button className="mt-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={handleTransfer}>Transfer Coins</button>
       </div><br></br><br></br>

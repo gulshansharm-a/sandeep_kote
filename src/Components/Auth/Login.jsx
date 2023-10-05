@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { auth } from "../../Authentication/firebase"; // Update the path based on your project structure
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import Popup from "./AuthComponents/Popup";
 
 export default function Login() {
 
@@ -13,11 +14,30 @@ export default function Login() {
 
     const navigate = useNavigate();
 
+    const roles = ["Admin", "Distributor", "Agent"];
+
+    const [currentIndex, setCurrentIndex] = useState(1);
+    const [currentRole, setCurrentRole] = useState(roles[currentIndex]);
+
     const handleLogin = async () => {
         try {
             setIsLoading(true); // Set loading state before making the asynchronous call
-            await signInWithEmailAndPassword(auth, email, password);
-            navigate('/dashboard');
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Log the UID to the console
+            console.log("User UID:", user.uid);
+
+            if (currentRole === "Admin" && user.email === "admin@gmail.com") {
+                navigate('/dashboard');
+            }
+            else if (user.displayName === currentRole) {
+                navigate('/dashboard');
+            }
+            else {
+                signOut(auth);
+                <Popup />
+            }
 
         } catch (error) {
             setError(error.message);
@@ -26,12 +46,8 @@ export default function Login() {
             setIsLoading(false); // Whether login is successful or not, reset loading state
         }
     };
-    
 
-    const roles = ["Admin", "Distributor", "Agent"];
 
-    const [currentIndex, setCurrentIndex] = useState(1);
-    const [currentRole, setCurrentRole] = useState(roles[currentIndex]);
     const imgUrl = [
         "https://res.cloudinary.com/dzhdarh4q/image/upload/v1696256406/Project2_coin/image-removebg-preview_12_cfs2hp.png",
         "https://res.cloudinary.com/dzhdarh4q/image/upload/v1696256406/Project2_coin/image-removebg-preview_11_xkljfu.png",

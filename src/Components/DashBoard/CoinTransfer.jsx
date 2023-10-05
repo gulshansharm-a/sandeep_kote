@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../../Authentication/firebase';
-import { Button } from "@material-tailwind/react";
-// import Button from 'react/components/Button';
+
 const CoinTransfer = () => {
   const [recipientUid, setRecipientUid] = useState('');
   const [amount, setAmount] = useState('');

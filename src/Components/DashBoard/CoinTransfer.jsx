@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { auth, db } from '../../../Authentication/firebase';
-
+import { auth, db } from '../../Authentication/firebase';
+import { Button } from "@material-tailwind/react";
+// import Button from 'react/components/Button';
 const CoinTransfer = () => {
   const [recipientUid, setRecipientUid] = useState('');
   const [amount, setAmount] = useState('');
@@ -107,26 +108,25 @@ const CoinTransfer = () => {
   };
 
   return (
-    <div className="lg:ml-40 mt-27 font-serif text-2xl">
-      <h2 className="text-4xl">Coin Transfer</h2><br></br>
+    <div >
+      <h2 className="lg:ml-96 mt-27">Coin Transfer</h2>
       <div>
-        <label>Recipient ID: </label>
-        <input type="text" className="border-2 border-amber-500" value={recipientUid} onChange={(e) => setRecipientUid(e.target.value)} />
+        <label>Recipient UID: </label>
+        <input type="text" value={recipientUid} onChange={(e) => setRecipientUid(e.target.value)} />
       </div>
-      <div><br></br>
+      <div>
         <label>Amount: </label>
-        <input type="number" className="border-2 border-amber-500" value={amount} onChange={(e) => setAmount(e.target.value)} />
-      </div><br></br>
+        <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
+      </div>
       {/* {auth.currentUser ? ( */}
         <div>
           {/* <p>Your Balance: {userBalance !== null ? userBalance : 'Loading...'}</p> */}
           <p>Balence left -{userBalance}</p>
-          
         </div>
       {/* // ) : null} */}
-      <div>
-        <button className="mt-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={handleTransfer}>Transfer Coins</button>
-      </div><br></br><br></br>
+      <div >
+        <button  className="mt-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={handleTransfer}>Transfer Coins</button>
+      </div>
     </div>
   );
 };

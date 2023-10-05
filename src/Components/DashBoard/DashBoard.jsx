@@ -6,6 +6,7 @@ import CoinCount from "./DashBoardComponents/CoinsCount";
 import { Outlet } from 'react-router-dom';
 
 import { getDatabase, ref, query, orderByChild, equalTo, get } from 'firebase/database';
+import Auth from "./Auth";
 
 
 export default function Dashboard() {
@@ -19,8 +20,12 @@ export default function Dashboard() {
         {/* <button onClick={handleLogOut}>Logout</button> */}
 
         <SideBar />
-        <div className="lg:ml-80 mt-14">
+        <div className="lg:ml-80 mt-14 bg-green">
+        {/* <Auth/> */}
+        <Auth />
           <Outlet />
+          
+         
         </div>
       </div>
     </>

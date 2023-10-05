@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
-import { auth } from "../../Authentication/firebase"; // Update the path based on your project structure
-import { createUserWithEmailAndPassword} from "firebase/auth";
+// import { auth } from "../DashBoard/Firebase"; // Update the path based on your project structure
+// import { createUserWithEmailAndPassword} from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
-
+// import { getFirestore, doc, setDoc } from "firebase/firestore";
+// import React, { useState, useEffect } from 'react';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { collection, doc, setDoc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../../Authentication/firebase';
 export default function SignUp() {
 
     const roles = ["Admin", "Distributor", "Agent"];
@@ -33,47 +36,69 @@ export default function SignUp() {
     }
 
     const navigate = useNavigate();
-
     const handleSignUp = async () => {
         try {
-          setIsLoading(true);
-      
-          // Check if passwords match
-          if (password !== confirmPassword) {
-            setError("Passwords do not match");
-            console.log("notttt");
-            return;
-          }
-      
-          // Use the auth object directly from your imported configuration
-          const userCredential = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-          );
-      
-          // Access the user's UID
-          const uid = userCredential.user.uid;
-      
-          // Set user role in Firestore under the corresponding collection
-          const firestore = getFirestore();
-          const userRole = currentRole;
-          const userDocRef = doc(firestore, "User", uid);
-      
-          // Set the document data
+          const { user } = await createUserWithEmailAndPassword(auth, email, password);
+          console.log('User created:', user);
+    
+          // Add user information to Firestore
+          const usersCollection = collection(db, 'users');
+          const userDocRef = doc(usersCollection, user.uid);
+    
           await setDoc(userDocRef, {
+            uid: user.uid,
             email: email,
-            role: userRole,
+            balance: 1000, // Initial balance
           });
-      
-          // Signup successful, you can redirect to the dashboard or do other actions
-          navigate('/dashboard');
+    
+          console.log('User details added to Firestore');
+    
+          alert('Account created successfully!');
         } catch (error) {
-          setError(error.message);
-        } finally {
-          setIsLoading(false);
+          console.error('Error signing up:', error.message);
+          alert(`Error: ${error.message}`);
         }
       };
+    // const handleSignUp = async () => {
+    //     try {
+    //       setIsLoading(true);
+      
+    //       // Check if passwords match
+    //       if (password !== confirmPassword) {
+    //         setError("Passwords do not match");
+    //         console.log("notttt");
+    //         return;
+    //       }
+      
+    //       // Use the auth object directly from your imported configuration
+    //       const userCredential = await createUserWithEmailAndPassword(
+    //         auth,
+    //         email,
+    //         password
+    //       );
+      
+    //       // Access the user's UID
+    //       const uid = userCredential.user.uid;
+      
+    //       // Set user role in Firestore under the corresponding collection
+    //       const firestore = getFirestore();
+    //       const userRole = currentRole;
+    //       const userDocRef = doc(firestore, "User", uid);
+      
+    //       // Set the document data
+    //       await setDoc(userDocRef, {
+    //         email: email,
+    //         role: userRole,
+    //       });
+      
+    //       // Signup successful, you can redirect to the dashboard or do other actions
+    //       navigate('/dashboard');
+    //     } catch (error) {
+    //       setError(error.message);
+    //     } finally {
+    //       setIsLoading(false);
+    //     }
+    //   };
 
     
     return (

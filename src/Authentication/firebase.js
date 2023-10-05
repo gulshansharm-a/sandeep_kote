@@ -1,22 +1,22 @@
-import { initializeApp } from "firebase/app";
-import {getAuth} from "firebase/auth"
-import { getFirestore } from 'firebase/firestore'; // Import Firestore
-import { getDatabase } from 'firebase/database'; 
+
+
+import { initializeApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4",
-  authDomain: "sandeepkote-c67f5.firebaseapp.com",
-  databaseURL: "https://sandeepkote-c67f5-default-rtdb.firebaseio.com",
-  projectId: "sandeepkote-c67f5",
-  storageBucket: "sandeepkote-c67f5.appspot.com",
-  messagingSenderId: "871561614523",
-  appId: "1:871561614523:web:3b12ae93e7490723ddc59e",
-  measurementId: "G-645LW1SWKT"
+    apiKey: "AIzaSyBfebOWmMS-C5UwSOatnF6KeWO-naQGAug",
+    authDomain: "zzqwesa.firebaseapp.com",
+    projectId: "zzqwesa",
+    storageBucket: "zzqwesa.appspot.com",
+    messagingSenderId: "83977301588",
+    appId: "1:83977301588:web:25d6fe7a66009ce91a47c1"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const database = getFirestore(app);
 
-export const  auth = getAuth(app);
-export const db = getFirestore(app); 
-export const database = getDatabase(app); 
+export { auth, db, database, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, collection, doc, setDoc, getDoc, onSnapshot, updateDoc };
+

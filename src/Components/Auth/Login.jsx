@@ -155,9 +155,6 @@ export default function Login() {
 
                                                     ))}
                                                 </p>
-                                                <p className="text-sm font-light text-gray-500">
-                                                    Don’t have an account yet? <a href="/signup" className="font-medium text-primary-600 hover:underline">Sign up</a>
-                                                </p>
                                             </form>
                                         </div>
                                     </div>

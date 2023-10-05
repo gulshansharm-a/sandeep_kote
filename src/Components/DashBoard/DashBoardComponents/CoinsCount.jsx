@@ -1,128 +1,134 @@
-import React, { useState, useEffect } from 'react';
-import { ref, get, set } from 'firebase/database';
-import { auth, database } from '../../../Authentication/firebase';
+// BalanceDeduction.js
 
-const CoinTransfer = () => {
-  const [recipientUid, setRecipientUid] = useState('');
-  const [amount, setAmount] = useState('');
-  const [userBalance, setUserBalance] = useState(null);
-  const [recipient, setRecipient] = useState(null);
+import React, { useState, useEffect } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getDatabase, ref, get, set } from 'firebase/database';
+
+const CoinCount = () => {
+
+  const [adminBalance, setAdminBalance] = useState(null);
+  const [agentBalance, setAgentBalance] = useState(null);
+  const [distributorMainBalance, setDistributorMainBalance] = useState(null);
+
+  // Initialize Firebase and database outside of the useEffect
+  const firebaseConfig = {
+    apiKey: "AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4",
+    authDomain: "sandeepkote-c67f5.firebaseapp.com",
+    databaseURL: "https://sandeepkote-c67f5-default-rtdb.firebaseio.com",
+    projectId: "sandeepkote-c67f5",
+    storageBucket: "sandeepkote-c67f5.appspot.com",
+    messagingSenderId: "871561614523",
+    appId: "1:871561614523:web:3b12ae93e7490723ddc59e",
+    measurementId: "G-645LW1SWKT"
+  };
+
+  const firebaseApp = initializeApp(firebaseConfig);
+  const database = getDatabase(firebaseApp);
 
   useEffect(() => {
-    const fetchUserBalance = async () => {
-      try {
-        const user = auth.currentUser;
+    // Fetch initial balances
+    fetchAdminBalance();
+    fetchAgentBalance();
+    fetchDistributorMainBalance();
 
-        if (user) {
-          const userRef = ref(database, `users/${user.uid}`);
-          const userSnapshot = await get(userRef);
-
-          if (userSnapshot.exists()) {
-            const balance = userSnapshot.val().balance;
-            setUserBalance(balance);
-          } else {
-            console.warn('User document not found');
-          }
-        } else {
-          console.error('User not authenticated');
-        }
-      } catch (error) {
-        console.error('Error fetching user balance:', error.message);
-      }
+    // Cleanup Firebase when component unmounts
+    return () => {
+      // Optionally, you might want to disconnect from Firebase here
     };
+  }, []); // Empty dependency array to run this effect once on mount
 
-    fetchUserBalance();
-  }, []);
-
-  const fetchRecipientDetails = async () => {
+  const fetchAdminBalance = async () => {
     try {
-      const recipientQuery = await get(ref(database, `users/${recipientUid}`));
-
-      if (recipientQuery.exists()) {
-        const recipientData = recipientQuery.val();
-        setRecipient(recipientData);
-      } else {
-        console.warn('Recipient document not found for UID:', recipientUid);
-      }
+      const snapshot = await get(ref(database, 'Admin/admin/balance'));
+      const balance = snapshot.val();
+      setAdminBalance(balance);
     } catch (error) {
-      console.error('Error fetching recipient details:', error.message);
+      console.error('Error fetching admin balance:', error.message);
     }
   };
 
-  useEffect(() => {
-    if (recipientUid) {
-      fetchRecipientDetails();
-    }
-  }, [recipientUid]);
-
-  const handleTransfer = async () => {
+  const fetchAgentBalance = async () => {
     try {
-      if (userBalance === null) {
-        console.error('User balance not available');
-        return;
-      }
-
-      const transferAmount = Number(amount);
-
-      if (isNaN(transferAmount) || transferAmount <= 0) {
-        console.error('Invalid transfer amount');
-        return;
-      }
-
-      if (transferAmount > userBalance) {
-        console.error('Insufficient balance');
-        return;
-      }
-
-      if (!recipient) {
-        console.error('Recipient details not available');
-        // Fetch recipient details before proceeding
-        await fetchRecipientDetails();
-
-        // Check again if recipient details are now available
-        if (!recipient) {
-          console.error('Recipient details not available');
-          return;
-        }
-      }
-
-      const recipientBalance = recipient.balance + transferAmount;
-      const updatedUserBalance = userBalance - transferAmount;
-
-      // Update the recipient's balance by adding the transferred amount
-      await set(ref(database, `users/${recipientUid}`), { balance: recipientBalance });
-
-      // Update the user's balance by subtracting the transferred amount
-      await set(ref(database, `users/${auth.currentUser.uid}`), { balance: updatedUserBalance });
-
-      setUserBalance(updatedUserBalance);
-
-      alert(`Coins transferred successfully!`);
+      const snapshot = await get(ref(database, 'Agent/agent001/balance'));
+      const balance = snapshot.val();
+      setAgentBalance(balance);
     } catch (error) {
-      console.error('Error transferring coins:', error.message);
-      alert(`Error: ${error.message}`);
+      console.error('Error fetching agent balance:', error.message);
+    }
+  };
+
+  const fetchDistributorMainBalance = async () => {
+    try {
+      const snapshot = await get(ref(database, 'Distributor/distributer main/balance'));
+      const balance = snapshot.val();
+      setDistributorMainBalance(balance);
+    } catch (error) {
+      console.error('Error fetching distributor main balance:', error.message);
+    }
+  };
+
+  const deductBalance = async () => {
+    try {
+      // Fetch the current balances
+      const adminSnapshot = await get(ref(database, 'Admin/admin/balance'));
+      const distributorMainSnapshot = await get(ref(database, 'Distributor/distributer main/balance'));
+
+      const currentAdminBalance = adminSnapshot.val();
+      const currentDistributorMainBalance = distributorMainSnapshot.val();
+      // Deduct 10 from Agent001's balance
+      const updatedAdminBalance = currentAdminBalance - 10;
+      const updatedDistributorMainBalance = currentDistributorMainBalance + 10;
+
+      // Update the balance in the database
+      await set(ref(database, 'Admin/admin/balance'), updatedAdminBalance);
+      await set(ref(database, 'Distributor/distributer main/balance'), updatedDistributorMainBalance);
+      // Fetch and display the updated balances
+      fetchAdminBalance();
+      fetchDistributorMainBalance();
+    } catch (error) {
+      console.error('Error deducting balance:', error.message);
+    }
+  };
+
+  const sendToDistributorMain = async () => {
+    try {
+      // Fetch the current balances
+      const agentSnapshot = await get(ref(database, 'Agent/agent001/balance'));
+      const distributorMainSnapshot = await get(ref(database, 'Distributor/distributer main/balance'));
+
+      const currentAgentBalance = agentSnapshot.val();
+      const currentDistributorMainBalance = distributorMainSnapshot.val();
+
+      // Deduct 10 from Agent001's balance
+      const updatedAgentBalance = currentAgentBalance + 10;
+
+      // Add 10 to DistributorMain's balance
+      const updatedDistributorMainBalance = currentDistributorMainBalance - 10;
+
+      // Update the balances in the database
+      await set(ref(database, 'Agent/agent001/balance'), updatedAgentBalance);
+      await set(ref(database, 'Distributor/distributer main/balance'), updatedDistributorMainBalance);
+
+      // Fetch and display the updated balances
+      fetchAgentBalance();
+      fetchDistributorMainBalance();
+    } catch (error) {
+      console.error('Error sending to DistributorMain:', error.message);
     }
   };
 
   return (
-    <div className="lg:ml-40 mt-27 font-serif text-2xl">
-      <h2 className="text-4xl">Coin Transfer</h2><br></br>
+    <div>
+      <h2>Balance Deduction</h2>
       <div>
-        <label>Recipient ID: </label>
-        <input type="text" className="border-2 border-amber-500" value={recipientUid} onChange={(e) => setRecipientUid(e.target.value)} />
+        <p>Admin Balance: {adminBalance !== null ? adminBalance : 'Loading...'}</p>
+        <p>Agent001 Balance: {agentBalance !== null ? agentBalance : 'Loading...'}</p>
+        <p>DistributorMain Balance: {distributorMainBalance !== null ? distributorMainBalance : 'Loading...'}</p>
+        <button onClick={deductBalance}>Transfer 10-Admin to Distributer</button><br></br>
+        <button onClick={sendToDistributorMain}>Transfer 10-Distributor to Agent</button>
       </div>
-      <div><br></br>
-        <label>Amount: </label>
-        <input type="number" className="border-2 border-amber-500" value={amount} onChange={(e) => setAmount(e.target.value)} />
-      </div><br></br>
-      <div>
-        <p>Balence left -{userBalance}</p>
-      </div>
-      <div>
-        <button className="mt-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={handleTransfer}>Transfer Coins</button>
-      </div><br></br><br></br>
     </div>
   );
 };
 
-export default CoinTransfer;
+export default CoinCount;

@@ -158,7 +158,7 @@ export default function SideBar() {
             <aside id="logo-sidebar" className="hidden md:block fixed top-0 left-0 z-40 w-80 h-screen pt-20 transition-transform -translate-x-full border-r sm:translate-x-0 bg-gray-800 border-gray-700" aria-label="Sidebar">
                 <div className="h-full px-3 pb-4 overflow-y-auto bg-gray-800">
                     <ul className="space-y-2 font-medium">
-                        <li className="text-white"><p>Welcome, {user ? user : 'Guest'}</p>
+                        <li className="text-white"><p>Welcome,</p>
                             <br></br> {userEmail}
                         </li>
                         <li>

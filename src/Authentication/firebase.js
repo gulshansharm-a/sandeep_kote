@@ -19,5 +19,5 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const database = getDatabase(app); 
 
-export { auth, db, database, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, collection, doc, setDoc, getDoc, onSnapshot, updateDoc };
+export {app, auth, db, database, getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, collection, doc, setDoc, getDoc, onSnapshot, updateDoc };
 

@@ -8,7 +8,7 @@ import { auth } from './Authentication/firebase';
 import { useState, useEffect } from 'react';
 import AddUsers from './Components/DashBoard/DashBoardComponents/AddUsers/AddUsers';
 import Users from './Components/DashBoard/DashBoardComponents/Users/Users';
-import Auth from '../src/Components/DashBoard/Auth';
+
 import CoinTransfer from './Components/DashBoard/CoinTransfer';
 function App() {
   const [user, setUser] = useState(null);

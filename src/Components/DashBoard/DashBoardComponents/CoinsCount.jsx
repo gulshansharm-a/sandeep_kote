@@ -119,13 +119,13 @@ const CoinCount = () => {
 
   return (
     <div>
-      <h2>Balance Deduction</h2>
+      <h2 className="lg:ml-40 mt-40 font-serif text-2xl">Balance Deduction</h2>
       <div>
-        <p>Admin Balance: {adminBalance !== null ? adminBalance : 'Loading...'}</p>
-        <p>Agent001 Balance: {agentBalance !== null ? agentBalance : 'Loading...'}</p>
-        <p>DistributorMain Balance: {distributorMainBalance !== null ? distributorMainBalance : 'Loading...'}</p>
-        <button onClick={deductBalance}>Transfer 10-Admin to Distributer</button><br></br>
-        <button onClick={sendToDistributorMain}>Transfer 10-Distributor to Agent</button>
+        <p className="lg:ml-40 mt-27 font-serif text-2xl">Admin Balance: {adminBalance !== null ? adminBalance : 'Loading...'}</p>
+        <p className="lg:ml-40 mt-27 font-serif text-2xl">Agent001 Balance: {agentBalance !== null ? agentBalance : 'Loading...'}</p>
+        <p className="lg:ml-40 mt-27 font-serif text-2xl">DistributorMain Balance: {distributorMainBalance !== null ? distributorMainBalance : 'Loading...'}</p>
+        <button className=" lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={deductBalance}>Transfer 10-Admin to Distributer</button><br></br>
+        <button className=" lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={sendToDistributorMain}>Transfer 10-Distributor to Agent</button>
       </div>
     </div>
   );

@@ -45,7 +45,8 @@ export default function Login() {
   const imgUrl = [
     "https://res.cloudinary.com/dzhdarh4q/image/upload/v1696256406/Project2_coin/image-removebg-preview_12_cfs2hp.png",
     "https://res.cloudinary.com/dzhdarh4q/image/upload/v1696256406/Project2_coin/image-removebg-preview_11_xkljfu.png",
-    "https://res.cloudinary.com/dzhdarh4q/image/upload/v1696254768/Project2_coin/COIN1_u5yrcs.png"
+    "https://res.cloudinary.com/dzhdarh4q/image/upload/v1696254768/Project2_coin/COIN1_u5yrcs.png",
+    // "https://res.cloudinary.com/dzhdarh4q/image/upload/v1696254768/Project2_coin/COIN1_u5yrcs.png"
   ];
 
   const homeImgSrc = imgUrl[currentIndex];
@@ -69,6 +70,7 @@ export default function Login() {
                 alt="left"
                 className="h-[80%] object-contain lg:object-center object-top"
               />
+              
             </div>
 
             {/* right */}

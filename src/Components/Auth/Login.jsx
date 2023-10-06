@@ -1,8 +1,8 @@
-import { app } from '../../Authentication/Firebase'; // Import the app from Firebase
+import { app, auth } from '../../Authentication/Firebase'; // Import the app from Firebase
 import React, { useState, useEffect } from 'react';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../../Authentication/firebase';
+
 import CoinCount from '../DashBoard/DashBoardComponents/CoinsCount';
 export default function Login() {
   const [email, setEmail] = useState('');

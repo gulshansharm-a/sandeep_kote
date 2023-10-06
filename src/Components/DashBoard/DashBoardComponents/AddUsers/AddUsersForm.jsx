@@ -26,24 +26,23 @@ export default function AddUsersForm() {
             console.log(user.displayName);
 
             if (user.displayName === null) {
-                setUser("Admin");
-                setRoles("Distributor");
+                setUser({ role: "Admin" });
+                setRoles(["Distributor"]);
                 console.log("done");
-            }
-            else if (user.displayName === "Distributor") {
+            } else if (user.displayName === "Distributor") {
                 setDistributorID((user.uid))
                 console.log(user.uid);
-                setRoles("Agent");
-                console.log("triggerd");
-                setUser("Distributer");
+                setRoles(["Agent"]);
+                console.log("triggered");
+                setUser({ role: "Distributor" });
                 console.log("done");
-            }
-            else if (user.displayName === "Agent") {
-                console.log("this is a agent");
+            } else if (user.displayName === "Agent") {
+                console.log("this is an agent");
                 setIsAdmin(true);
-                alert("No accesss");
+                alert("No access");
                 navigate('/dashboard');
             }
+            
         });
 
         // Cleanup the observer on component unmount

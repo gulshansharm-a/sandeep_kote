@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { auth } from "../../Auth/firebase";
 import { signOut } from "firebase/auth";
+import { get, ref } from 'firebase/database';
 import { Button, Modal } from 'flowbite-react';
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { auth, database } from "../../../Authentication/firebase";
 
 export default function SideBar() {
 
@@ -53,27 +53,50 @@ export default function SideBar() {
         }
     };
 
+    const [currentUserID, setCurrentUserID] = useState(null);
+
+    // the role of the user
+    const [userRole, setUserRole] = useState(null);
+
+    
     useEffect(() => {
         // Set up an observer to listen for changes in authentication state
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
-            setUser(user);
-            setUserEmail(user.email);
 
-            if (user.displayName === null) {
-                setUser("Admin");
-            }
-            if (user.displayName === "Distributer") {
-                setUser("Distributer");
-            }
-            if (user.displayName === "Agent") {
-                setUser("Agent");
+            
+            if (user) {
+                try {
+                    const snapshot = await get(ref(database));
+                    
+                    const data = snapshot.val();
+                    
+                    // Iterate through each role (admin, agent, dis, players)
+                    for (const role in data) {
+                        // Check if the UID exists in the current role
+                        if (data[role][user.uid]) {
+                            console.log("triggeed");
+                            setUserRole(role);
+                            setUserEmail(user.email);
+                            console.log(user.email);
+                            setCurrentUserID(user.uid);
+                            
+                            console.log(role);
+                            break;
+                        }
+                        else
+                        {
+                            console.log("not found");
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching data from Firebase:', error.message);
+                }
             }
         });
 
         // Cleanup the observer on component unmount
         return () => unsubscribe();
     }, []);
-
 
     return (
         <>
@@ -164,6 +187,7 @@ export default function SideBar() {
                         <li>
                             <a href="#" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
                                 <span className="ml-3 text-[30px]">{role}</span>
+                                <span className="ml-3 text-[30px]">{userEmail}</span>
                             </a>
                         </li>
                         <li>
@@ -236,7 +260,7 @@ export default function SideBar() {
             <aside className={`md:hidden w-screen ${side ? 'hidden' : 'translate-x-0'}`}>
                 <div className="h-screen w-[60%] px-3 pb-4 overflow-y-auto bg-gray-800">
                     <ul className="space-y-2 text-white font-medium mt-20">
-                        <li className="text-white"><p>Welcome, {user ? user : 'Guest'}</p></li>
+                        {/* <li className="text-white"><p>Welcome, {user ? user : 'Guest'}</p></li> */}
                         <li>
                             <a href="#" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
                                 <span className="ml-3 text-[30px]">{role}</span>

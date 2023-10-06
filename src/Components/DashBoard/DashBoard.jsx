@@ -1,11 +1,5 @@
-import { auth, database } from "../Auth/firebase";
-import { useState, useEffect } from "react";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
-import SideBar from "./DashBoardComponents/SideBar";
-import CoinCount from "./DashBoardComponents/CoinsCount";
 import { Outlet } from 'react-router-dom';
-
-import { getDatabase, ref, query, orderByChild, equalTo, get } from 'firebase/database';
+import SideBar from "./DashBoardComponents/SideBar";
 
 
 export default function Dashboard() {

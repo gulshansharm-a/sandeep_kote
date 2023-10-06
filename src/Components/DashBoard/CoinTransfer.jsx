@@ -1,8 +1,6 @@
-// CoinTransfer.js
-
-import React, { useState, useEffect } from 'react';
-import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { auth, db } from '../Auth/firebase';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { auth, db } from '../../Authentication/firebase';
 
 const CoinTransfer = () => {
   const [recipientUid, setRecipientUid] = useState('');

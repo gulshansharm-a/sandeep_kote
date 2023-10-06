@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { getDatabase, ref, get } from 'firebase/database';
-import { auth, database } from "../../../Auth/firebase";
+import { get, ref } from 'firebase/database';
+import { useEffect, useState } from 'react';
+import { database } from "../../../../Authentication/firebase";
+import UserAgents from './UserAgents';
 import UserCard from './UserCard';
-import UserAgents from './UserAgents'
 
 const Users = () => {
     const [distributors, setDistributors] = useState([]);

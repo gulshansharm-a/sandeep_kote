@@ -1,147 +1,144 @@
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { ref, set, get } from 'firebase/database';
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { get, ref, set } from 'firebase/database';
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, database } from "../../../Auth/firebase";
+import { auth, database } from "../../../../Authentication/firebase";
 
 export default function AddUsersForm() {
     const navigate = useNavigate();
 
+    // user name of the user
+    const [userName, setUserName] = useState(null);
+
+    // id of the user
+    const [currentUserID, setCurrentUserID] = useState(null);
+
     // the role of the user
-    const [user, setUser] = useState(null);
-    const [currentUser, setCurrentUser] = useState("null");
+    const [userRole, setUserRole] = useState(null);
 
-    const [isAdmin, setIsAdmin] = useState(false);
-
-    const [distributerID, setDistributorID] = useState("null")
-
-
-    const [selectedRole, setRoles] = useState([]);  // Initialize roles state
+    // user that can be created
+    const [createUserRole, setCreateUserRole] = useState(null);
 
     useEffect(() => {
         // Set up an observer to listen for changes in authentication state
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
-            setUser(user);
 
-            console.log(user.displayName);
+            if (user) {
+                try {
+                    const snapshot = await get(ref(database));
 
-            if (user.displayName === null) {
-                setUser({ role: "Admin" });
-                setRoles(["Distributor"]);
-                console.log("done");
-            } else if (user.displayName === "Distributor") {
-                setDistributorID((user.uid))
-                console.log(user.uid);
-                setRoles(["Agent"]);
-                console.log("triggered");
-                setUser({ role: "Distributor" });
-                console.log("done");
-            } else if (user.displayName === "Agent") {
-                console.log("this is an agent");
-                setIsAdmin(true);
-                alert("No access");
-                navigate('/dashboard');
+                    const data = snapshot.val();
+
+                    // Iterate through each role (admin, agent, dis, players)
+                    for (const role in data) {
+                        // Check if the UID exists in the current role
+                        if (data[role][user.uid]) {
+                            // You found the role, update your state or do whatever you need
+                            console.log('User Role:', role);
+                            setUserRole(role);
+                            setCurrentUserID(user.uid);
+                            console.log(user.uid);
+                            console.log(createUserRole);
+                            
+                            console.log(role);
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching data from Firebase:', error.message);
+                }
+
+                if (userRole === "Admin") {
+                    setCreateUserRole("Distributer");
+                }
+                else if (userRole === "Distributer") {
+                    setCreateUserRole("Agent");
+                }
+                else if (userRole === "Agent") {
+                    setCreateUserRole("Player");
+                }
             }
-            
         });
 
         // Cleanup the observer on component unmount
         return () => unsubscribe();
-    }, []);
-
-    // console.log(distributerID);
-
-
-    // else {
-    //     roles = ["Agent"]
-    // }
-
-    // console.log(roles);
+    }, [userRole]);
 
     const [email, setEmail] = useState(null);
-    const [error, setError] = useState(null);
-    const [password, setPassword] = useState("sandeepKote");
-    const [username, setUsername] = useState("sandeepKote");
+    const [password, setPassword] = useState(null);
+    const [username, setUsername] = useState(null);
 
     const [openModal, setOpenModal] = useState(false);
 
-
-    const [currentIndex, setCurrentIndex] = useState(0);
-    // const [selectedRole, setselectedRole] = useState(roles[currentIndex])
-
-    console.log(selectedRole);
-
-
     const [isLoading, setIsLoading] = useState(false);
-
-    // to get the uid of the current authenticated user
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            setCurrentUser(user.uid);
-        });
-
-        return () => unsubscribe(); // Cleanup on component unmount
-    }, []);
-
-
 
     const handleSignUp = async () => {
         try {
             setIsLoading(true);
 
-            // Use the auth object directly from your imported configuration
+            // const userName = username;
+            console.log(username);
+
             const userCredential = await createUserWithEmailAndPassword(
                 auth,
                 email,
                 password
             );
 
-            await updateProfile(userCredential.user, {
-                displayName: selectedRole, // Replace with the desired display name
-            });
+            let userData = {};
 
-            const userId = userCredential.user.uid;
-
-            let userData = {
-                uid: userId,
-            }
-
-            if (selectedRole === "Agent") {
-
-                console.log("selectedRole === Agent");
-                // Fetch the distributor's name from the database using the UID
-                const distributorRef = ref(database, `Distributor/${currentUser}`);
-                const distributorSnapshot = await get(distributorRef);
-
-                if (distributorSnapshot.exists()) {
-                    const distributorData = distributorSnapshot.val();
-                    userData = {
-                        uid: userId,
-                        distributor: currentUser, // Use the current user's UID
-                        distributorName: Object.keys(distributorData), // Replace 'name' with the actual field name in your database
-                    };
+            if (createUserRole === "Distributer") {
+                userData = {
+                    userName: username,
+                    email: email,
+                    pass: password,
                 }
             }
+            else if (createUserRole === "Agent") {
+                userData = {
+                    userName: username,
+                    email: email,
+                    pass: password,
+                    distributerID: currentUserID
+                }
+            }
+            else if (createUserRole === "Player") {
+                // Fetch DistributerID based on the AgentID
+                const agentRef = ref(database, `Agent/${currentUserID}`); // Adjust 'agents' to the actual node name
+                const agentSnapshot = await get(agentRef);
+        
+                if (agentSnapshot.exists()) {
+                    const agentData = agentSnapshot.val();
+                    userData = {
+                        ...userData,
+                        agentID: currentUserID,
+                        distributerID: agentData.admin,
+                    };
 
-            const userRef = ref(database, `${selectedRole}/${username}`);
+                    console.log(userData);
+
+                    console.log("got it");
+                    console.log(agentData.admin);
+                } else {
+                    // Handle the case when the agent node doesn't exist
+                    console.error('Agent node not found');
+                }
+            }
+        
+            console.log(createUserRole);
+            console.log(userCredential.user.uid);
+            // Save user data to the database
+            const userRef = ref(database, `${createUserRole}/${userCredential.user.uid}`); // Adjust 'users' to the actual node name
             await set(userRef, userData);
 
+            console.log(userData);
 
-            let userdbdata = {
-                uid: userId,
-                email: userCredential.user.email,
-                balance: 1000,
-                role: selectedRole
-            }
-
-            const userdb = ref(database, `users/${user.uid}`);
-            await set(userdb, userdbdata);
 
             setOpenModal(true);
             setSuccess(true);
 
         } catch (error) {
-            setError(error.message);
+            // setError(error.message);
         } finally {
             setIsLoading(false);
         }
@@ -154,7 +151,7 @@ export default function AddUsersForm() {
             {isLoading ? <div>
                 LOADING
             </div>
-                : isAdmin ?  <div>no accesss</div>:
+                :
                 <div>
                     <h1 className="text-gray-900 text-[40px] uppercase font-bold">Add user</h1>
                     <form onSubmit={(e) => {
@@ -168,7 +165,7 @@ export default function AddUsersForm() {
                             <input
                                 type="text"
                                 onChange={(e) => setUsername(e.target.value)}
-                                id="email"
+                                id="username"
                                 className="shadow-sm bg-gray-50 border border-gray-300 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
                                 placeholder="user"
                                 required
@@ -200,28 +197,11 @@ export default function AddUsersForm() {
                             />
                         </div>
 
-
-                        {/* <label htmlFor="countries" className="block mb-2 text-sm font-medium text-gray-900">Role</label> */}
-                        {/* <label htmlFor="countires" className="mt-7 block mb-2 text-sm font-medium text-gray-900 dark:text-gray-900">
-                            Role
-                        </label> */}
-                        {/* <select
-                            onChange={handleRoleChange}
-                            value={roles[currentIndex]}
-                            id="countries"
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        >
-                            {roles.map((role) => (
-                                <option key={role}>{role}</option>
-                            ))}
-                        </select> */}
-
-
                         <button
                             type="submit"
                             className="mt-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                         >
-                            Add as an {selectedRole}
+                            Add as an {createUserRole}
                         </button>
 
 
@@ -235,7 +215,7 @@ export default function AddUsersForm() {
                                 </svg>
                                 <span className="sr-only">Check icon</span>
                             </div>
-                            <div className="ml-3 text-sm font-normal">{username} added as {selectedRole}</div>
+                            <div className="ml-3 text-sm font-normal">{username} added as {createUserRole}</div>
                             <button onClick={() => { setOpenModal(false) }} type="button" className="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" data-dismiss-target="#toast-success" aria-label="Close">
                                 <span className="sr-only">Close</span>
                                 <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">

@@ -9,27 +9,38 @@ export default function AddUsersForm() {
 
     // the role of the user
     const [user, setUser] = useState(null);
-    const [currentUser, setCurrentUser] = useState(null);
+    const [currentUser, setCurrentUser] = useState("null");
+
+    const [isAdmin, setIsAdmin] = useState(false);
 
     const [distributerID, setDistributorID] = useState("null")
+
+
+    const [selectedRole, setRoles] = useState([]);  // Initialize roles state
 
     useEffect(() => {
         // Set up an observer to listen for changes in authentication state
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
             setUser(user);
 
+            console.log(user.displayName);
+
             if (user.displayName === null) {
                 setUser("Admin");
+                setRoles("Distributor");
                 console.log("done");
             }
             else if (user.displayName === "Distributor") {
                 setDistributorID((user.uid))
                 console.log(user.uid);
+                setRoles("Agent");
                 console.log("triggerd");
                 setUser("Distributer");
                 console.log("done");
             }
             else if (user.displayName === "Agent") {
+                console.log("this is a agent");
+                setIsAdmin(true);
                 alert("No accesss");
                 navigate('/dashboard');
             }
@@ -41,17 +52,10 @@ export default function AddUsersForm() {
 
     // console.log(distributerID);
 
-    let roles = [];
 
-    if (user === "Admin") {
-        roles = ["Distributor"];
-    }
-    else if (user === "Distributor") {
-        roles = ["Agent"];
-    }
-    else {
-        roles = ["Agent"]
-    }
+    // else {
+    //     roles = ["Agent"]
+    // }
 
     // console.log(roles);
 
@@ -64,14 +68,12 @@ export default function AddUsersForm() {
 
 
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [selectedRole, setselectedRole] = useState(roles[currentIndex])
+    // const [selectedRole, setselectedRole] = useState(roles[currentIndex])
+
+    console.log(selectedRole);
 
 
     const [isLoading, setIsLoading] = useState(false);
-
-    useEffect(() => {
-        setselectedRole(roles[currentIndex])
-    }, [currentIndex])
 
     // to get the uid of the current authenticated user
     useEffect(() => {
@@ -153,7 +155,7 @@ export default function AddUsersForm() {
             {isLoading ? <div>
                 LOADING
             </div>
-                :
+                : isAdmin ?  <div>no accesss</div>:
                 <div>
                     <h1 className="text-gray-900 text-[40px] uppercase font-bold">Add user</h1>
                     <form onSubmit={(e) => {
@@ -201,9 +203,9 @@ export default function AddUsersForm() {
 
 
                         {/* <label htmlFor="countries" className="block mb-2 text-sm font-medium text-gray-900">Role</label> */}
-                        <label htmlFor="countires" className="mt-7 block mb-2 text-sm font-medium text-gray-900 dark:text-gray-900">
+                        {/* <label htmlFor="countires" className="mt-7 block mb-2 text-sm font-medium text-gray-900 dark:text-gray-900">
                             Role
-                        </label>
+                        </label> */}
                         {/* <select
                             onChange={handleRoleChange}
                             value={roles[currentIndex]}

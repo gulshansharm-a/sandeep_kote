@@ -1,4 +1,4 @@
-import { auth, database } from "../../Authentication/firebase";
+import { auth, database } from "../Auth/firebase";
 import { useState, useEffect } from "react";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import SideBar from "./DashBoardComponents/SideBar";

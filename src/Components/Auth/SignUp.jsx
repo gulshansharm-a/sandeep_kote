@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 // import React, { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { collection, doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../../Authentication/firebase';
+import { auth, db } from './firebase';
 export default function SignUp() {
 
     const roles = ["Admin", "Distributor", "Agent"];

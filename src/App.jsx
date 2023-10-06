@@ -4,7 +4,7 @@ import SignUp from './Components/Auth/SignUp';
 import DashBoard from './Components/DashBoard/DashBoard';
 import CoinCount from './Components/DashBoard/DashBoardComponents/CoinsCount';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { auth } from './Authentication/firebase';
+import { auth } from './Components/Auth/firebase';
 import { useState, useEffect } from 'react';
 import AddUsers from './Components/DashBoard/DashBoardComponents/AddUsers/AddUsers';
 import Users from './Components/DashBoard/DashBoardComponents/Users/Users';

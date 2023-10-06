@@ -1,4 +1,4 @@
-import { app, auth } from '../../Authentication/Firebase'; // Import the app from Firebase
+import { app, auth } from './firebase'; // Import the app from Firebase
 import React, { useState, useEffect } from 'react';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';

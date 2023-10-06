@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { collection, doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../../Authentication/firebase';
+import { auth, db } from '../Auth/firebase';
 
 const Auth = () => {
   const [email, setEmail] = useState('');

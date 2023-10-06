@@ -2,7 +2,7 @@ import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref, set, get } from 'firebase/database';
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, database } from "../../../../Authentication/firebase";
+import { auth, database } from "../../../Auth/firebase";
 
 export default function AddUsersForm() {
     const navigate = useNavigate();

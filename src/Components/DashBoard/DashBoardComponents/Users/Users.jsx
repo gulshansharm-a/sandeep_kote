@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getDatabase, ref, get } from 'firebase/database';
-import { auth, database } from "../../../../Authentication/firebase";
+import { auth, database } from "../../../Auth/firebase";
 import UserCard from './UserCard';
 import UserAgents from './UserAgents'
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { auth, db } from '../../Authentication/firebase';
+import { auth, db } from '../Auth/firebase';
 
 const CoinTransfer = () => {
   const [recipientUid, setRecipientUid] = useState('');

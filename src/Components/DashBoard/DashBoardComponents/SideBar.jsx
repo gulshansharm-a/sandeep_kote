@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { auth } from "../../../Authentication/firebase";
+import { auth } from "../../Auth/firebase";
 import { signOut } from "firebase/auth";
 import { Button, Modal } from 'flowbite-react';
 import { useNavigate } from "react-router-dom";

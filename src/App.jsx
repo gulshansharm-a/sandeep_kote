@@ -7,6 +7,7 @@ import { auth } from './Authentication/firebase';
 import { useState, useEffect } from 'react';
 import AddUsers from './Components/DashBoard/DashBoardComponents/AddUsers/AddUsers';
 import Users from './Components/DashBoard/DashBoardComponents/Users/Users';
+import MenuUsers from './Components/DashBoard/DashBoardComponents/MenuUsers/MenuUsers';
 
 import CoinTransfer from './Components/DashBoard/CoinTransfer';
 
@@ -54,6 +55,7 @@ function App() {
                 <Route path="" element={<CoinCount />} />
                 <Route path="addusers" element={<AddUsers />} />
                 <Route path="users" element={<Users />} />
+                <Route path="menuUsers" element={<MenuUsers />} />
                 {/* Add more routes for other choices */}
               </Route>
             ) : (

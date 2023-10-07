@@ -49,9 +49,9 @@ export default function AddUsersForm() {
                 }
 
                 if (userRole === "Admin") {
-                    setCreateUserRole("Distributer");
+                    setCreateUserRole("Distributor");
                 }
-                else if (userRole === "Distributer") {
+                else if (userRole === "Distributor") {
                     setCreateUserRole("Agent");
                 }
                 else if (userRole === "Agent") {

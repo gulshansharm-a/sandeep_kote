@@ -8,7 +8,7 @@ import Popup from "./AuthComponents/Popup";
 
 let currentRole = ""; // Initialize currentRole
 
- function Login() {
+ export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState(null);
@@ -166,5 +166,5 @@ let currentRole = ""; // Initialize currentRole
         </>
     );
 }
-export default {Login, currentRole}
+// export default {Login, currentRole}
  // Export currentRole after it has been assigned a value

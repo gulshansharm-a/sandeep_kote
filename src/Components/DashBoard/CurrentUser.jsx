@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../Authentication/firebase";
-import Popup from "./AuthComponents/Popup";
+import Popup from "../Auth/AuthComponents/Popup";
 
 let currentRole = ""; // Initialize currentRole
 
@@ -166,5 +166,5 @@ let currentRole = ""; // Initialize currentRole
         </>
     );
 }
-export default {Login, currentRole}
- // Export currentRole after it has been assigned a value
+
+export default { currentRole }; // Export currentRole after it has been assigned a value

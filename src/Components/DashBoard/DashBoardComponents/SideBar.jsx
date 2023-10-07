@@ -58,18 +58,18 @@ export default function SideBar() {
     // the role of the user
     const [userRole, setUserRole] = useState(null);
 
-    
+
     useEffect(() => {
         // Set up an observer to listen for changes in authentication state
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
 
-            
+
             if (user) {
                 try {
                     const snapshot = await get(ref(database));
-                    
+
                     const data = snapshot.val();
-                    
+
                     // Iterate through each role (admin, agent, dis, players)
                     for (const role in data) {
                         // Check if the UID exists in the current role
@@ -79,12 +79,11 @@ export default function SideBar() {
                             setUserEmail(user.email);
                             console.log(user.email);
                             setCurrentUserID(user.uid);
-                            
+
                             console.log(role);
                             break;
                         }
-                        else
-                        {
+                        else {
                             console.log("not found");
                         }
                     }
@@ -178,17 +177,17 @@ export default function SideBar() {
             {/* desktop */}
 
             {/* w-80 */}
-            <aside id="logo-sidebar" className="hidden md:block fixed top-0 left-0 z-40 w-80 h-screen pt-20 transition-transform -translate-x-full border-r sm:translate-x-0 bg-gray-800 border-gray-700" aria-label="Sidebar">
+            <aside id="logo-sidebar" className="hidden lg:block fixed top-0 left-0 z-40 w-80 h-screen pt-20 transition-transform -translate-x-full border-r sm:translate-x-0 bg-gray-800 border-gray-700" aria-label="Sidebar">
                 <div className="h-full px-3 pb-4 overflow-y-auto bg-gray-800">
                     <ul className="space-y-2 font-medium">
                         <li className="text-white"><p>Welcome,</p>
-                            <br></br> {userEmail}
+                            <br></br> {userEmail} <br></br>
                         </li>
                         <li>
-                            <a href="#" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
+                            {/* <a href="#" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
                                 <span className="ml-3 text-[30px]">{role}</span>
                                 <span className="ml-3 text-[30px]">{userEmail}</span>
-                            </a>
+                            </a> */}
                         </li>
                         <li>
                             <a href="/dashboard/coin" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
@@ -234,14 +233,19 @@ export default function SideBar() {
                                 <span className="flex-1 ml-3 whitespace-nowrap"> Coins</span>
                             </a>
                         </li>
-                        <li>
-                            <a href="/dashboard/addusers" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
-                                <svg className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
-                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3" />
-                                </svg>
-                                <span className="flex-1 ml-3 whitespace-nowrap">Add users</span>
-                            </a>
-                        </li>
+                        {userRole === "Player" ?
+                            <div></div>
+                            :
+                            <li>
+                                <a href="/dashboard/addusers" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
+                                    <svg className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
+                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3" />
+                                    </svg>
+
+                                    <span className="flex-1 ml-3 whitespace-nowrap">Add users</span>
+                                </a>
+                            </li>
+                        }
                         <li>
                             <a href="#" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
                                 <svg className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -257,13 +261,15 @@ export default function SideBar() {
             </aside>
 
             {/* mobile */}
-            <aside className={`md:hidden w-screen ${side ? 'hidden' : 'translate-x-0'}`}>
+            <aside className={`lg:hidden w-screen ${side ? 'hidden' : 'translate-x-0'}`}>
                 <div className="h-screen w-[60%] px-3 pb-4 overflow-y-auto bg-gray-800">
                     <ul className="space-y-2 text-white font-medium mt-20">
                         {/* <li className="text-white"><p>Welcome, {user ? user : 'Guest'}</p></li> */}
                         <li>
                             <a href="#" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
-                                <span className="ml-3 text-[30px]">{role}</span>
+                                <li className="text-white"><p>Welcome,</p>
+                                    <br></br> {userEmail} <br></br>
+                                </li>
                             </a>
                         </li>
                         <li>
@@ -273,6 +279,7 @@ export default function SideBar() {
                                     <path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z" />
                                 </svg>
                                 <span className="ml-3">Dashboard</span>
+
                             </a>
                         </li>
                         <li>
@@ -309,14 +316,20 @@ export default function SideBar() {
                                 <span className="flex-1 ml-3 whitespace-nowrap">Request Coin</span>
                             </a>
                         </li>
-                        <li>
-                            <a href="/dashboard/addusers" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
-                                <svg className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
-                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3" />
-                                </svg>
-                                <span className="flex-1 ml-3 whitespace-nowrap">Add Users</span>
-                            </a>
-                        </li>
+                        {userRole === "Player" ?
+                            <div></div>
+                            :
+                            <li>
+                                <a href="/dashboard/addusers" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
+                                    <svg className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
+                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3" />
+                                    </svg>
+
+
+                                    <span className="flex-1 ml-3 whitespace-nowrap">Add Users</span>
+                                </a>
+                            </li>
+                        }
                         <li>
                             <a href="#" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
                                 <svg className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">

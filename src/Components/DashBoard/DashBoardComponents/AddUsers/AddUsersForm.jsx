@@ -118,8 +118,10 @@ export default function AddUsersForm() {
                     userData = {
                         ...userData,
                         agentID: currentUserID,
-                        distributerID: agentData.admin,
+                        distributerID: agentData.distributerID,
                     };
+
+                    console.log(agentData.distributerID);
 
                     console.log(userData);
 

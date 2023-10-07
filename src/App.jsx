@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import AddUsers from './Components/DashBoard/DashBoardComponents/AddUsers/AddUsers';
 import Users from './Components/DashBoard/DashBoardComponents/Users/Users';
 import MenuUsers from './Components/DashBoard/DashBoardComponents/MenuUsers/MenuUsers';
+import MenuUserSpecific from './Components/DashBoard/DashBoardComponents/MenuUsers/MenuUserSpecific'
 
 import CoinTransfer from './Components/DashBoard/CoinTransfer';
 
@@ -56,6 +57,7 @@ function App() {
                 <Route path="addusers" element={<AddUsers />} />
                 <Route path="users" element={<Users />} />
                 <Route path="menuUsers" element={<MenuUsers />} />
+                <Route path="menuUsers/specific" element={<MenuUserSpecific />} />
                 {/* Add more routes for other choices */}
               </Route>
             ) : (

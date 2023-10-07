@@ -157,27 +157,52 @@ export default function MenuUsers() {
         console.log(`Filter Change: ${columnName} - ${value}`);
         setFilterOptions({ ...filterOptions, [columnName]: value });
     };
-    
+
 
     const applyFilters = (user) => {
         const result = Object.keys(filterOptions).every((column) => {
             const filterValue = filterOptions[column]?.toLowerCase();
-            const includes = user[column] && user[column].toString().toLowerCase().includes(filterValue);
-            console.log(`${column}: ${user[column]} | Filter: ${filterValue} | Result: ${includes}`);
-            return includes;
+            const userColumnValue = user[column] && user[column].toString().toLowerCase();
+
+            switch (selectedOption) {
+                case 'Distributor':
+                    return (
+                        userColumnValue && userColumnValue.includes(filterValue) ||
+                        dis[user.userId] && dis[user.userId].toLowerCase().includes(filterValue)
+                    );
+                case 'Agent':
+                    return (
+                        userColumnValue && userColumnValue.includes(filterValue) ||
+                        dis[user.userId] && dis[user.userId].toLowerCase().includes(filterValue) ||
+                        agent[user.userId] && agent[user.userId].toLowerCase().includes(filterValue)
+                    );
+                case 'Player':
+                    return (
+                        userColumnValue && userColumnValue.includes(filterValue) ||
+                        dis[user.userId] && dis[user.userId].toLowerCase().includes(filterValue) ||
+                        agent[user.userId] && agent[user.userId].toLowerCase().includes(filterValue) ||
+                        player[user.userId] && player[user.userId].toLowerCase().includes(filterValue)
+                    );
+                default:
+                    return userColumnValue && userColumnValue.includes(filterValue);
+            }
         });
-    
+
         console.log(`User ${user.email} passes filters: ${result}`);
         return result;
     };
-    
+
+
     currentUsers = filteredUsers
-    .filter(applyFilters)
-    .slice(indexOfFirstItem, indexOfLastItem);
+        .filter(applyFilters)
+        .slice(indexOfFirstItem, indexOfLastItem);
 
 
     return (
         <div className="p-4">
+            <div className="w-full flex justify-end mt-4">
+                <a href='/dashboard/menuUsers/specific' className="bg-blue-500 text-white px-4 py-2 rounded">Search by Specific</a>
+            </div>
             <div className="mb-4">
                 <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="userType">
                     Select User Type:
@@ -209,44 +234,53 @@ export default function MenuUsers() {
                 />
             </div>
 
-            <table className="w-full border">
+            <table className='w-full border mb-10'>
 
                 <thead>
                     <tr>
-                        <th className="p-3 border">S.No</th>
                         <th className="p-3 border">
-                            <div>
-                                Email
+                            <div className="filter-column">
+                                <label className="text-gray-700">Email:</label>
                                 <input
                                     type="text"
                                     value={filterOptions.email || ''}
                                     onChange={(e) => handleFilterChange('email', e.target.value)}
+                                    className="ml-2 p-2 border rounded bg-gray-100 focus:outline-none focus:ring focus:border-blue-500"
+                                    placeholder="Filter by Email"
                                 />
                             </div>
                         </th>
                         <th className="p-3 border">
-                            <div>
-                                Username
+                            <div className="filter-column">
+                                <label className="text-gray-700">Username:</label>
                                 <input
                                     type="text"
                                     value={filterOptions.userName || ''}
                                     onChange={(e) => handleFilterChange('userName', e.target.value)}
+                                    className="ml-2 p-2 border rounded bg-gray-100 focus:outline-none focus:ring focus:border-blue-500"
+                                    placeholder="Filter by Username"
                                 />
                             </div>
                         </th>
                         <th className="p-3 border">
-                            <div>
-                                Balance
+                            <div className="filter-column">
+                                <label className="text-gray-700">Balance:</label>
                                 <input
                                     type="text"
                                     value={filterOptions.balance || ''}
                                     onChange={(e) => handleFilterChange('balance', e.target.value)}
+                                    className="ml-2 p-2 border rounded bg-gray-100 focus:outline-none focus:ring focus:border-blue-500"
+                                    placeholder="Filter by Balance"
                                 />
                             </div>
                         </th>
                         {/* ... (other columns) */}
                     </tr>
                 </thead>
+            </table>
+
+
+            <table className="w-full border">
 
                 <thead>
                     <tr>
@@ -320,7 +354,7 @@ export default function MenuUsers() {
                         <button
                             key={index}
                             onClick={() => handlePageChange(index + 1)}
-                            className="p-2 border rounded hover:bg-gray-200 focus:outline-none focus:ring focus:border-blue-500"
+                            className="bg-gray-900 p-2 text-white border rounded hover:bg-gray-700 focus:outline-none focus:ring focus:border-blue-500"
                         >
                             {index + 1}
                         </button>

@@ -1,11 +1,14 @@
+// Login.js
+
+import React, { useEffect, useState } from "react";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../../Authentication/firebase"; // Update the path based on your project structure
+import { auth } from "../../Authentication/firebase";
 import Popup from "./AuthComponents/Popup";
 
-export default function Login() {
+let currentRole = ""; // Initialize currentRole
 
+ export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState(null);
@@ -17,14 +20,12 @@ export default function Login() {
     const roles = ["Admin", "Distributor", "Agent"];
 
     const [currentIndex, setCurrentIndex] = useState(1);
-    const [currentRole, setCurrentRole] = useState(roles[currentIndex]);
 
     const handleLogin = async () => {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            // Log the UID to the console
             console.log("User UID:", user.uid);
 
             // Check the user's role based on the UID
@@ -187,3 +188,4 @@ export default function Login() {
             </>
         );
     }
+ 

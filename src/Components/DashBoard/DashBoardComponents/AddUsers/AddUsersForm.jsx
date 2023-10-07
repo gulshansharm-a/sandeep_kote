@@ -96,6 +96,7 @@ export default function AddUsersForm() {
                     userName: username,
                     email: email,
                     pass: password,
+                    balance : 1000,
                 }
             }
             else if (createUserRole === "Agent") {
@@ -103,7 +104,8 @@ export default function AddUsersForm() {
                     userName: username,
                     email: email,
                     pass: password,
-                    distributerID: currentUserID
+                    distributerID: currentUserID,
+                    balance :1000,
                 }
             }
             else if (createUserRole === "Player") {

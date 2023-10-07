@@ -80,7 +80,7 @@ export default function MenuUsers() {
     );
 
 
-    const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+    let currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
 
 
     const [dis, setDis] = useState({});
@@ -151,6 +151,30 @@ export default function MenuUsers() {
         }
     };
 
+    const [filterOptions, setFilterOptions] = useState({});
+
+    const handleFilterChange = (columnName, value) => {
+        console.log(`Filter Change: ${columnName} - ${value}`);
+        setFilterOptions({ ...filterOptions, [columnName]: value });
+    };
+    
+
+    const applyFilters = (user) => {
+        const result = Object.keys(filterOptions).every((column) => {
+            const filterValue = filterOptions[column]?.toLowerCase();
+            const includes = user[column] && user[column].toString().toLowerCase().includes(filterValue);
+            console.log(`${column}: ${user[column]} | Filter: ${filterValue} | Result: ${includes}`);
+            return includes;
+        });
+    
+        console.log(`User ${user.email} passes filters: ${result}`);
+        return result;
+    };
+    
+    currentUsers = filteredUsers
+    .filter(applyFilters)
+    .slice(indexOfFirstItem, indexOfLastItem);
+
 
     return (
         <div className="p-4">
@@ -186,6 +210,44 @@ export default function MenuUsers() {
             </div>
 
             <table className="w-full border">
+
+                <thead>
+                    <tr>
+                        <th className="p-3 border">S.No</th>
+                        <th className="p-3 border">
+                            <div>
+                                Email
+                                <input
+                                    type="text"
+                                    value={filterOptions.email || ''}
+                                    onChange={(e) => handleFilterChange('email', e.target.value)}
+                                />
+                            </div>
+                        </th>
+                        <th className="p-3 border">
+                            <div>
+                                Username
+                                <input
+                                    type="text"
+                                    value={filterOptions.userName || ''}
+                                    onChange={(e) => handleFilterChange('userName', e.target.value)}
+                                />
+                            </div>
+                        </th>
+                        <th className="p-3 border">
+                            <div>
+                                Balance
+                                <input
+                                    type="text"
+                                    value={filterOptions.balance || ''}
+                                    onChange={(e) => handleFilterChange('balance', e.target.value)}
+                                />
+                            </div>
+                        </th>
+                        {/* ... (other columns) */}
+                    </tr>
+                </thead>
+
                 <thead>
                     <tr>
                         <th className="p-3 border">S.No</th>
@@ -220,7 +282,7 @@ export default function MenuUsers() {
                                 <td className="p-3 border">{agent[user.userId]}</td>
                             )}
                             {selectedOption === 'Player' && (
-                                <td className="p-3 border">{dis[user.userId]}</td> 
+                                <td className="p-3 border">{dis[user.userId]}</td>
                             )}
                             {selectedOption === 'Player' && (
                                 <td className="p-3 border">{agent[user.userId]}</td>
@@ -231,6 +293,8 @@ export default function MenuUsers() {
                         </tr>
                     ))}
                 </tbody>
+
+
             </table>
 
             <div className="mt-4">
@@ -243,7 +307,7 @@ export default function MenuUsers() {
                     onChange={handleRowsPerPageChange}
                     className="p-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
                 >
-                    {[1, 5, 10, 15, 20, 25, 30].map((value) => (
+                    {[1, 2, 5, 10, 15, 20, 25, 30].map((value) => (
                         <option key={value} value={value}>
                             {value}
                         </option>

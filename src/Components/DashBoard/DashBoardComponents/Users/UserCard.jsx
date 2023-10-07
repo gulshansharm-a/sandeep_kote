@@ -1,4 +1,4 @@
-export default function UserCard({ userName, userEmail, balance }) {
+export default function UserCard({ userName, Email, balance }) {
     return (
         <>
             {/* <h2>Distributor: {distributorName} - {email}</h2> */}
@@ -15,7 +15,7 @@ export default function UserCard({ userName, userEmail, balance }) {
                                         {userName}
                                     </p>
                                     <p className="mt-2 text-sm text-gray-500 truncate dark:text-gray-400">
-                                        {userEmail}
+                                        {Email}
                                     </p>
                                 </div>
                                 <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">

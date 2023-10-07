@@ -39,7 +39,7 @@ export default function AddUsersForm() {
                             setCurrentUserID(user.uid);
                             console.log(user.uid);
                             console.log(createUserRole);
-                            
+
                             console.log(role);
                             break;
                         }
@@ -85,9 +85,13 @@ export default function AddUsersForm() {
                 password
             );
 
-            let userData = {};
+            let userData = {
+                userName: username,
+                email: email,
+                pass: password,
+            }
 
-            if (createUserRole === "Distributer") {
+            if (createUserRole === "Distributor") {
                 userData = {
                     userName: username,
                     email: email,
@@ -106,7 +110,7 @@ export default function AddUsersForm() {
                 // Fetch DistributerID based on the AgentID
                 const agentRef = ref(database, `Agent/${currentUserID}`); // Adjust 'agents' to the actual node name
                 const agentSnapshot = await get(agentRef);
-        
+
                 if (agentSnapshot.exists()) {
                     const agentData = agentSnapshot.val();
                     userData = {
@@ -124,7 +128,7 @@ export default function AddUsersForm() {
                     console.error('Agent node not found');
                 }
             }
-        
+
             console.log(createUserRole);
             console.log(userCredential.user.uid);
             // Save user data to the database
@@ -133,6 +137,12 @@ export default function AddUsersForm() {
 
             console.log(userData);
 
+            const timer = setTimeout(() => {
+                // Reload the page
+                window.location.reload();
+            }, 2000);
+
+            timer();
 
             setOpenModal(true);
             setSuccess(true);

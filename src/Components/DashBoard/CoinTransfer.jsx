@@ -3,7 +3,7 @@ import { initializeApp } from 'firebase/app';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getDatabase, ref, get, set, push } from 'firebase/database';
 import { auth } from '../../Authentication/firebase';
-import TransactionHistory from '../DashBoard/DashBoardComponents/TransactionHIstory';
+import TransactionHistory from '../DashBoard/DashBoardComponents/TransactionHistory';
 
 const CoinTransfer = () => {
   const [adminBalance, setAdminBalance] = useState(null);

@@ -1,932 +1,189 @@
-// import React, { useState, useEffect } from 'react';
-// import { initializeApp } from 'firebase/app';
-// import { onAuthStateChanged } from 'firebase/auth';
-// import { getDatabase, ref, get, set } from 'firebase/database';
-// import { auth } from "../../../Authentication/firebase";
-// import TransactionHistory from './TransactionHistory';
 
-// const CoinCount = () => {
-//   const [adminBalance, setAdminBalance] = useState(null);
-//   const [distributorBalance, setDistributorBalance] = useState(null);
-//   const [agentBalance, setAgentBalance] = useState(null);
-//   const [playerBalance, setPlayerBalance] = useState(null);
-//   const [transferAmount, setTransferAmount] = useState('');
-//   const [targetEmail, setTargetEmail] = useState('');
-//   const [recipientBalance, setRecipientBalance] = useState(null);
-//   const [userRole, setUserRole] = useState(null);
-//   const [currentUserId, setCurrentUserId] = useState(null);
-//   const [transactions, setTransactions] = useState([]);
-
-//   const firebaseConfig = {
-//     apiKey: "AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4",
-//     authDomain: "sandeepkote-c67f5.firebaseapp.com",
-//     databaseURL: "https://sandeepkote-c67f5-default-rtdb.firebaseio.com",
-//     projectId: "sandeepkote-c67f5",
-//     storageBucket: "sandeepkote-c67f5.appspot.com",
-//     messagingSenderId: "871561614523",
-//     appId: "1:871561614523:web:3b12ae93e7490723ddc59e",
-//     measurementId: "G-645LW1SWKT"
-//   };
-
-//   const firebaseApp = initializeApp(firebaseConfig);
-//   const database = getDatabase(firebaseApp);
-
-//   useEffect(() => {
-//     const unsubscribe = auth.onAuthStateChanged(async (user) => {
-//       if (user) {
-//         try {
-//           const snapshot = await get(ref(database));
-
-//           const data = snapshot.val();
-
-//           for (const role in data) {
-//             if (data[role][user.uid]) {
-//               console.log('User Role:', role);
-//               setUserRole(role);
-//               setCurrentUserId(user.uid);
-//               break;
-//             }
-//           }
-//         } catch (error) {
-//           console.error('Error fetching data from Firebase:', error.message);
-//         }
-//       }
-//     });
-
-//     return () => unsubscribe();
-//   }, []);
-
-//   useEffect(() => {
-//     if (userRole === 'Admin') {
-//       fetchAdminBalance();
-//     } else if (userRole === 'Distributor') {
-//       fetchDistributorBalance();
-//     } else if (userRole === 'Agent') {
-//       fetchAgentBalance();
-//     } else if (userRole === 'Player') {
-//       fetchPlayerBalance();
-//     }
-//   }, [userRole]);
-
-//   const fetchAdminBalance = async () => {
-//     try {
-//       const snapshot = await get(ref(database, 'Admin/admin/balance'));
-//       const balance = snapshot.val();
-//       setAdminBalance(balance);
-//     } catch (error) {
-//       console.error('Error fetching admin balance:', error.message);
-//     }
-//   };
-
-//   const fetchDistributorBalance = async () => {
-//     try {
-//       const snapshot = await get(ref(database, `Distributor/${currentUserId}/balance`));
-//       const balance = snapshot.val();
-//       setDistributorBalance(balance);
-//     } catch (error) {
-//       console.error('Error fetching distributor balance:', error.message);
-//     }
-//   };
-
-//   const fetchAgentBalance = async () => {
-//     try {
-//       const snapshot = await get(ref(database, `Agent/${currentUserId}/balance`));
-//       const balance = snapshot.val();
-//       setAgentBalance(balance);
-//     } catch (error) {
-//       console.error('Error fetching agent balance:', error.message);
-//     }
-//   };
-
-//   const fetchPlayerBalance = async () => {
-//     try {
-//       const snapshot = await get(ref(database, `Player/${currentUserId}/balance`));
-//       const balance = snapshot.val();
-//       setPlayerBalance(balance);
-//     } catch (error) {
-//       console.error('Error fetching player balance:', error.message);
-//     }
-//   };
-
-//   const handleTargetEmailChange = (e) => {
-//     setTargetEmail(e.target.value);
-//   };
-
-//   const fetchRecipientBalance = async (recipientRole) => {
-//     try {
-//       let recipientBalance = null;
-
-//       if (recipientRole === 'Distributor') {
-//         const recipientSnapshot = await get(ref(database, 'Distributor'));
-//         const recipientData = recipientSnapshot.val();
-//         for (const recipientUid in recipientData) {
-//           if (recipientData[recipientUid]?.email === targetEmail) {
-//             recipientBalance = recipientData[recipientUid]?.balance;
-//             break;
-//           }
-//         }
-//       } else if (recipientRole === 'Agent') {
-//         const recipientSnapshot = await get(ref(database, 'Agent'));
-//         const recipientData = recipientSnapshot.val();
-//         for (const recipientUid in recipientData) {
-//           if (recipientData[recipientUid]?.email === targetEmail) {
-//             recipientBalance = recipientData[recipientUid]?.balance;
-//             break;
-//           }
-//         }
-//       }
-
-//       if (recipientBalance !== null) {
-//         setRecipientBalance(recipientBalance);
-//       } else {
-//         console.error('Recipient not found with the entered email.');
-//       }
-//     } catch (error) {
-//       console.error('Error fetching recipient balance:', error.message);
-//     }
-//   };
-
-//   const handleTransferAmountChange = (e) => {
-//     setTransferAmount(e.target.value);
-//   };
-
-//   const transferMoney = async (recipientRole) => {
-//     try {
-//       const transferAmountNumber = parseFloat(transferAmount);
-//       if (isNaN(transferAmountNumber) || transferAmountNumber <= 0) {
-//         console.error('Invalid transfer amount');
-//         return;
-//       }
-
-//       if (userRole === 'Admin') {
-//         const updatedAdminBalance = adminBalance - transferAmountNumber;
-//         await set(ref(database, 'Admin/admin/balance'), updatedAdminBalance);
-//         fetchAdminBalance();
-//       } else if (userRole === 'Distributor') {
-//         const updatedDistributorBalance = distributorBalance - transferAmountNumber;
-//         await set(ref(database, `Distributor/${currentUserId}/balance`), updatedDistributorBalance);
-//         fetchDistributorBalance();
-
-//         if (recipientRole === 'Agent') {
-//           const agentSnapshot = await get(ref(database, 'Agent/AGENT_UID/balance'));
-//           const agentBalance = agentSnapshot.val();
-//           const updatedAgentBalance = agentBalance + transferAmountNumber;
-//           await set(ref(database, 'Agent/AGENT_UID/balance'), updatedAgentBalance);
-//           fetchAgentBalance();
-//         } else if (recipientRole === 'Player') {
-//           const playerSnapshot = await get(ref(database, 'Player/PLAYER_UID/balance'));
-//           const playerBalance = playerSnapshot.val();
-//           const updatedPlayerBalance = playerBalance + transferAmountNumber;
-//           await set(ref(database, 'Player/PLAYER_UID/balance'), updatedPlayerBalance);
-//           fetchPlayerBalance();
-//         }
-//       } else if (userRole === 'Agent') {
-//         const updatedAgentBalance = agentBalance - transferAmountNumber;
-//         await set(ref(database, `Agent/${currentUserId}/balance`), updatedAgentBalance);
-//         fetchAgentBalance();
-
-//         if (recipientRole === 'Distributor') {
-//           const distributorSnapshot = await get(ref(database, 'Distributor/DISTRIBUTOR_UID/balance'));
-//           const distributorBalance = distributorSnapshot.val();
-//           const updatedDistributorBalance = distributorBalance + transferAmountNumber;
-//           await set(ref(database, 'Distributor/DISTRIBUTOR_UID/balance'), updatedDistributorBalance);
-//           fetchDistributorBalance();
-//         } else if (recipientRole === 'Player') {
-//           const playerSnapshot = await get(ref(database, 'Player/PLAYER_UID/balance'));
-//           const playerBalance = playerSnapshot.val();
-//           const updatedPlayerBalance = playerBalance + transferAmountNumber;
-//           await set(ref(database, 'Player/PLAYER_UID/balance'), updatedPlayerBalance);
-//           fetchPlayerBalance();
-//         }
-//       } else if (userRole === 'Player') {
-//         const updatedPlayerBalance = playerBalance - transferAmountNumber;
-//         await set(ref(database, `Player/${currentUserId}/balance`), updatedPlayerBalance);
-//         fetchPlayerBalance();
-
-//         if (recipientRole === 'Agent') {
-//           const agentSnapshot = await get(ref(database, 'Agent/AGENT_UID/balance'));
-//           const agentBalance = agentSnapshot.val();
-//           const updatedAgentBalance = agentBalance + transferAmountNumber;
-//           await set(ref(database, 'Agent/AGENT_UID/balance'), updatedAgentBalance);
-//           fetchAgentBalance();
-//         } else if (recipientRole === 'Distributor') {
-//           const distributorSnapshot = await get(ref(database, 'Distributor/DISTRIBUTOR_UID/balance'));
-//           const distributorBalance = distributorSnapshot.val();
-//           const updatedDistributorBalance = distributorBalance + transferAmountNumber;
-//           await set(ref(database, 'Distributor/DISTRIBUTOR_UID/balance'), updatedDistributorBalance);
-//           fetchDistributorBalance();
-//         }
-//       }
-
-//       if (recipientBalance !== null) {
-//         let updatedRecipientBalance = recipientBalance + transferAmountNumber;
-
-//         if (recipientRole === 'Distributor') {
-//           await set(ref(database, `Agent/AGENT_UID/balance`), updatedRecipientBalance);
-//         } else if (recipientRole === 'Agent') {
-//           await set(ref(database, `Player/PLAYER_UID/balance`), updatedRecipientBalance);
-//         } else if (recipientRole === 'Player') {
-//           await set(ref(database, `Agent/AGENT_UID/balance`), updatedRecipientBalance);
-//         }
-
-//         setRecipientBalance(updatedRecipientBalance);
-//       }
-
-//       // Capture transaction details
-//       const transactionDetails = {
-//         amount: transferAmountNumber,
-//         transactionType: 'Transfer',
-//         recipientRole: recipientRole,
-//         recipientEmail: targetEmail,
-//         timestamp: new Date().toISOString(),
-//       };
-
-//       // Update transactions state with the new transaction
-//       setTransactions((prevTransactions) => [...prevTransactions, transactionDetails]);
-//     } catch (error) {
-//       console.error('Error transferring money:', error.message);
-//     }
-//   };
-
-//   const handleTransferToAdmin = async () => {
-//     try {
-//       const transferAmountNumber = parseFloat(transferAmount);
-//       if (isNaN(transferAmountNumber) || transferAmountNumber <= 0) {
-//         console.error('Invalid transfer amount');
-//         return;
-//       }
-
-//       if (userRole === 'Distributor') {
-//         const updatedDistributorBalance = distributorBalance - transferAmountNumber;
-//         await set(ref(database, `Distributor/${currentUserId}/balance`), updatedDistributorBalance);
-//         fetchDistributorBalance();
-
-//         const adminSnapshot = await get(ref(database, 'Admin/admin/balance'));
-//         const adminBalance = adminSnapshot.val();
-//         const updatedAdminBalance = adminBalance + transferAmountNumber;
-//         await set(ref(database, 'Admin/admin/balance'), updatedAdminBalance);
-//         fetchAdminBalance();
-//       }
-//     } catch (error) {
-//       console.error('Error transferring money to admin:', error.message);
-//     }
-//   };
-
-//   const handleTransferToAgent = async () => {
-//     try {
-//       const transferAmountNumber = parseFloat(transferAmount);
-//       if (isNaN(transferAmountNumber) || transferAmountNumber <= 0) {
-//         console.error('Invalid transfer amount');
-//         return;
-//       }
-
-//       const updatedPlayerBalance = playerBalance - transferAmountNumber;
-//       await set(ref(database, `Player/${currentUserId}/balance`), updatedPlayerBalance);
-//       fetchPlayerBalance();
-
-//       const agentSnapshot = await get(ref(database, 'Agent/AGENT_UID/balance'));
-//       const agentBalance = agentSnapshot.val();
-//       const updatedAgentBalance = agentBalance + transferAmountNumber;
-//       await set(ref(database, 'Agent/AGENT_UID/balance'), updatedAgentBalance);
-//       fetchAgentBalance();
-
-//       // Capture transaction details
-//       const transactionDetails = {
-//         amount: transferAmountNumber,
-//         transactionType: 'Transfer',
-//         recipientRole: 'Agent',
-//         recipientEmail: '', // You may update this with the actual agent's email
-//         timestamp: new Date().toISOString(),
-//       };
-
-//       // Update transactions state with the new transaction
-//       setTransactions((prevTransactions) => [...prevTransactions, transactionDetails]);
-//     } catch (error) {
-//       console.error('Error transferring money to agent:', error.message);
-//     }
-//   };
-//   return (
-//     <div>
-//       <h2 className="lg:ml-40 mt-40 font-serif text-2xl">Balance Deduction</h2>
-//       {userRole === 'Admin' && (
-//         <div>
-//           <p className="lg:ml-40 mt-27 font-serif text-2xl">Admin Balance: {adminBalance !== null ? adminBalance : 'Loading...'}</p>
-//           <input
-//             type="text"
-//             placeholder="Enter recipient email"
-//             value={targetEmail}
-//             onChange={handleTargetEmailChange}
-//             className="lg:ml-40 mt-27 px-2 py-1"
-//           />
-//           <button
-//             className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-//             onClick={() => fetchRecipientBalance('Distributor')}
-//           >
-//             Fetch Recipient Balance
-//           </button>
-//           <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
-//           <input
-//             type="number"
-//             placeholder="Enter amount"
-//             value={transferAmount}
-//             onChange={handleTransferAmountChange}
-//             className="lg:ml-40 mt-27 px-2 py-1"
-//           />
-//           <button
-//             className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-//             onClick={() => transferMoney('Distributor')}
-//           >
-//             Transfer Money to Distributor
-//           </button>
-//           <br />
-//         </div>
-//       )}
-//       {userRole === 'Distributor' && (
-//         <div>
-//           <p className="lg:ml-40 mt-27 font-serif text-2xl">Distributor Balance: {distributorBalance !== null ? distributorBalance : 'Loading...'}</p>
-//           <input
-//             type="text"
-//             placeholder="Enter recipient email"
-//             value={targetEmail}
-//             onChange={handleTargetEmailChange}
-//             className="lg:ml-40 mt-27 px-2 py-1"
-//           />
-//           <button
-//             className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-//             onClick={() => fetchRecipientBalance('Agent')}
-//           >
-//             Fetch Recipient Balance
-//           </button>
-//           <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
-//           <input
-//             type="number"
-//             placeholder="Enter amount"
-//             value={transferAmount}
-//             onChange={handleTransferAmountChange}
-//             className="lg:ml-40 mt-27 px-2 py-1"
-//           />
-//           <button
-//             className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-//             onClick={() => transferMoney('Agent')}
-//           >
-//             Transfer Money to Agent
-//           </button>
-//           <br />
-//           <input
-//             type="number"
-//             placeholder="Enter amount to transfer to Admin"
-//             value={transferAmount}
-//             onChange={handleTransferAmountChange}
-//             className="lg:ml-40 mt-27 px-2 py-1"
-//           />
-//           <button
-//             className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-//             onClick={handleTransferToAdmin}
-//           >
-//             Transfer to Admin
-//           </button>
-//           <TransactionHistory transactions={transactions} />
-//         </div>
-//       )}
-//       {userRole === 'Agent' && (
-//         <div>
-//           <p className="lg:ml-40 mt-27 font-serif text-2xl">Agent Balance: {agentBalance !== null ? agentBalance : 'Loading...'}</p>
-//           <input
-//             type="text"
-//             placeholder="Enter recipient email"
-//             value={targetEmail}
-//             onChange={handleTargetEmailChange}
-//             className="lg:ml-40 mt-27 px-2 py-1"
-//           />
-//           <button
-//             className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-//             onClick={() => fetchRecipientBalance('Distributor')}
-//           >
-//             Fetch Recipient Balance (Distributor)
-//           </button>
-//           <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
-//           <input
-//             type="number"
-//             placeholder="Enter amount"
-//             value={transferAmount}
-//             onChange={handleTransferAmountChange}
-//             className="lg:ml-40 mt-27 px-2 py-1"
-//           />
-//           <button
-//             className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-//             onClick={() => transferMoney('Distributor')}
-//           >
-//             Transfer Money to Distributor
-//           </button>
-//           <br />
-          
-//           <TransactionHistory transactions={transactions} />
-//         </div>
-//       )}
-//       {userRole === 'Player' && (
-//         <div>
-//           <p className="lg:ml-40 mt-27 font-serif text-2xl">Player Balance: {playerBalance !== null ? playerBalance : 'Loading...'}</p>
-//           <input
-//             type="text"
-//             placeholder="Enter recipient email"
-//             value={targetEmail}
-//             onChange={handleTargetEmailChange}
-//             className="lg:ml-40 mt-27 px-2 py-1"
-//           />
-//           <button
-//             className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-//             onClick={() => fetchRecipientBalance('Agent')}
-//           >
-//             Fetch Recipient Balance (Agent)
-//           </button>
-//           <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
-//           <input
-//             type="number"
-//             placeholder="Enter amount"
-//             value={transferAmount}
-//             onChange={handleTransferAmountChange}
-//             className="lg:ml-40 mt-27 px-2 py-1"
-//           />
-//           <button
-//             className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-//             onClick={() => transferMoney('Agent')}
-//           >
-//             Transfer Money to Agent
-//           </button>
-//           <br />
-//           <TransactionHistory transactions={transactions} />
-//         </div>
-//       )}
-//     </div>
-//   );
+// const firebaseConfig = {
+//   apiKey: "AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4",
+//   authDomain: "sandeepkote-c67f5.firebaseapp.com",
+//   databaseURL: "https://sandeepkote-c67f5-default-rtdb.firebaseio.com",
+//   projectId: "sandeepkote-c67f5",
+//   storageBucket: "sandeepkote-c67f5.appspot.com",
+//   messagingSenderId: "871561614523",
+//   appId: "1:871561614523:web:3b12ae93e7490723ddc59e",
+//   measurementId: "G-645LW1SWKT"
 // };
-
-// export default CoinCount;
-
 
 import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
-import { onAuthStateChanged } from 'firebase/auth';
-import { getDatabase, ref, get, set, push } from 'firebase/database';
-import { auth } from "../../../Authentication/firebase";
-import TransactionHistory from './TransactionHistory';
+import { getDatabase, ref, get, set } from 'firebase/database';
+import { getAuth } from 'firebase/auth';
 
 const CoinCount = () => {
+  const [loggedInUserId, setLoggedInUserId] = useState(null);
   const [adminBalance, setAdminBalance] = useState(null);
-  const [distributorBalance, setDistributorBalance] = useState(null);
-  const [agentBalance, setAgentBalance] = useState(null);
-  const [playerBalance, setPlayerBalance] = useState(null);
-  const [transferAmount, setTransferAmount] = useState('');
-  const [targetEmail, setTargetEmail] = useState('');
-  const [recipientBalance, setRecipientBalance] = useState(null);
-  const [userRole, setUserRole] = useState(null);
-  const [currentUserId, setCurrentUserId] = useState(null);
-  const [transactions, setTransactions] = useState([]);
+  const [standing, setStanding] = useState(null);
+  const [earning, setEarning] = useState(null);
+  const [earningPercentage, setEarningPercentage] = useState(null);
+  const [kata, setKata] = useState(null);
+  const [chapa, setChapa] = useState(null);
+  const [earningPercentageInput, setEarningPercentageInput] = useState('');
+  const [remainingTime, setRemainingTime] = useState(null);
 
   const firebaseConfig = {
-    apiKey: "AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4",
-    authDomain: "sandeepkote-c67f5.firebaseapp.com",
-    databaseURL: "https://sandeepkote-c67f5-default-rtdb.firebaseio.com",
-    projectId: "sandeepkote-c67f5",
-    storageBucket: "sandeepkote-c67f5.appspot.com",
-    messagingSenderId: "871561614523",
-    appId: "1:871561614523:web:3b12ae93e7490723ddc59e",
-    measurementId: "G-645LW1SWKT"
+  apiKey: "AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4",
+  authDomain: "sandeepkote-c67f5.firebaseapp.com",
+  databaseURL: "https://sandeepkote-c67f5-default-rtdb.firebaseio.com",
+  projectId: "sandeepkote-c67f5",
+  storageBucket: "sandeepkote-c67f5.appspot.com",
+  messagingSenderId: "871561614523",
+  appId: "1:871561614523:web:3b12ae93e7490723ddc59e",
+  measurementId: "G-645LW1SWKT"
   };
 
   const firebaseApp = initializeApp(firebaseConfig);
   const database = getDatabase(firebaseApp);
+  const auth = getAuth();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        try {
-          const snapshot = await get(ref(database));
+    const userId = auth.currentUser?.uid;
+    if (userId) {
+      setLoggedInUserId(userId);
+      fetchAdminData(userId);
+      fetchTimerData();
+    }
+  }, []);
+  const setCustomBet = async (betValue) => {
+    try {
+        // Update the database with the chosen bet value
+        await set(ref(database, `customBet`), betValue);
+        console.log(`customBet set to: ${betValue}`);
+        alert(`customBet updated to: ${betValue}`);
+    } catch (error) {
+        console.error('Error setting customBet:', error.message);
+        alert('Error updating customBet. Please try again.');
+    }
+};
 
-          const data = snapshot.val();
-
-          for (const role in data) {
-            if (data[role][user.uid]) {
-              console.log('User Role:', role);
-              setUserRole(role);
-              setCurrentUserId(user.uid);
-              break;
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching data from Firebase:', error.message);
-        }
+  const fetchAdminData = async (userId) => {
+    try {
+      const adminSnapshot = await get(ref(database, `/`));
+      const adminData = adminSnapshot.val();
+      if (adminData) {
+        setAdminBalance(adminData.balance || null);
+        setStanding(adminData.standing || null);
+        setEarning(adminData.earning || null);
+        setEarningPercentage(adminData.earningPercentage || null);
+        setEarningPercentageInput(adminData.earningPercentage || '');
+        setKata(adminData.kata || null);
+        setChapa(adminData.chapa || null);
+      } else {
+        console.error('The logged-in user is not an admin.');
       }
-    });
+    } catch (error) {
+      console.error('Error fetching admin data:', error.message);
+    }
+  };
 
-    return () => unsubscribe();
+  const fetchTimerData = async () => {
+    try {
+      const timerSnapshot = await get(ref(database, 'timer/time'));
+      const timestamp = timerSnapshot.val();
+      const currentTime = Date.now();
+      const elapsedTime = currentTime - timestamp;
+      setRemainingTime(60000 - elapsedTime);
+    } catch (error) {
+      console.error('Error fetching timer data:', error.message);
+    }
+  };
+  
+  useEffect(() => {
+    const timerInterval = setInterval(() => {
+      setRemainingTime(prevTime => {
+        if (prevTime <= 0) {
+          fetchTimerData();  // Fetch the updated timer value
+          return 60000;  // Reset timer to 60 seconds
+        }
+        return prevTime - 1000;
+      });
+    }, 1000);
+    
+    return () => clearInterval(timerInterval);
   }, []);
 
-  useEffect(() => {
-    if (userRole === 'Admin') {
-      fetchAdminBalance();
-    } else if (userRole === 'Distributor') {
-      fetchDistributorBalance();
-    } else if (userRole === 'Agent') {
-      fetchAgentBalance();
-    } else if (userRole === 'Player') {
-      fetchPlayerBalance();
-    }
-  }, [userRole]);
+const handleEarningPercentageChange = async (e) => {
+  const value = parseFloat(e.target.value);
+  console.log(`Trying to set earning percentage to: ${value}`); // Logging
 
-  const fetchAdminBalance = async () => {
-    try {
-      const snapshot = await get(ref(database, 'Admin/admin/balance'));
-      const balance = snapshot.val();
-      setAdminBalance(balance);
-    } catch (error) {
-      console.error('Error fetching admin balance:', error.message);
-    }
-  };
-
-  const fetchDistributorBalance = async () => {
-    try {
-      const snapshot = await get(ref(database, `Distributor/${currentUserId}/balance`));
-      const balance = snapshot.val();
-      setDistributorBalance(balance);
-    } catch (error) {
-      console.error('Error fetching distributor balance:', error.message);
-    }
-  };
-
-  const fetchAgentBalance = async () => {
-    try {
-      const snapshot = await get(ref(database, `Agent/${currentUserId}/balance`));
-      const balance = snapshot.val();
-      setAgentBalance(balance);
-    } catch (error) {
-      console.error('Error fetching agent balance:', error.message);
-    }
-  };
-
-  const fetchPlayerBalance = async () => {
-    try {
-      const snapshot = await get(ref(database, `Player/${currentUserId}/balance`));
-      const balance = snapshot.val();
-      setPlayerBalance(balance);
-    } catch (error) {
-      console.error('Error fetching player balance:', error.message);
-    }
-  };
-
-  const handleTargetEmailChange = (e) => {
-    setTargetEmail(e.target.value);
-  };
-
-  const fetchRecipientBalance = async (recipientRole) => {
-    try {
-      let recipientBalance = null;
-
-      if (recipientRole === 'Distributor') {
-        const recipientSnapshot = await get(ref(database, 'Distributor'));
-        const recipientData = recipientSnapshot.val();
-        for (const recipientUid in recipientData) {
-          if (recipientData[recipientUid]?.email === targetEmail) {
-            recipientBalance = recipientData[recipientUid]?.balance;
-            break;
-          }
-        }
-      } else if (recipientRole === 'Agent') {
-        const recipientSnapshot = await get(ref(database, 'Agent'));
-        const recipientData = recipientSnapshot.val();
-        for (const recipientUid in recipientData) {
-          if (recipientData[recipientUid]?.email === targetEmail) {
-            recipientBalance = recipientData[recipientUid]?.balance;
-            break;
-          }
-        }
+  if (value >= 0 && value <= 100) {
+      setEarningPercentageInput(value);
+      try {
+          await set(ref(database, `earningPercentage`), value);
+          setEarningPercentage(value);
+          alert('Earning percentage updated successfully.');
+      } catch (error) {
+          console.error('Error updating earning percentage:', error.message); // Enhanced error logging
+          alert('Error updating earning percentage. Please try again.');
       }
+  }
+};
 
-      if (recipientBalance !== null) {
-        setRecipientBalance(recipientBalance);
-      } else {
-        console.error('Recipient not found with the entered email.');
-      }
-    } catch (error) {
-      console.error('Error fetching recipient balance:', error.message);
-    }
-  };
 
-  const handleTransferAmountChange = (e) => {
-    setTransferAmount(e.target.value);
-  };
-
-  const transferMoney = async (recipientRole) => {
+  const updateEarningPercentage = async () => {
     try {
-      const transferAmountNumber = parseFloat(transferAmount);
-      if (isNaN(transferAmountNumber) || transferAmountNumber <= 0) {
-        console.error('Invalid transfer amount');
-        return;
-      }
-
-      if (userRole === 'Admin') {
-        const updatedAdminBalance = adminBalance - transferAmountNumber;
-        await set(ref(database, 'Admin/admin/balance'), updatedAdminBalance);
-        fetchAdminBalance();
-      } else if (userRole === 'Distributor') {
-        const updatedDistributorBalance = distributorBalance - transferAmountNumber;
-        await set(ref(database, `Distributor/${currentUserId}/balance`), updatedDistributorBalance);
-        fetchDistributorBalance();
-
-        if (recipientRole === 'Agent') {
-          const agentSnapshot = await get(ref(database, 'Agent/AGENT_UID/balance'));
-          const agentBalance = agentSnapshot.val();
-          const updatedAgentBalance = agentBalance + transferAmountNumber;
-          await set(ref(database, 'Agent/AGENT_UID/balance'), updatedAgentBalance);
-          fetchAgentBalance();
-        } else if (recipientRole === 'Player') {
-          const playerSnapshot = await get(ref(database, 'Player/PLAYER_UID/balance'));
-          const playerBalance = playerSnapshot.val();
-          const updatedPlayerBalance = playerBalance + transferAmountNumber;
-          await set(ref(database, 'Player/PLAYER_UID/balance'), updatedPlayerBalance);
-          fetchPlayerBalance();
-        }
-      } else if (userRole === 'Agent') {
-        const updatedAgentBalance = agentBalance - transferAmountNumber;
-        await set(ref(database, `Agent/${currentUserId}/balance`), updatedAgentBalance);
-        fetchAgentBalance();
-
-        if (recipientRole === 'Distributor') {
-          const distributorSnapshot = await get(ref(database, 'Distributor/DISTRIBUTOR_UID/balance'));
-          const distributorBalance = distributorSnapshot.val();
-          const updatedDistributorBalance = distributorBalance + transferAmountNumber;
-          await set(ref(database, 'Distributor/DISTRIBUTOR_UID/balance'), updatedDistributorBalance);
-          fetchDistributorBalance();
-        } else if (recipientRole === 'Player') {
-          const playerSnapshot = await get(ref(database, 'Player/PLAYER_UID/balance'));
-          const playerBalance = playerSnapshot.val();
-          const updatedPlayerBalance = playerBalance + transferAmountNumber;
-          await set(ref(database, 'Player/PLAYER_UID/balance'), updatedPlayerBalance);
-          fetchPlayerBalance();
-        }
-      } else if (userRole === 'Player') {
-        const updatedPlayerBalance = playerBalance - transferAmountNumber;
-        await set(ref(database, `Player/${currentUserId}/balance`), updatedPlayerBalance);
-        fetchPlayerBalance();
-
-        if (recipientRole === 'Agent') {
-          const agentSnapshot = await get(ref(database, 'Agent/AGENT_UID/balance'));
-          const agentBalance = agentSnapshot.val();
-          const updatedAgentBalance = agentBalance + transferAmountNumber;
-          await set(ref(database, 'Agent/AGENT_UID/balance'), updatedAgentBalance);
-          fetchAgentBalance();
-        } else if (recipientRole === 'Distributor') {
-          const distributorSnapshot = await get(ref(database, 'Distributor/DISTRIBUTOR_UID/balance'));
-          const distributorBalance = distributorSnapshot.val();
-          const updatedDistributorBalance = distributorBalance + transferAmountNumber;
-          await set(ref(database, 'Distributor/DISTRIBUTOR_UID/balance'), updatedDistributorBalance);
-          fetchDistributorBalance();
-        }
-      }
-
-      if (recipientBalance !== null) {
-        let updatedRecipientBalance = recipientBalance + transferAmountNumber;
-
-        if (recipientRole === 'Distributor') {
-          await set(ref(database, `Agent/AGENT_UID/balance`), updatedRecipientBalance);
-        } else if (recipientRole === 'Agent') {
-          await set(ref(database, `Player/PLAYER_UID/balance`), updatedRecipientBalance);
-        } else if (recipientRole === 'Player') {
-          await set(ref(database, `Agent/AGENT_UID/balance`), updatedRecipientBalance);
-        }
-
-        setRecipientBalance(updatedRecipientBalance);
-      }
-
-      // Capture transaction details
-      const transactionDetails = {
-        amount: transferAmountNumber,
-        transactionType: 'Transfer',
-        recipientRole: recipientRole,
-        recipientEmail: targetEmail,
-        timestamp: new Date().toISOString(),
-      };
-
-      // Update transactions state with the new transaction
-      setTransactions((prevTransactions) => [...prevTransactions, transactionDetails]);
+      await set(ref(database, `admin/${loggedInUserId}/earningPercentage`), parseFloat(earningPercentageInput));
+      setEarningPercentage(earningPercentageInput);
     } catch (error) {
-      console.error('Error transferring money:', error.message);
+      console.error('Error updating earning percentage:', error.message);
     }
   };
-
-  const handleTransferToAdmin = async () => {
-    try {
-      const transferAmountNumber = parseFloat(transferAmount);
-      if (isNaN(transferAmountNumber) || transferAmountNumber <= 0) {
-        console.error('Invalid transfer amount');
-        return;
-      }
-
-      if (userRole === 'Distributor') {
-        const updatedDistributorBalance = distributorBalance - transferAmountNumber;
-        await set(ref(database, `Distributor/${currentUserId}/balance`), updatedDistributorBalance);
-        fetchDistributorBalance();
-
-        const adminSnapshot = await get(ref(database, 'Admin/admin/balance'));
-        const adminBalance = adminSnapshot.val();
-        const updatedAdminBalance = adminBalance + transferAmountNumber;
-        await set(ref(database, 'Admin/admin/balance'), updatedAdminBalance);
-        fetchAdminBalance();
-      }
-    } catch (error) {
-      console.error('Error transferring money to admin:', error.message);
-    }
-  };
-
-  const handleTransferToAgent = async () => {
-    try {
-      const transferAmountNumber = parseFloat(transferAmount);
-      if (isNaN(transferAmountNumber) || transferAmountNumber <= 0) {
-        console.error('Invalid transfer amount');
-        return;
-      }
-
-      const updatedPlayerBalance = playerBalance - transferAmountNumber;
-      await set(ref(database, `Player/${currentUserId}/balance`), updatedPlayerBalance);
-      fetchPlayerBalance();
-
-      const agentSnapshot = await get(ref(database, 'Agent/AGENT_UID/balance'));
-      const agentBalance = agentSnapshot.val();
-      const updatedAgentBalance = agentBalance + transferAmountNumber;
-      await set(ref(database, 'Agent/AGENT_UID/balance'), updatedAgentBalance);
-      fetchAgentBalance();
-
-      // Capture transaction details
-      const transactionDetails = {
-        amount: transferAmountNumber,
-        transactionType: 'Transfer',
-        recipientRole: 'Agent',
-        recipientEmail: '', // You may update this with the actual agent's email
-        timestamp: new Date().toISOString(),
-      };
-
-      // Update transactions state with the new transaction
-      setTransactions((prevTransactions) => [...prevTransactions, transactionDetails]);
-    } catch (error) {
-      console.error('Error transferring money to agent:', error.message);
-    }
-  };
-
-
-
   return (
-    <div>
-      <h2 className="lg:ml-40 mt-40 font-serif text-2xl">Balance Deduction</h2>
-      {userRole === 'Admin' && (
-        <div>
-          <p className="lg:ml-40 mt-27 font-serif text-2xl">Admin Balance: {adminBalance !== null ? adminBalance : 'Loading...'}</p>
-          <input
-            type="text"
-            placeholder="Enter recipient email"
-            value={targetEmail}
-            onChange={handleTargetEmailChange}
-            className="lg:ml-40 mt-27 px-2 py-1"
-          />
-          <button
-            className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            onClick={() => fetchRecipientBalance('Distributor')}
-          >
-            Fetch Recipient Balance
-          </button>
-          <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
+    <div className="flex h-screen px-10 items-center justify-center">
+  
+      {/* Left Side (Admin Details) */}
+      <div className="flex-1 pr-10">
+        <p className="font-serif text-3xl mb-6">Standing: {standing || 'Loading...'}</p>
+        <p className="font-serif text-3xl mb-6">Earning: {earning || 'Loading...'}</p>
+        <p className="font-serif text-3xl mb-6">Earning Percentage: {earningPercentage || 'Loading...'}</p>
+        <div className="mb-6 flex items-center">
           <input
             type="number"
-            placeholder="Enter amount"
-            value={transferAmount}
-            onChange={handleTransferAmountChange}
-            className="lg:ml-40 mt-27 px-2 py-1"
+            min="0"
+            max="100"
+            value={earningPercentageInput}
+            onChange={handleEarningPercentageChange}
+            className="mr-4"
           />
-          <button
-            className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            onClick={() => transferMoney('Distributor')}
-          >
-            Transfer to Distributor
-          </button>
-          <button
-            className="lg:ml-40 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            onClick={handleTransferToAdmin}
-          >
-            Transfer to Admin
-          </button>
+          <button onClick={updateEarningPercentage} className="px-5 py-3 bg-blue-500 text-white rounded">Update Percentage</button>
         </div>
-      )}
-
-      {userRole === 'Distributor' && (
+      </div>
+  
+      {/* Spacer */}
+      <div className="w-10"></div>
+  
+      {/* Right Side */}
+      <div className="flex-1 flex flex-col items-center justify-start">
+  
+        {/* Chapa and Kata circles */}
+        <div className="flex mb-8">
+          <div className="coin bg-gray-300 rounded-full h-48 w-48 flex items-center justify-center mr-24">
+            <p className="font-serif text-2xl">Chapa {chapa || 'Loading...'}</p>
+          </div>
+          <div className="coin bg-gray-300 rounded-full h-48 w-48 flex items-center justify-center ml-24">
+            <p className="font-serif text-2xl">Kata {kata || 'Loading...'}</p>
+          </div>
+        </div>
+  
+        {/* Timer */}
+        <p className="mb-8 font-serif text-3xl">{remainingTime ? Math.floor(remainingTime / 1000) : 'Loading...'}</p>
+  
+        {/* Chapa and Kata buttons */}
         <div>
-          <p className="lg:ml-40 mt-27 font-serif text-2xl">Distributor Balance: {distributorBalance !== null ? distributorBalance : 'Loading...'}</p>
-          <input
-            type="text"
-            placeholder="Enter recipient email"
-            value={targetEmail}
-            onChange={handleTargetEmailChange}
-            className="lg:ml-40 mt-27 px-2 py-1"
-          />
-          <button
-            className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            onClick={() => fetchRecipientBalance('Agent')}
-          >
-            Fetch Recipient Balance
-          </button>
-          <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
-          <input
-            type="number"
-            placeholder="Enter amount"
-            value={transferAmount}
-            onChange={handleTransferAmountChange}
-            className="lg:ml-40 mt-27 px-2 py-1"
-          />
-          <button
-            className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            onClick={() => transferMoney('Agent')}
-          >
-            Transfer to Agent
-          </button>
-          <button
-            className="lg:ml-40 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            onClick={handleTransferToAdmin}
-          >
-            Transfer to Admin
-          </button>
+          <button onClick={() => setCustomBet("chapa")} className="mr-8 px-6 py-3 bg-blue-500 text-white rounded">Chapa</button>
+          <button onClick={() => setCustomBet("kata")} className="ml-8 px-6 py-3 bg-blue-500 text-white rounded">Kata</button>
         </div>
-      )}
-
-      {userRole === 'Agent' && (
-        <div>
-          <p className="lg:ml-40 mt-27 font-serif text-2xl">Agent Balance: {agentBalance !== null ? agentBalance : 'Loading...'}</p>
-          <input
-            type="text"
-            placeholder="Enter recipient email"
-            value={targetEmail}
-            onChange={handleTargetEmailChange}
-            className="lg:ml-40 mt-27 px-2 py-1"
-          />
-          <button
-            className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            onClick={() => fetchRecipientBalance('Distributor')}
-          >
-            Fetch Recipient Balance
-          </button>
-          <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
-          <input
-            type="number"
-            placeholder="Enter amount"
-            value={transferAmount}
-            onChange={handleTransferAmountChange}
-            className="lg:ml-40 mt-27 px-2 py-1"
-          />
-          <button
-            className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            onClick={() => transferMoney('Distributor')}
-          >
-            Transfer to Distributor
-          </button>
-        </div>
-      )}
-
-      {userRole === 'Player' && (
-        <div>
-          <p className="lg:ml-40 mt-27 font-serif text-2xl">Player Balance: {playerBalance !== null ? playerBalance : 'Loading...'}</p>
-          <input
-            type="text"
-            placeholder="Enter recipient email"
-            value={targetEmail}
-            onChange={handleTargetEmailChange}
-            className="lg:ml-40 mt-27 px-2 py-1"
-          />
-          <button
-            className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            onClick={() => fetchRecipientBalance('Agent')}
-          >
-            Fetch Recipient Balance
-          </button>
-          <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
-          <input
-            type="number"
-            placeholder="Enter amount"
-            value={transferAmount}
-            onChange={handleTransferAmountChange}
-            className="lg:ml-40 mt-27 px-2 py-1"
-          />
-          <button
-            className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            onClick={() => transferMoney('Agent')}
-          >
-            Transfer to Agent
-          </button>
-        </div>
-      )}
-
-      <div>
-        <h2 className="lg:ml-40 mt-40 font-serif text-2xl">Transaction History</h2>
-        <TransactionHistory transactions={transactions} />
+  
       </div>
     </div>
   );
+    
+  
 };
 
 export default CoinCount;

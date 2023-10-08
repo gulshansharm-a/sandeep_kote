@@ -1,3 +1,15 @@
+
+// const firebaseConfig = {
+//   apiKey: "AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4",
+//   authDomain: "sandeepkote-c67f5.firebaseapp.com",
+//   databaseURL: "https://sandeepkote-c67f5-default-rtdb.firebaseio.com",
+//   projectId: "sandeepkote-c67f5",
+//   storageBucket: "sandeepkote-c67f5.appspot.com",
+//   messagingSenderId: "871561614523",
+//   appId: "1:871561614523:web:3b12ae93e7490723ddc59e",
+//   measurementId: "G-645LW1SWKT"
+// };
+
 import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, get, set } from 'firebase/database';

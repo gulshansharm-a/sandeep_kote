@@ -52,7 +52,7 @@ function App() {
             {user ? (
               <Route path="/dashboard" element={<DashBoard />}>
                 {/* Add other nested routes based on user's choice */}
-                <Route path="coin" element={<CoinCount />} />
+                <Route path="coin" element={<CoinTransfer />} />
                 <Route path="" element={<CoinCount />} />
                 <Route path="addusers" element={<AddUsers />} />
                 <Route path="users" element={<Users />} />

@@ -43,7 +43,7 @@ const TransactionHistory = () => {
             <td className="p-3 border">{transaction.transactionType},{' '}</td> 
             <td className="p-3 border">{transaction.recipientRole},{' '}</td> 
             <td className="p-3 border">{transaction.recipientEmail},{' '}</td> 
-            <td className="p-3 border">{transaction.timestamp}</td> 
+            <td className="p-3 border"> {transaction.timestamp.slice(0, 10)} {/* Display only the date */}</td> 
 
           </tr>
         ))}

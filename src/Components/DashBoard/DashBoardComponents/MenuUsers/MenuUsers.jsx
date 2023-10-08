@@ -1,6 +1,9 @@
+import { child, get, ref } from 'firebase/database';
 import { useEffect, useState } from 'react';
-import { ref, get, child } from 'firebase/database';
 import { database } from '../../../../Authentication/firebase';
+import { auth } from "../../../../Authentication/firebase";
+import MenuUsersDist from './MenuUsersDist';
+import MenuUsersAgent from './MenuUsersAgent';
 
 export default function MenuUsers() {
     const [selectedOption, setSelectedOption] = useState('Distributor');
@@ -8,6 +11,42 @@ export default function MenuUsers() {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [searchTerm, setSearchTerm] = useState('');
+    const [currentAuthUser, setcurrentAuthUser] = useState('');
+
+    // to find to role of current user
+    useEffect(() => {
+        // Set up an observer to listen for changes in authentication state
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
+
+            if (user) {
+                try {
+                    const snapshot = await get(ref(database));
+
+                    const data = snapshot.val();
+
+                    // Iterate through each role (admin, agent, dis, players)
+                    for (const role in data) {
+                        // Check if the UID exists in the current role
+                        if (data[role][user.uid]) {
+                            console.log(role);
+                            setcurrentAuthUser(role);
+
+                            console.log(role);
+                            break;
+                        }
+                        else {
+                            console.log("not found");
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching data from Firebase:', error.message);
+                }
+            }
+        });
+
+        // Cleanup the observer on component unmount
+        return () => unsubscribe();
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -199,169 +238,187 @@ export default function MenuUsers() {
 
 
     return (
-        <div className="p-4">
-            <div className="w-full flex justify-end mt-4">
-                <a href='/dashboard/menuUsers/specific' className="bg-blue-500 text-white px-4 py-2 rounded">Search by Specific</a>
-            </div>
-            <div className="mb-4">
-                <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="userType">
-                    Select User Type:
-                </label>
-                <select
-                    id="userType"
-                    className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
-                    value={selectedOption}
-                    onChange={handleOptionChange}
-                >
-                    <option value="Admin">Admin</option>
-                    <option value="Distributor">Distributor</option>
-                    <option value="Agent">Agent</option>
-                    <option value="Player">Player</option>
-                </select>
-            </div>
-
-            <div className="mb-4">
-                <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="search">
-                    Search:
-                </label>
-                <input
-                    type="text"
-                    id="search"
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
-                    placeholder="Search by email"
-                />
-            </div>
-
-            <table className='w-full border mb-10'>
-
-                <thead>
-                    <tr>
-                        <th className="p-3 border">
-                            <div className="filter-column">
-                                <label className="text-gray-700">Email:</label>
-                                <input
-                                    type="text"
-                                    value={filterOptions.email || ''}
-                                    onChange={(e) => handleFilterChange('email', e.target.value)}
-                                    className="ml-2 p-2 border rounded bg-gray-100 focus:outline-none focus:ring focus:border-blue-500"
-                                    placeholder="Filter by Email"
-                                />
-                            </div>
-                        </th>
-                        <th className="p-3 border">
-                            <div className="filter-column">
-                                <label className="text-gray-700">Username:</label>
-                                <input
-                                    type="text"
-                                    value={filterOptions.userName || ''}
-                                    onChange={(e) => handleFilterChange('userName', e.target.value)}
-                                    className="ml-2 p-2 border rounded bg-gray-100 focus:outline-none focus:ring focus:border-blue-500"
-                                    placeholder="Filter by Username"
-                                />
-                            </div>
-                        </th>
-                        <th className="p-3 border">
-                            <div className="filter-column">
-                                <label className="text-gray-700">Balance:</label>
-                                <input
-                                    type="text"
-                                    value={filterOptions.balance || ''}
-                                    onChange={(e) => handleFilterChange('balance', e.target.value)}
-                                    className="ml-2 p-2 border rounded bg-gray-100 focus:outline-none focus:ring focus:border-blue-500"
-                                    placeholder="Filter by Balance"
-                                />
-                            </div>
-                        </th>
-                        {/* ... (other columns) */}
-                    </tr>
-                </thead>
-            </table>
-
-
-            <table className="w-full border">
-
-                <thead>
-                    <tr>
-                        <th className="p-3 border">S.No</th>
-                        <th className="p-3 border">Email</th>
-                        <th className="p-3 border">Username</th>
-                        <th className="p-3 border">Balance</th>
-                        {selectedOption === 'Distributor' && <th className="p-3 border">Admin Email</th>}
-
-                        {selectedOption === 'Agent' && <th className="p-3 border">Admin Email</th>}
-                        {selectedOption === 'Agent' && <th className="p-3 border">Distributor Email</th>}
-
-                        {selectedOption === 'Player' && <th className="p-3 border">Admin Email</th>}
-                        {selectedOption === 'Player' && <th className="p-3 border">Distributor Email</th>}
-                        {selectedOption === 'Player' && <th className="p-3 border">Agent Email</th>}
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {currentUsers.map((user, index) => (
-                        <tr key={user.userId}>
-                            <td className="p-3 border">{indexOfFirstItem + index + 1}</td>
-                            <td className="p-3 border">{user.email}</td>
-                            <td className="p-3 border">{user.userName}</td>
-                            <td className="p-3 border">{user.balance}</td>
-                            {selectedOption === 'Distributor' && (
-                                <td className="p-3 border">{dis[user.userId]}</td>
-                            )}
-                            {selectedOption === 'Agent' && (
-                                <td className="p-3 border">{dis[user.userId]}</td>
-                            )}
-                            {selectedOption === 'Agent' && (
-                                <td className="p-3 border">{agent[user.userId]}</td>
-                            )}
-                            {selectedOption === 'Player' && (
-                                <td className="p-3 border">{dis[user.userId]}</td>
-                            )}
-                            {selectedOption === 'Player' && (
-                                <td className="p-3 border">{agent[user.userId]}</td>
-                            )}
-                            {selectedOption === 'Player' && (
-                                <td className="p-3 border">{player[user.userId]}</td>
-                            )}
-                        </tr>
-                    ))}
-                </tbody>
-
-
-            </table>
-
-            <div className="mt-4">
-                <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="rowsPerPage">
-                    Rows per page:
-                </label>
-                <select
-                    id="rowsPerPage"
-                    value={rowsPerPage}
-                    onChange={handleRowsPerPageChange}
-                    className="p-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
-                >
-                    {[1, 2, 5, 10, 15, 20, 25, 30].map((value) => (
-                        <option key={value} value={value}>
-                            {value}
-                        </option>
-                    ))}
-                </select>
-
-                <div className="mt-2 flex justify-center space-x-2">
-                    {/* Centering the pagination buttons horizontally */}
-                    {Array.from({ length: Math.ceil(filteredUsers.length / rowsPerPage) }).map((_, index) => (
-                        <button
-                            key={index}
-                            onClick={() => handlePageChange(index + 1)}
-                            className="bg-gray-900 p-2 text-white border rounded hover:bg-gray-700 focus:outline-none focus:ring focus:border-blue-500"
+        <div>
+            {currentAuthUser === "Admin" ?
+                <div className="p-4">
+                    <div className="w-full flex justify-end mt-4">
+                        <a href='/dashboard/menuUsers/specific' className="bg-blue-500 text-white px-4 py-2 rounded">Search by Specific</a>
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="userType">
+                            Select User Type:
+                        </label>
+                        <select
+                            id="userType"
+                            className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
+                            value={selectedOption}
+                            onChange={handleOptionChange}
                         >
-                            {index + 1}
-                        </button>
-                    ))}
+                            <option value="Admin">Admin</option>
+                            <option value="Distributor">Distributor</option>
+                            <option value="Agent">Agent</option>
+                            <option value="Player">Player</option>
+                        </select>
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="search">
+                            Search:
+                        </label>
+                        <input
+                            type="text"
+                            id="search"
+                            value={searchTerm}
+                            onChange={handleSearch}
+                            className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
+                            placeholder="Search by email"
+                        />
+                    </div>
+
+                    <table className='w-full border mb-10'>
+
+                        <thead>
+                            <tr>
+                                <th className="p-3 border">
+                                    <div className="filter-column">
+                                        <label className="text-gray-700">Email:</label>
+                                        <input
+                                            type="text"
+                                            value={filterOptions.email || ''}
+                                            onChange={(e) => handleFilterChange('email', e.target.value)}
+                                            className="ml-2 p-2 border rounded bg-gray-100 focus:outline-none focus:ring focus:border-blue-500"
+                                            placeholder="Filter by Email"
+                                        />
+                                    </div>
+                                </th>
+                                <th className="p-3 border">
+                                    <div className="filter-column">
+                                        <label className="text-gray-700">Username:</label>
+                                        <input
+                                            type="text"
+                                            value={filterOptions.userName || ''}
+                                            onChange={(e) => handleFilterChange('userName', e.target.value)}
+                                            className="ml-2 p-2 border rounded bg-gray-100 focus:outline-none focus:ring focus:border-blue-500"
+                                            placeholder="Filter by Username"
+                                        />
+                                    </div>
+                                </th>
+                                <th className="p-3 border">
+                                    <div className="filter-column">
+                                        <label className="text-gray-700">Balance:</label>
+                                        <input
+                                            type="text"
+                                            value={filterOptions.balance || ''}
+                                            onChange={(e) => handleFilterChange('balance', e.target.value)}
+                                            className="ml-2 p-2 border rounded bg-gray-100 focus:outline-none focus:ring focus:border-blue-500"
+                                            placeholder="Filter by Balance"
+                                        />
+                                    </div>
+                                </th>
+                                {/* ... (other columns) */}
+                            </tr>
+                        </thead>
+                    </table>
+
+
+                    <table className="w-full border">
+
+                        <thead>
+                            <tr>
+                                <th className="p-3 border">S.No</th>
+                                <th className="p-3 border">Email</th>
+                                <th className="p-3 border">Username</th>
+                                <th className="p-3 border">Balance</th>
+                                {selectedOption === 'Distributor' && <th className="p-3 border">Admin Email</th>}
+
+                                {selectedOption === 'Agent' && <th className="p-3 border">Admin Email</th>}
+                                {selectedOption === 'Agent' && <th className="p-3 border">Distributor Email</th>}
+
+                                {selectedOption === 'Player' && <th className="p-3 border">Admin Email</th>}
+                                {selectedOption === 'Player' && <th className="p-3 border">Distributor Email</th>}
+                                {selectedOption === 'Player' && <th className="p-3 border">Agent Email</th>}
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {currentUsers.map((user, index) => (
+                                <tr key={user.userId}>
+                                    <td className="p-3 border">{indexOfFirstItem + index + 1}</td>
+                                    <td className="p-3 border">{user.email}</td>
+                                    <td className="p-3 border">{user.userName}</td>
+                                    <td className="p-3 border">{user.balance}</td>
+                                    {selectedOption === 'Distributor' && (
+                                        <td className="p-3 border">{dis[user.userId]}</td>
+                                    )}
+                                    {selectedOption === 'Agent' && (
+                                        <td className="p-3 border">{dis[user.userId]}</td>
+                                    )}
+                                    {selectedOption === 'Agent' && (
+                                        <td className="p-3 border">{agent[user.userId]}</td>
+                                    )}
+                                    {selectedOption === 'Player' && (
+                                        <td className="p-3 border">{dis[user.userId]}</td>
+                                    )}
+                                    {selectedOption === 'Player' && (
+                                        <td className="p-3 border">{agent[user.userId]}</td>
+                                    )}
+                                    {selectedOption === 'Player' && (
+                                        <td className="p-3 border">{player[user.userId]}</td>
+                                    )}
+                                </tr>
+                            ))}
+                        </tbody>
+
+
+                    </table>
+
+                    <div className="mt-4">
+                        <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="rowsPerPage">
+                            Rows per page:
+                        </label>
+                        <select
+                            id="rowsPerPage"
+                            value={rowsPerPage}
+                            onChange={handleRowsPerPageChange}
+                            className="p-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
+                        >
+                            {[1, 2, 5, 10, 15, 20, 25, 30].map((value) => (
+                                <option key={value} value={value}>
+                                    {value}
+                                </option>
+                            ))}
+                        </select>
+
+                        <div className="mt-2 flex justify-center space-x-2">
+                            {/* Centering the pagination buttons horizontally */}
+                            {Array.from({ length: Math.ceil(filteredUsers.length / rowsPerPage) }).map((_, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => handlePageChange(index + 1)}
+                                    className="bg-gray-900 p-2 text-white border rounded hover:bg-gray-700 focus:outline-none focus:ring focus:border-blue-500"
+                                >
+                                    {index + 1}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
-            </div>
+
+                :
+
+                currentAuthUser === "Distributor" ?
+
+                    <div>
+                        <MenuUsersDist />
+                    </div>
+                    :
+
+                    <div>
+                        <MenuUsersAgent />
+                    </div>
+            }
         </div>
+
     );
 
 

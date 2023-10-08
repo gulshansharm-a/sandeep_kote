@@ -27,14 +27,14 @@ const CoinCount = () => {
   const [remainingTime, setRemainingTime] = useState(null);
 
   const firebaseConfig = {
-  apiKey: "AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4",
-  authDomain: "sandeepkote-c67f5.firebaseapp.com",
-  databaseURL: "https://sandeepkote-c67f5-default-rtdb.firebaseio.com",
-  projectId: "sandeepkote-c67f5",
-  storageBucket: "sandeepkote-c67f5.appspot.com",
-  messagingSenderId: "871561614523",
-  appId: "1:871561614523:web:3b12ae93e7490723ddc59e",
-  measurementId: "G-645LW1SWKT"
+    apiKey: "AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4",
+    authDomain: "sandeepkote-c67f5.firebaseapp.com",
+    databaseURL: "https://sandeepkote-c67f5-default-rtdb.firebaseio.com",
+    projectId: "sandeepkote-c67f5",
+    storageBucket: "sandeepkote-c67f5.appspot.com",
+    messagingSenderId: "871561614523",
+    appId: "1:871561614523:web:3b12ae93e7490723ddc59e",
+    measurementId: "G-645LW1SWKT"
   };
 
   const firebaseApp = initializeApp(firebaseConfig);
@@ -51,15 +51,15 @@ const CoinCount = () => {
   }, []);
   const setCustomBet = async (betValue) => {
     try {
-        // Update the database with the chosen bet value
-        await set(ref(database, `customBet`), betValue);
-        console.log(`customBet set to: ${betValue}`);
-        alert(`customBet updated to: ${betValue}`);
+      // Update the database with the chosen bet value
+      await set(ref(database, `customBet`), betValue);
+      console.log(`customBet set to: ${betValue}`);
+      alert(`customBet updated to: ${betValue}`);
     } catch (error) {
-        console.error('Error setting customBet:', error.message);
-        alert('Error updating customBet. Please try again.');
+      console.error('Error setting customBet:', error.message);
+      alert('Error updating customBet. Please try again.');
     }
-};
+  };
 
   const fetchAdminData = async (userId) => {
     try {
@@ -92,7 +92,7 @@ const CoinCount = () => {
       console.error('Error fetching timer data:', error.message);
     }
   };
-  
+
   useEffect(() => {
     const timerInterval = setInterval(() => {
       setRemainingTime(prevTime => {
@@ -103,26 +103,26 @@ const CoinCount = () => {
         return prevTime - 1000;
       });
     }, 1000);
-    
+
     return () => clearInterval(timerInterval);
   }, []);
 
-const handleEarningPercentageChange = async (e) => {
-  const value = parseFloat(e.target.value);
-  console.log(`Trying to set earning percentage to: ${value}`); // Logging
+  const handleEarningPercentageChange = async (e) => {
+    const value = parseFloat(e.target.value);
+    console.log(`Trying to set earning percentage to: ${value}`); // Logging
 
-  if (value >= 0 && value <= 100) {
+    if (value >= 0 && value <= 100) {
       setEarningPercentageInput(value);
       try {
-          await set(ref(database, `earningPercentage`), value);
-          setEarningPercentage(value);
-          alert('Earning percentage updated successfully.');
+        await set(ref(database, `earningPercentage`), value);
+        setEarningPercentage(value);
+        alert('Earning percentage updated successfully.');
       } catch (error) {
-          console.error('Error updating earning percentage:', error.message); // Enhanced error logging
-          alert('Error updating earning percentage. Please try again.');
+        console.error('Error updating earning percentage:', error.message); // Enhanced error logging
+        alert('Error updating earning percentage. Please try again.');
       }
-  }
-};
+    }
+  };
 
 
   const updateEarningPercentage = async () => {
@@ -135,7 +135,7 @@ const handleEarningPercentageChange = async (e) => {
   };
   return (
     <div className="flex h-screen px-10 items-center justify-center">
-  
+
       {/* Left Side (Admin Details) */}
       <div className="flex-1 pr-10">
         <p className="font-serif text-3xl mb-6">Standing: {standing || 'Loading...'}</p>
@@ -148,42 +148,62 @@ const handleEarningPercentageChange = async (e) => {
             max="100"
             value={earningPercentageInput}
             onChange={handleEarningPercentageChange}
-            className="mr-4"
+            className="mr-4 px-4 py-2 border border-gray-300 rounded focus:outline-none"
           />
-          <button onClick={updateEarningPercentage} className="px-5 py-3 bg-blue-500 text-white rounded">Update Percentage</button>
+          <button onClick={updateEarningPercentage} className="px-6 py-3 bg-blue-500 text-white rounded">Update Percentage</button>
         </div>
       </div>
-  
+
       {/* Spacer */}
       <div className="w-10"></div>
-  
+
       {/* Right Side */}
       <div className="flex-1 flex flex-col items-center justify-start">
-  
+
         {/* Chapa and Kata circles */}
         <div className="flex mb-8">
-          <div className="coin bg-gray-300 rounded-full h-48 w-48 flex items-center justify-center mr-24">
-            <p className="font-serif text-2xl">Chapa {chapa || 'Loading...'}</p>
+          <div className="coin h-48 w-48 flex flex-col  items-center justify-center mr-24 ">
+            <img
+              className="top-0 left-0 w-full h-full object-cover"
+              src="https://res.cloudinary.com/dzhdarh4q/image/upload/v1696779744/qdytcjqof9xrsomcm0r9.jpg"
+              alt="Chapa"
+            />
+            <p className="font-serif text-2xl text-black">Chapa {chapa || 'Loading...'}</p>
           </div>
-          <div className="coin bg-gray-300 rounded-full h-48 w-48 flex items-center justify-center ml-24">
-            <p className="font-serif text-2xl">Kata {kata || 'Loading...'}</p>
+          <div className="coin h-48 w-48 flex flex-col items-center justify-center mr-24 ">
+            <img
+              className="top-0 left-0 w-full h-full object-cover"
+              src="https://res.cloudinary.com/dzhdarh4q/image/upload/v1696778738/k7spz6emh3wu91uosgwt.jpg"
+              alt="Kata"
+            />
+            <p className="font-serif text-2xl text-black">Kata {kata || 'Loading...'}</p>
           </div>
+          {/* <div className="coin bg-gray-300 rounded-full h-48 w-48 flex items-center justify-center ml-24 relative overflow-hidden">
+            <img
+              className="absolute top-0 left-0 w-full h-full object-cover"
+              src="path/to/kata-image.jpg"
+              alt="Kata"
+            />
+            <p className="font-serif text-2xl text-white z-10">Kata {kata || 'Loading...'}</p>
+          </div> */}
         </div>
-  
+
+
         {/* Timer */}
         <p className="mb-8 font-serif text-3xl">{remainingTime ? Math.floor(remainingTime / 1000) : 'Loading...'}</p>
-  
+
         {/* Chapa and Kata buttons */}
-        <div>
-          <button onClick={() => setCustomBet("chapa")} className="mr-8 px-6 py-3 bg-blue-500 text-white rounded">Chapa</button>
-          <button onClick={() => setCustomBet("kata")} className="ml-8 px-6 py-3 bg-blue-500 text-white rounded">Kata</button>
+        <div className="flex">
+          <button onClick={() => setCustomBet("chapa")} className="mr-4 px-6 py-3 bg-blue-500 text-white rounded">Chapa</button>
+          <button onClick={() => setCustomBet("kata")} className="ml-4 px-6 py-3 bg-blue-500 text-white rounded">Kata</button>
         </div>
-  
+
       </div>
     </div>
+
   );
-    
-  
+
+
 };
 
 export default CoinCount;

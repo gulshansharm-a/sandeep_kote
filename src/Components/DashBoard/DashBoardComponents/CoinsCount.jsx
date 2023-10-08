@@ -134,72 +134,66 @@ const CoinCount = () => {
     }
   };
   return (
-    <div className="flex h-screen px-10 items-center justify-center">
+    <div className="flex flex-col lg:flex-row h-screen px-4 lg:px-10 items-center justify-center">
 
-      {/* Left Side (Admin Details) */}
-      <div className="flex-1 pr-10">
-        <p className="font-serif text-3xl mb-6">Standing: {standing || 'Loading...'}</p>
-        <p className="font-serif text-3xl mb-6">Earning: {earning || 'Loading...'}</p>
-        <p className="font-serif text-3xl mb-6">Earning Percentage: {earningPercentage || 'Loading...'}</p>
-        <div className="mb-6 flex items-center">
-          <input
-            type="number"
-            min="0"
-            max="100"
-            value={earningPercentageInput}
-            onChange={handleEarningPercentageChange}
-            className="mr-4 px-4 py-2 border border-gray-300 rounded focus:outline-none"
-          />
-          <button onClick={updateEarningPercentage} className="px-6 py-3 bg-blue-500 text-white rounded">Update Percentage</button>
-        </div>
-      </div>
+  {/* Left Side (Admin Details) */}
+  <div className="lg:flex-1 pr-0 lg:pr-10 mb-6 lg:mb-0">
+    <p className="font-serif text-2xl lg:text-3xl mb-2 lg:mb-6">Standing: {standing || 'Loading...'}</p>
+    <p className="font-serif text-2xl lg:text-3xl mb-2 lg:mb-6">Earning: {earning || 'Loading...'}</p>
+    <p className="font-serif text-2xl lg:text-3xl mb-2 lg:mb-6">Earning Percentage: {earningPercentage || 'Loading...'}</p>
+    <div className="mb-2 lg:mb-6 flex items-center">
+      <input
+        type="number"
+        min="0"
+        max="100"
+        value={earningPercentageInput}
+        onChange={handleEarningPercentageChange}
+        className="mr-2 lg:mr-4 px-4 py-2 border border-gray-300 rounded focus:outline-none text-sm lg:text-base"
+      />
+      <button onClick={updateEarningPercentage} className="px-4 lg:px-6 py-2 lg:py-3 bg-blue-500 text-white rounded text-sm lg:text-base">Update Percentage</button>
+    </div>
+  </div>
 
-      {/* Spacer */}
-      <div className="w-10"></div>
+  {/* Spacer */}
+  <div className="w-0 lg:w-10"></div>
 
-      {/* Right Side */}
-      <div className="flex-1 flex flex-col items-center justify-start">
+  {/* Right Side */}
+  <div className="lg:flex-1 flex flex-col items-center justify-start">
 
-        {/* Chapa and Kata circles */}
-        <div className="flex mb-8">
-          <div className="coin h-48 w-48 flex flex-col  items-center justify-center mr-24 ">
-            <img
-              className="top-0 left-0 w-full h-full object-cover"
+    {/* Chapa and Kata circles */}
+    <div className="flex flex-row lg:flex-row mb-4 lg:mb-8">
+      <div className="coin h-30 lg:h-48 w-48 lg:w-48 flex flex-col items-center justify-center mb-2 lg:mb-0 lg:mr-4">
+        {/* ... (same as before) */}
+        <img
+              className="top-0 left-0 w-full h-full"
               src="https://res.cloudinary.com/dzhdarh4q/image/upload/v1696779744/qdytcjqof9xrsomcm0r9.jpg"
               alt="Chapa"
             />
             <p className="font-serif text-2xl text-black">Chapa {chapa || 'Loading...'}</p>
-          </div>
-          <div className="coin h-48 w-48 flex flex-col items-center justify-center mr-24 ">
-            <img
-              className="top-0 left-0 w-full h-full object-cover"
+      </div>
+      <div className="coin h-30 lg:h-48 w-48 lg:w-48 flex flex-col items-center justify-center">
+        {/* ... (same as before) */}
+        <img
+              className="top-0 left-0 w-full h-full"
               src="https://res.cloudinary.com/dzhdarh4q/image/upload/v1696778738/k7spz6emh3wu91uosgwt.jpg"
               alt="Kata"
             />
             <p className="font-serif text-2xl text-black">Kata {kata || 'Loading...'}</p>
-          </div>
-          {/* <div className="coin bg-gray-300 rounded-full h-48 w-48 flex items-center justify-center ml-24 relative overflow-hidden">
-            <img
-              className="absolute top-0 left-0 w-full h-full object-cover"
-              src="path/to/kata-image.jpg"
-              alt="Kata"
-            />
-            <p className="font-serif text-2xl text-white z-10">Kata {kata || 'Loading...'}</p>
-          </div> */}
-        </div>
-
-
-        {/* Timer */}
-        <p className="mb-8 font-serif text-3xl">{remainingTime ? Math.floor(remainingTime / 1000) : 'Loading...'}</p>
-
-        {/* Chapa and Kata buttons */}
-        <div className="flex">
-          <button onClick={() => setCustomBet("chapa")} className="mr-4 px-6 py-3 bg-blue-500 text-white rounded">Chapa</button>
-          <button onClick={() => setCustomBet("kata")} className="ml-4 px-6 py-3 bg-blue-500 text-white rounded">Kata</button>
-        </div>
-
       </div>
     </div>
+
+    {/* Timer */}
+    <p className="mb-4 lg:mb-8 font-serif text-2xl lg:text-3xl">{remainingTime ? Math.floor(remainingTime / 1000) : 'Loading...'}</p>
+
+    {/* Chapa and Kata buttons */}
+    <div className="flex">
+      <button onClick={() => setCustomBet("chapa")} className="mr-2 lg:mr-4 px-4 lg:px-6 py-2 lg:py-3 bg-blue-500 text-white rounded text-sm lg:text-base">Chapa</button>
+      <button onClick={() => setCustomBet("kata")} className="ml-2 lg:ml-4 px-4 lg:px-6 py-2 lg:py-3 bg-blue-500 text-white rounded text-sm lg:text-base">Kata</button>
+    </div>
+
+  </div>
+</div>
+
 
   );
 

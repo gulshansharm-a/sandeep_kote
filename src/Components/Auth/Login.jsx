@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { auth } from "../../Authentication/firebase"; // Update the path based on your project structure
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "../Loading/Loading";
 
 export default function Login() {
 
@@ -51,7 +52,7 @@ export default function Login() {
     return (
         <>
             {isLoading ? <div>
-                LOADING
+                <LoadingSpinner/>
             </div>
                 :
                 <div className="lg:h-screen h-[1000px] w-screen p-3 bg-gray-800">

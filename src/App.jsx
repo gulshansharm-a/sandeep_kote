@@ -11,6 +11,7 @@ import MenuUsers from './Components/DashBoard/DashBoardComponents/MenuUsers/Menu
 import MenuUserSpecific from './Components/DashBoard/DashBoardComponents/MenuUsers/MenuUserSpecific'
 
 import CoinTransfer from './Components/DashBoard/CoinTransfer';
+import LoadingSpinner from './Components/Loading/Loading';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -28,7 +29,7 @@ function App() {
 
   if (loading) {
     // You can show a loading spinner or message here
-    return <div>Loading...</div>;
+    return <div><LoadingSpinner/></div>;
   }
 
   return (

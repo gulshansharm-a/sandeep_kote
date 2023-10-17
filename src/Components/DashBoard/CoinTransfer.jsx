@@ -302,7 +302,7 @@ const CoinTransfer = () => {
             className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             onClick={() => fetchRecipientBalance('Distributor')}
           >
-            Fetch Recipient Balance
+            Fetch Distributor Balance
           </button>
           <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
           <input
@@ -357,7 +357,7 @@ const CoinTransfer = () => {
             className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             onClick={() => fetchRecipientBalance('Agent')}
           >
-            Fetch Recipient Balance
+            Fetch Agent Balance
           </button>
           <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
           <input
@@ -396,7 +396,7 @@ const CoinTransfer = () => {
             className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             onClick={() => fetchRecipientBalance('Player')}
           >
-            Fetch Recipient Balance
+            Fetch Player Balance
           </button>
           <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
           <input
@@ -423,7 +423,7 @@ const CoinTransfer = () => {
             className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             onClick={() => fetchRecipientBalance('Distributor')}
           >
-            Fetch Recipient Balance
+            Fetch Distributor Balance
           </button>
           <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
           <input
@@ -464,7 +464,7 @@ const CoinTransfer = () => {
             className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             onClick={() => fetchRecipientBalance('Agent')}
           >
-            Fetch Recipient Balance
+            Fetch Agent Balance
           </button>
           <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
           <input

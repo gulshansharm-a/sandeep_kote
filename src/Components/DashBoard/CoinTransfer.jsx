@@ -302,7 +302,7 @@ const CoinTransfer = () => {
             className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             onClick={() => fetchRecipientBalance('Distributor')}
           >
-            Fetch Recipient Balance
+            Fetch Distributor Balance
           </button>
           <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
           <input
@@ -330,6 +330,22 @@ const CoinTransfer = () => {
       {userRole === 'Distributor' && (
         <div>
           <p className="lg:ml-40 mt-27 font-serif text-2xl">Distributor Balance: {distributorBalance !== null ? distributorBalance : 'Loading...'}</p>
+          
+          
+          <input
+            type="number"
+            placeholder="Enter amount"
+            value={transferAmount}
+            onChange={handleTransferAmountChange}
+            className="lg:ml-40 mt-27 px-2 py-1"
+          />
+          
+          <button
+            className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            onClick={() => transferMoney('Admin')}
+          >
+            Transfer to Admin
+          </button>
           <input
             type="text"
             placeholder="Enter recipient email"
@@ -341,7 +357,7 @@ const CoinTransfer = () => {
             className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             onClick={() => fetchRecipientBalance('Agent')}
           >
-            Fetch Recipient Balance
+            Fetch Agent Balance
           </button>
           <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
           <input
@@ -380,7 +396,7 @@ const CoinTransfer = () => {
             className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             onClick={() => fetchRecipientBalance('Player')}
           >
-            Fetch Recipient Balance
+            Fetch Player Balance
           </button>
           <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
           <input
@@ -396,6 +412,34 @@ const CoinTransfer = () => {
           >
             Transfer to Player
           </button>
+          <input
+            type="text"
+            placeholder="Enter recipient email"
+            value={targetEmail}
+            onChange={handleTargetEmailChange}
+            className="lg:ml-40 mt-27 px-2 py-1"
+          />
+          <button
+            className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            onClick={() => fetchRecipientBalance('Distributor')}
+          >
+            Fetch Distributor Balance
+          </button>
+          <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
+          <input
+            type="number"
+            placeholder="Enter amount"
+            value={transferAmount}
+            onChange={handleTransferAmountChange}
+            className="lg:ml-40 mt-27 px-2 py-1"
+          />
+          <button
+            className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            onClick={() => transferMoney('Distributor')}
+          >
+            Transfer to Distributor
+          </button>
+
           {/* <button
             className="lg:ml-40 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             onClick={() => creditBalance('Player', 25)} // Example: Credit 25 to the player's balance
@@ -407,7 +451,35 @@ const CoinTransfer = () => {
 
       {userRole === 'Player' && (
         <div>
+          
           <p className="lg:ml-40 mt-27 font-serif text-2xl">Player Balance: {playerBalance !== null ? playerBalance : 'Loading...'}</p>
+          <input
+            type="text"
+            placeholder="Enter recipient email"
+            value={targetEmail}
+            onChange={handleTargetEmailChange}
+            className="lg:ml-40 mt-27 px-2 py-1"
+          />
+          <button
+            className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            onClick={() => fetchRecipientBalance('Agent')}
+          >
+            Fetch Agent Balance
+          </button>
+          <p className="lg:ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
+          <input
+            type="number"
+            placeholder="Enter amount"
+            value={transferAmount}
+            onChange={handleTransferAmountChange}
+            className="lg:ml-40 mt-27 px-2 py-1"
+          />
+          <button
+            className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            onClick={() => transferMoney('Agent')}
+          >
+            Transfer to Agent
+          </button>
         </div>
       )}
 

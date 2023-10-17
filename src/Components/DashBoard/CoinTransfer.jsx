@@ -197,7 +197,7 @@ const CoinTransfer = () => {
       // Update transactions state with the new transaction
       const transactionDetails = {
         amount: transferAmountNumber,
-        transactionType: 'Transfer',
+        userRole: userRole,
         recipientRole: recipientRole,
         recipientEmail: targetEmail,
         timestamp: new Date().toISOString(),
@@ -483,7 +483,7 @@ const CoinTransfer = () => {
         </div>
       )}
 
-      <TransactionHistory transactions={transactions} />
+      <TransactionHistory transactions={transactions}  />
     </div>
   );
 };

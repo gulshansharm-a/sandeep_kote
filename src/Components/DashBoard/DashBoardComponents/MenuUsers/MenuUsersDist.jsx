@@ -1,6 +1,7 @@
 import { child, get, ref } from 'firebase/database';
 import { useEffect, useState } from 'react';
 import { auth, database } from "../../../../Authentication/firebase";
+import { useNavigate } from "react-router-dom";
 
 export default function MenuUsersDist() {
     const [selectedOption, setSelectedOption] = useState('Agent');
@@ -10,6 +11,14 @@ export default function MenuUsersDist() {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentAuthUser, setcurrentAuthUser] = useState(null);
     const [currentAuthUserEmail, setcurrentAuthUserEmail] = useState(null);
+
+    const navigate = useNavigate();
+
+    const handleRowClick = (email, role) => {
+        console.log("clicked");
+        navigate(`/dashboard/user?email=${encodeURIComponent(email)}&role=${encodeURIComponent(role)}`);
+    };
+
 
     // to find to role of current user
     useEffect(() => {
@@ -141,10 +150,10 @@ export default function MenuUsersDist() {
                         roleEmail1 = await getUserEmail('Admin', user.adminID);
                     } else if (selectedOption === 'Agent') {
                         roleEmail1 = await getUserEmail('Admin', user.adminID);
-                        roleEmail2 = await getUserEmail('Distributor', user.distributerID);
+                        roleEmail2 = await getUserEmail('Distributor', user.distributorID);
                     } else if (selectedOption === 'Player') {
                         roleEmail1 = await getUserEmail('Admin', user.adminID);
-                        roleEmail2 = await getUserEmail('Distributor', user.distributerID);
+                        roleEmail2 = await getUserEmail('Distributor', user.distributorID);
                         roleEmail3 = await getUserEmail('Agent', user.agentID);
                     }
 
@@ -342,9 +351,9 @@ export default function MenuUsersDist() {
 
                 <tbody>
                     {currentUsers.map((user, index) => (
-                        <tr key={user.userId}>
+                        <tr key={user.userId} onClick={() => handleRowClick(user.email, user.role)}>
 
-                            { selectedOption === 'Player' && agent[user.userId] === currentAuthUserEmail && (
+                            {selectedOption === 'Player' && agent[user.userId] === currentAuthUserEmail && (
                                 <td className="p-3 border">{count++}</td>
                             )}
 
@@ -357,20 +366,6 @@ export default function MenuUsersDist() {
                             {selectedOption === 'Player' && agent[user.userId] === currentAuthUserEmail && (
                                 <td className="p-3 border">{user.balance}</td>
                             )}
-
-                            {/* {selectedOption === 'Agent' && agent[user.userId] === currentAuthUserEmail && (
-                                <td className="p-3 border">{agent[user.userId]}</td>
-                            )}
-
-                            {(selectedOption === 'Player' && agent[user.userId] === currentAuthUserEmail) ? (
-                                <td className="p-3 border">{player[user.userId]}</td>
-                            ) : null} */}
-                            
-                            {/* {(selectedOption === 'Player' && player[user.userId === currentAuthUserEmail]) && (
-                                <td className="p-3 border">{agent[user.userId]}</td>
-                            )} */}
-
-
                         </tr>
                     ))}
                 </tbody>

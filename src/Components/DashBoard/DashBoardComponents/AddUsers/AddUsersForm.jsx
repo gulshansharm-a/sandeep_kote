@@ -100,7 +100,7 @@ export default function AddUsersForm() {
                     const disData = disSnapshot.val();
                     userData = {
                         ...userData,
-                        distributerID: currentUserID,
+                        distributorID: currentUserID,
                         balance: 1000,
                         adminID: disData.adminID,
                     };
@@ -114,7 +114,7 @@ export default function AddUsersForm() {
                     userData = {
                         ...userData,
                         agentID: currentUserID,
-                        distributerID: agentData.distributerID,
+                        distributorID: agentData.distributorID,
                         balance: 1000,
                         adminID: agentData.adminID,
                     };

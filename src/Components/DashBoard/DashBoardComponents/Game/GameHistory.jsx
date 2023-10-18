@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { auth, database } from '../../../../Authentication/firebase';
 import { get, ref } from 'firebase/database';
+import PlayerData from './Try';
 
 export default function GameHistory() {
   const [userRole, setUserRole] = useState(null);
@@ -214,6 +215,7 @@ export default function GameHistory() {
           ))}
         </div>
       </div>
+      <PlayerData />
     </div>
   );
 }

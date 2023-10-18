@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, onValue } from 'firebase/database';
+import React, { useEffect, useState } from 'react';
+import { auth, database } from '../../../../Authentication/firebase';
+import { get, ref } from 'firebase/database';
+import PlayerData from './Try';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4',
@@ -121,6 +122,7 @@ const GameHistory = () => {
           ))}
         </div>
       </div>
+      <PlayerData />
     </div>
   );
 };

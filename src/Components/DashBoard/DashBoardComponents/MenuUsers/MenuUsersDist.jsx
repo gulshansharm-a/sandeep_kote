@@ -15,9 +15,9 @@ export default function MenuUsersDist() {
     const navigate = useNavigate();
 
     const handleRowClick = (email, role) => {
-        console.log("clicked");
+        console.log("Clicked row with email:", email, "and role:", role);
         navigate(`/dashboard/user?email=${encodeURIComponent(email)}&role=${encodeURIComponent(role)}`);
-    };
+      };      
 
 
     // to find to role of current user
@@ -172,7 +172,7 @@ export default function MenuUsersDist() {
             setAgent(agentData);
             setPlayer(playerData);
 
-            // console.log(agent);
+            console.log(agent);
         };
 
         fetchEmails();
@@ -369,7 +369,6 @@ export default function MenuUsersDist() {
                         </tr>
                     ))}
                 </tbody>
-
 
             </table>
 

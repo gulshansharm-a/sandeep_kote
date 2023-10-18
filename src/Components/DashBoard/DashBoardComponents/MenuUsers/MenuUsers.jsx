@@ -142,10 +142,10 @@ export default function MenuUsers() {
                         roleEmail1 = await getUserEmail('Admin', user.adminID);
                     } else if (selectedOption === 'Agent') {
                         roleEmail1 = await getUserEmail('Admin', user.adminID);
-                        roleEmail2 = await getUserEmail('Distributor', user.distributerID);
+                        roleEmail2 = await getUserEmail('Distributor', user.distributorID);
                     } else if (selectedOption === 'Player') {
                         roleEmail1 = await getUserEmail('Admin', user.adminID);
-                        roleEmail2 = await getUserEmail('Distributor', user.distributerID);
+                        roleEmail2 = await getUserEmail('Distributor', user.distributorID);
                         roleEmail3 = await getUserEmail('Agent', user.agentID);
                     }
 

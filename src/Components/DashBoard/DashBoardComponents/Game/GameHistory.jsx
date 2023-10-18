@@ -20,6 +20,8 @@ const GameHistory = () => {
   const [playerData, setPlayerData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [searchQuery, setSearchQuery] = useState('');
+  let [count, setCount] = useState(1);
 
   useEffect(() => {
     const playerRef = ref(database, 'Player');
@@ -38,17 +40,28 @@ const GameHistory = () => {
             kata: betData?.kata || '-',
             result: betData?.result || '-',
             time: betData?.time || '-',
+            betID: betKey || '-',
           };
         });
 
-        setPlayerData(dataArray);
+        // Filter playerData based on searchQuery
+        const filteredData = dataArray.filter(
+          (player) =>
+            (typeof player.email === 'string' && player.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (typeof player.chapa === 'string' && player.chapa.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (typeof player.kata === 'string' && player.kata.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (typeof player.result === 'string' && player.result.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (typeof player.time === 'string' && player.time.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (typeof player.betID === 'string' && player.betID.toLowerCase().includes(searchQuery.toLowerCase()))
+        );
+        setPlayerData(filteredData);
       }
     });
 
     return () => {
       unsubscribe();
     };
-  }, [database]);
+  }, [database, searchQuery]);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -59,36 +72,59 @@ const GameHistory = () => {
     setCurrentPage(1);
   };
 
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+    setCurrentPage(1);
+  };
+
   const indexOfLastItem = currentPage * rowsPerPage;
   const indexOfFirstItem = indexOfLastItem - rowsPerPage;
 
   const currentPlayers = playerData.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
-    <div className="lg:ml-20 mt-5 font-serif">
-      <h2 className='font-bold text-xl mt-10'>Game History</h2>
-      <table className="mt-4 w-full border">
-        <thead>
-          <tr>
-            <th className="p-3 border">Email</th>
-            <th className="p-3 border">Chapa</th>
-            <th className="p-3 border">Kata</th>
-            <th className="p-3 border">Result</th>
-            <th className="p-3 border">Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentPlayers.map((player, index) => (
-            <tr key={index}>
-              <td className="p-3 border">{player.email}</td>
-              <td className="p-3 border">{player.chapa}</td>
-              <td className="p-3 border">{player.kata}</td>
-              <td className="p-3 border">{player.result}</td>
-              <td className="p-3 border">{player.time}</td>
+    <div className="mt-2 p-4">
+      <h2 className='font-bold text-xl mt-10'>Game History Players</h2>
+
+      {/* Add search input */}
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={handleSearchChange}
+        placeholder="Search by email, chapa, kata, result, time, or Bet ID"
+        className="p-2 border rounded focus:outline-none focus:ring focus:border-blue-500 mt-4"
+      />
+
+      {playerData.length === 0 ? (
+        <p className="mt-4 text-red-500">No matching data found</p>
+      ) : (
+        <table className="mt-4 w-full border">
+          <thead>
+            <tr>
+              <th className="p-3 border">S.No</th>
+              <th className="p-3 border">Email</th>
+              <th className="p-3 border">Chapa</th>
+              <th className="p-3 border">Kata</th>
+              <th className="p-3 border">Result</th>
+              <th className="p-3 border">Time</th>
+              <th className="p-3 border">Bet ID</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {currentPlayers.map((player, index) => (
+              <tr key={index}>
+                <td className="p-3 border">{count++}</td>
+                <td className="p-3 border">{player.email}</td>
+                <td className="p-3 border">{player.chapa}</td>
+                <td className="p-3 border">{player.kata}</td>
+                <td className="p-3 border">{player.result}</td>
+                <td className="p-3 border">{player.time}</td>
+                <td className="p-3 border">{player.betID}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
 
       <div className="mt-4">
         <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="rowsPerPage">
@@ -112,9 +148,8 @@ const GameHistory = () => {
             <button
               key={index + 1}
               onClick={() => handlePageChange(index + 1)}
-              className={`${
-                currentPage === index + 1 ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'
-              } p-2 border rounded hover:bg-gray-200 focus:outline-none focus:ring focus:border-blue-500`}
+              className={`${currentPage === index + 1 ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'
+                } p-2 border rounded hover:bg-gray-200 focus:outline-none focus:ring focus:border-blue-500`}
             >
               {index + 1}
             </button>

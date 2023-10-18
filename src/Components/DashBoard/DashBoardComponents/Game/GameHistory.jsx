@@ -21,7 +21,6 @@ const GameHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchQuery, setSearchQuery] = useState('');
-  let [count, setCount] = useState(1);
 
   useEffect(() => {
     const playerRef = ref(database, 'Player');
@@ -77,6 +76,10 @@ const GameHistory = () => {
     setCurrentPage(1);
   };
 
+  const calculateSerialNumber = (index) => {
+    return (currentPage - 1) * rowsPerPage + index + 1;
+  };
+
   const indexOfLastItem = currentPage * rowsPerPage;
   const indexOfFirstItem = indexOfLastItem - rowsPerPage;
 
@@ -113,7 +116,7 @@ const GameHistory = () => {
           <tbody>
             {currentPlayers.map((player, index) => (
               <tr key={index}>
-                <td className="p-3 border">{count++}</td>
+                <td className="p-3 border">{calculateSerialNumber(index)}</td>
                 <td className="p-3 border">{player.email}</td>
                 <td className="p-3 border">{player.chapa}</td>
                 <td className="p-3 border">{player.kata}</td>

@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { auth, database } from '../../../../Authentication/firebase';
-import { get, ref } from 'firebase/database';
-import PlayerData from './Try';
+import React, { useState, useEffect } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getDatabase, ref, onValue } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4',
@@ -67,7 +66,7 @@ const GameHistory = () => {
 
   return (
     <div className="lg:ml-20 mt-5 font-serif">
-      <h2 className='font-bold'>Game History</h2>
+      <h2 className='font-bold text-xl mt-10'>Game History</h2>
       <table className="mt-4 w-full border">
         <thead>
           <tr>
@@ -122,7 +121,6 @@ const GameHistory = () => {
           ))}
         </div>
       </div>
-      <PlayerData />
     </div>
   );
 };

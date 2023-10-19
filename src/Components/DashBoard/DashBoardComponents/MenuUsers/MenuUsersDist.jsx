@@ -23,9 +23,9 @@ export default function MenuUsersDist() {
                         if (data[role][user.uid]) {
                             console.log(role);
     
-                            setcurrentAuthUser(() => {
-                                
-                            });
+                            // setcurrentAuthUser(() => {
+
+                            // });
     
                             console.log(user.email);
     

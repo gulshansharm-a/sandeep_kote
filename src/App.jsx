@@ -14,6 +14,7 @@ import Users from './Components/DashBoard/DashBoardComponents/Users/Users';
 import CoinTransfer from './Components/DashBoard/CoinTransfer';
 import LoadingSpinner from './Components/Loading/Loading';
 import GameHistory from './Components/DashBoard/DashBoardComponents/Game/GameHistory'
+import CommissionHistory from './Components/DashBoard/DashBoardComponents/CommissionHistory/CommissionHistory';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -95,6 +96,7 @@ function App() {
                 <Route path="" element={<CoinCount />} />
                 <Route path="addusers" element={<AddUsers />} />
                 <Route path="users" element={<Users />} />
+                <Route path="commission-history" element={<CommissionHistory />} />
                 <Route path="menuUsers" element={<MenuUsers />} />
                 <Route path="gameHistory" element={<GameHistory />} />
                 <Route path="menuUsers/specific" element={<MenuUserSpecific />} />

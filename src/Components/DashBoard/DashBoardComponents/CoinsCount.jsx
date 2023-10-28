@@ -1,15 +1,3 @@
-
-// const firebaseConfig = {
-//   apiKey: "AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4",
-//   authDomain: "sandeepkote-c67f5.firebaseapp.com",
-//   databaseURL: "https://sandeepkote-c67f5-default-rtdb.firebaseio.com",
-//   projectId: "sandeepkote-c67f5",
-//   storageBucket: "sandeepkote-c67f5.appspot.com",
-//   messagingSenderId: "871561614523",
-//   appId: "1:871561614523:web:3b12ae93e7490723ddc59e",
-//   measurementId: "G-645LW1SWKT"
-// };
-
 import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, get, set } from 'firebase/database';
@@ -25,6 +13,18 @@ const CoinCount = () => {
   const [chapa, setChapa] = useState(null);
   const [earningPercentageInput, setEarningPercentageInput] = useState('');
   const [remainingTime, setRemainingTime] = useState(null);
+  const [isCommissionModalOpen, setCommissionModalOpen] = useState(false);
+  const [distributorCommission, setDistributorCommission] = useState(0);
+  const [agentCommission, setAgentCommission] = useState(0);
+
+  const openCommissionModal = () => {
+    fetchCommissionsFromDatabase();
+    setCommissionModalOpen(true);
+  };
+
+  const closeCommissionModal = () => {
+    setCommissionModalOpen(false);
+  };
 
   const firebaseConfig = {
   apiKey: "AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4",
@@ -40,6 +40,27 @@ const CoinCount = () => {
   const firebaseApp = initializeApp(firebaseConfig);
   const database = getDatabase(firebaseApp);
   const auth = getAuth();
+
+  const fetchCommissionsFromDatabase = async () => {
+    try {
+      // Fetch the commission data from the database
+      const commissionSnapshot = await get(ref(database, 'commission'));
+      const commissionData = commissionSnapshot.val();
+
+      console.log(commissionData);
+      
+      if (commissionData) {
+        // Set the fetched values to the state
+        setDistributorCommission(commissionData.dist || 0);
+        setAgentCommission(commissionData.agent || 0);
+      } else {
+        console.error('Commission data not found in the database.');
+      }
+    } catch (error) {
+      console.error('Error fetching commission data:', error.message);
+    }
+  };
+  
 
   useEffect(() => {
     const userId = auth.currentUser?.uid;
@@ -156,82 +177,147 @@ const handleEarningPercentageChange = async (e) => {
       console.error('An error occurred while sending the request:', error);
     }
   };
+
+  const saveCommissionChanges = async () => {
+    // Update the commission values in Firebase
+    await set(ref(database, 'commission/dist'), distributorCommission);
+    await set(ref(database, 'commission/agent'), agentCommission);
+
+    alert("commission changed successfully")
+  
+    // Close the pop-up
+    closeCommissionModal();
+  };
+
+  
   return (
+
     <div>
-      <div className='flex flex-row justify-between'>
-        <div className='flex flex-row justify-end'>
-          <button onClick={handleCalculateCommissions} className="m-10 px-4 py-2 bg-red-500 text-white rounded text-sm lg:text-base">Commission</button>
-        </div>
-
-
-      </div>
-
-
-
-      <div className="flex flex-col lg:flex-row h-[75vh] px-4 lg:px-10 items-center justify-center">
-
-        {/* Left Side (Admin Details) */}
-        <div className="lg:flex-1 pr-0 lg:pr-10 mb-6 lg:mb-0">
-          <p className="text-2xl lg:text-3xl mb-2 lg:mb-6">Standing: {standing || 'Loading...'}</p>
-          <p className="text-2xl lg:text-3xl mb-2 lg:mb-6">Earning: {earning || 'Loading...'}</p>
-          <p className="text-2xl lg:text-3xl mb-2 lg:mb-6">Earning Percentage: {earningPercentage || 'Loading...'}</p>
-          <div className="mb-2 lg:mb-6 flex items-center">
+  
+      {isCommissionModalOpen ? (
+        // Example modal content
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 modal-content p-4 bg-white rounded shadow-md">
+          <h2 className="text-2xl font-semibold mb-4">Commission Percentage Change</h2>
+          <div className="mb-4">
+            <p>Distributor Commission: {distributorCommission}%</p>
             <input
               type="number"
-              min="0"
-              max="100"
-              value={earningPercentageInput}
-              onChange={handleEarningPercentageChange}
-              className="mr-2 lg:mr-4 px-4 py-2 border border-gray-300 rounded focus:outline-none text-sm lg:text-base"
+              className="w-1/3 px-2 py-1 mb-2 border border-gray-300 rounded"
+              value={distributorCommission}
+              onChange={(e) => setDistributorCommission(e.target.value)}
             />
-            <button onClick={updateEarningPercentage} className="px-4 lg:px-6 py-2 lg:py-3 bg-blue-500 text-white rounded text-sm lg:text-base">Update Percentage</button>
           </div>
-        </div>
-
-        {/* Spacer */}
-        <div className="w-0 lg:w-10"></div>
-
-        {/* Right Side */}
-        <div className="lg:flex-1 flex flex-col items-center justify-start">
-
-          {/* Chapa and Kata circles */}
-          <div className="flex flex-row lg:flex-row mb-4 lg:mb-8">
-            <div className="coin h-30 lg:h-48 w-48 lg:w-48 flex flex-col items-center justify-center mb-2 lg:mb-0 lg:mr-4">
-              {/* ... (same as before) */}
-              <img
-                className="top-0 left-0 w-full h-full"
-                src="https://res.cloudinary.com/dzhdarh4q/image/upload/v1696779744/qdytcjqof9xrsomcm0r9.jpg"
-                alt="Chapa"
-              />
-              <p className="text-2xl text-black">Chapa {chapa || 'Loading...'}</p>
-            </div>
-            <div className="coin h-30 lg:h-48 w-48 lg:w-48 flex flex-col items-center justify-center">
-              {/* ... (same as before) */}
-              <img
-                className="top-0 left-0 w-full h-full"
-                src="https://res.cloudinary.com/dzhdarh4q/image/upload/v1696778738/k7spz6emh3wu91uosgwt.jpg"
-                alt="Kata"
-              />
-              <p className="text-2xl text-black">Kata {kata || 'Loading...'}</p>
-            </div>
+          <div className="mb-4">
+            <p>Agent Commission: {agentCommission}%</p>
+            <input
+              type="number"
+              className="w-1/3 px-2 py-1 mb-2 border border-gray-300 rounded"
+              value={agentCommission}
+              onChange={(e) => setAgentCommission(e.target.value)}
+            />
           </div>
-
-          {/* Timer */}
-          <p className="mb-4 lg:mb-8 text-2xl lg:text-3xl">{remainingTime ? Math.floor(remainingTime / 1000) : 'Loading...'}</p>
-
-          {/* Chapa and Kata buttons */}
           <div className="flex">
-            <button onClick={() => setCustomBet("chapa")} className="mr-2 lg:mr-4 px-4 lg:px-6 py-2 lg:py-3 bg-blue-500 text-white rounded text-sm lg:text-base">Chapa</button>
-            <button onClick={() => setCustomBet("kata")} className="ml-2 lg:ml-4 px-4 lg:px-6 py-2 lg:py-3 bg-blue-500 text-white rounded text-sm lg:text-base">Kata</button>
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded mr-2"
+              onClick={saveCommissionChanges}
+            >
+              Save
+            </button>
+            <button
+              className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-2 px-4 rounded"
+              onClick={closeCommissionModal}
+            >
+              Cancel
+            </button>
           </div>
-
         </div>
-      </div>
+  
+  
+      ) :
+        <div>
+          <div className='flex flex-row justify-between'>
+            <div className='flex flex-row justify-end'>
+              <button onClick={openCommissionModal} className="m-10 px-4 py-2 bg-blue-500 text-white rounded text-sm lg:text-base">Commission Percentage Change</button>
+            </div>
+  
+  
+            <div className='flex flex-row justify-end'>
+              <button onClick={handleCalculateCommissions} className="m-10 px-4 py-2 bg-red-500 text-white rounded text-sm lg:text-base">Commission</button>
+            </div>
+  
+  
+          </div>
+  
+  
+  
+          <div className="flex flex-col lg:flex-row h-[75vh] px-4 lg:px-10 items-center justify-center">
+  
+            {/* Left Side (Admin Details) */}
+            <div className="lg:flex-1 pr-0 lg:pr-10 mb-6 lg:mb-0">
+              <p className="text-2xl lg:text-3xl mb-2 lg:mb-6">Standing: {standing || 'Loading...'}</p>
+              <p className="text-2xl lg:text-3xl mb-2 lg:mb-6">Earning: {earning || 'Loading...'}</p>
+              <p className="text-2xl lg:text-3xl mb-2 lg:mb-6">Earning Percentage: {earningPercentage || 'Loading...'}</p>
+              <div className="mb-2 lg:mb-6 flex items-center">
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={earningPercentageInput}
+                  onChange={handleEarningPercentageChange}
+                  className="mr-2 lg:mr-4 px-4 py-2 border border-gray-300 rounded focus:outline-none text-sm lg:text-base"
+                />
+                <button onClick={updateEarningPercentage} className="px-4 lg:px-6 py-2 lg:py-3 bg-blue-500 text-white rounded text-sm lg:text-base">Update Percentage</button>
+              </div>
+            </div>
+  
+            {/* Spacer */}
+            <div className="w-0 lg:w-10"></div>
+  
+            {/* Right Side */}
+            <div className="lg:flex-1 flex flex-col items-center justify-start">
+  
+              {/* Chapa and Kata circles */}
+              <div className="flex flex-row lg:flex-row mb-4 lg:mb-8">
+                <div className="coin h-30 lg:h-48 w-48 lg:w-48 flex flex-col items-center justify-center mb-2 lg:mb-0 lg:mr-4">
+                  {/* ... (same as before) */}
+                  <img
+                    className="top-0 left-0 w-full h-full"
+                    src="https://res.cloudinary.com/dzhdarh4q/image/upload/v1696779744/qdytcjqof9xrsomcm0r9.jpg"
+                    alt="Chapa"
+                  />
+                  <p className="text-2xl text-black">Chapa {chapa || 'Loading...'}</p>
+                </div>
+                <div className="coin h-30 lg:h-48 w-48 lg:w-48 flex flex-col items-center justify-center">
+                  {/* ... (same as before) */}
+                  <img
+                    className="top-0 left-0 w-full h-full"
+                    src="https://res.cloudinary.com/dzhdarh4q/image/upload/v1696778738/k7spz6emh3wu91uosgwt.jpg"
+                    alt="Kata"
+                  />
+                  <p className="text-2xl text-black">Kata {kata || 'Loading...'}</p>
+                </div>
+              </div>
+  
+              {/* Timer */}
+              <p className="mb-4 lg:mb-8 text-2xl lg:text-3xl">{remainingTime ? Math.floor(remainingTime / 1000) : 'Loading...'}</p>
+  
+              {/* Chapa and Kata buttons */}
+              <div className="flex">
+                <button onClick={() => setCustomBet("chapa")} className="mr-2 lg:mr-4 px-4 lg:px-6 py-2 lg:py-3 bg-blue-500 text-white rounded text-sm lg:text-base">Chapa</button>
+                <button onClick={() => setCustomBet("kata")} className="ml-2 lg:ml-4 px-4 lg:px-6 py-2 lg:py-3 bg-blue-500 text-white rounded text-sm lg:text-base">Kata</button>
+              </div>
+  
+            </div>
+          </div>
+        </div>
+  
+      }
+  
+  
     </div>
-
-
+  
+  
   );
-
 
 };
 

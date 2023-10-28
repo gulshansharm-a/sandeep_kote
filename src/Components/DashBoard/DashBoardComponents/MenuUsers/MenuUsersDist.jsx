@@ -1,7 +1,6 @@
 import { child, get, ref } from 'firebase/database';
-import { useDebugValue, useEffect, useState } from 'react';
-import { database } from '../../../../Authentication/firebase';
-import { auth } from "../../../../Authentication/firebase";
+import { useEffect, useState } from 'react';
+import { auth, database } from '../../../../Authentication/firebase';
 
 export default function MenuUsersDist() {
     const [selectedOption, setSelectedOption] = useState('Distributor');
@@ -26,6 +25,7 @@ export default function MenuUsersDist() {
                             // setcurrentAuthUser(() => {
 
                             // });
+                            setcurrentAuthUser(role);
     
                             console.log(user.email);
     

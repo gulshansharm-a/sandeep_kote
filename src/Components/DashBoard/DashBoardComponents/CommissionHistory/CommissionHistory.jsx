@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getDatabase, ref, get } from 'firebase/database';
 
 const CommissionHistory = () => {
@@ -9,18 +9,24 @@ const CommissionHistory = () => {
     const [commissionHistory, setCommissionHistory] = useState([]);
     const database = getDatabase(); // Initialize your Firebase Realtime Database instance
 
+    useEffect(() => {
+        fetchUsersForRole(selectedRole);
+    }, [selectedRole]);
+
     const fetchUsersForRole = (role) => {
         if (role) {
             const usersRef = ref(database, `${role}`);
-            // console.log(usersRef);
             get(usersRef)
                 .then((snapshot) => {
                     if (snapshot.exists()) {
-                        console.log("user are there");
-                        setUsers(Object.keys(snapshot.val()));
+                        const userData = snapshot.val();
+                        const userArray = Object.keys(userData).map((uid) => ({
+                            uid,
+                            email: userData[uid].email, // Assuming the user data has an 'email' field
+                        }));
+                        setUsers(userArray);
                     } else {
-                        console.log("user are not there");
-                        setUsers([]); // No users for the selected role
+                        setUsers([]);
                     }
                 })
                 .catch((error) => {
@@ -29,15 +35,15 @@ const CommissionHistory = () => {
         }
     };
 
-    const fetchCommissionHistory = (user) => {
-        if (user) {
-            const userRef = ref(database, `${selectedRole}/${user}/commissionHistory`);
+    const fetchCommissionHistory = (uid) => {
+        if (uid) {
+            const userRef = ref(database, `${selectedRole}/${uid}/commissionHistory`);
             get(userRef)
                 .then((snapshot) => {
                     if (snapshot.exists()) {
                         setCommissionHistory(Object.values(snapshot.val()));
                     } else {
-                        setCommissionHistory([]); // No commission history for the selected user
+                        setCommissionHistory([]);
                     }
                 })
                 .catch((error) => {
@@ -57,8 +63,6 @@ const CommissionHistory = () => {
               value={selectedRole}
               onChange={(e) => {
                 setSelectedRole(e.target.value);
-                // Fetch users when a role is selected
-                fetchUsersForRole(e.target.value);
               }}
               className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
             >
@@ -79,15 +83,14 @@ const CommissionHistory = () => {
               value={selectedUser}
               onChange={(e) => {
                 setSelectedUser(e.target.value);
-                // Fetch commission history when a user is selected
                 fetchCommissionHistory(e.target.value);
               }}
               className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
             >
               <option value="">Select a user</option>
               {users.map((user) => (
-                <option key={user} value={user}>
-                  {user}
+                <option key={user.uid} value={user.uid}>
+                  {user.email}
                 </option>
               ))}
             </select>
@@ -115,7 +118,6 @@ const CommissionHistory = () => {
           </div>
         </div>
       );
-      
 };
 
 export default CommissionHistory;

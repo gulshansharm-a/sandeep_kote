@@ -127,6 +127,9 @@ export default function AddUsersForm() {
             const userRef = ref(database, `${createUserRole}/${userCredential.user.uid}`);
             await set(userRef, userData);
 
+            const successMessage = `${email} is added as ${createUserRole} successfully`;
+            alert(successMessage);
+
             const timer = setTimeout(() => {
                 // Reload the page
                 window.location.reload();
@@ -137,8 +140,13 @@ export default function AddUsersForm() {
             setOpenModal(true);
             setSuccess(true);
         } catch (error) {
+            if (error.code === 'auth/email-already-in-use') {
+                // This error code indicates that the email is already in use
+                // You can display an alert or set an error message here
+                alert('The email address is already in use.');
+            }
             console.error('Error during user registration:', error);
-            // Handle the error, set an error message, etc.
+
         } finally {
             setIsLoading(false);
         }

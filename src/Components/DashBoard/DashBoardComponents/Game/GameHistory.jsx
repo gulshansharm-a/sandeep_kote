@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue } from 'firebase/database';
-import { auth } from '../../../../Authentication/firebase'; // Import your firebase auth object
 
 const firebaseConfig = {
-  // Your Firebase Config
   apiKey: 'AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4',
   authDomain: 'sandeepkote-c67f5.firebaseapp.com',
   databaseURL: 'https://sandeepkote-c67f5-default-rtdb.firebaseio.com',
@@ -23,44 +21,9 @@ const GameHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentAuthUser, setCurrentAuthUser] = useState(null);
 
   useEffect(() => {
-    // Set up an observer to listen for changes in authentication state
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        try {
-          const snapshot = await onValue(ref(database));
-
-          const data = snapshot.val();
-
-          // Iterate through each role (admin, agent, dis, players)
-          for (const role in data) {
-            // Check if the UID exists in the current role
-            if (data[role][user.uid]) {
-              setCurrentAuthUser(role);
-              break;
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching data from Firebase:', error.message);
-        }
-      }
-    });
-
-    // Cleanup the observer on component unmount
-    return () => unsubscribe();
-  }, [database]);
-
-  useEffect(() => {
-    if (!currentAuthUser) {
-      return; // No need to fetch player data if the user role is not determined
-    }
-
-    const playerRef =
-      currentAuthUser === 'Admin'
-        ? ref(database, 'Player')
-        : ref(database, 'Player', user.uid);
+    const playerRef = ref(database, 'Player');
 
     const unsubscribe = onValue(playerRef, (snapshot) => {
       const data = snapshot.val();
@@ -83,18 +46,12 @@ const GameHistory = () => {
         // Filter playerData based on searchQuery
         const filteredData = dataArray.filter(
           (player) =>
-            (typeof player.email === 'string' &&
-              player.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (typeof player.chapa === 'string' &&
-              player.chapa.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (typeof player.kata === 'string' &&
-              player.kata.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (typeof player.result === 'string' &&
-              player.result.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (typeof player.time === 'string' &&
-              player.time.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (typeof player.betID === 'string' &&
-              player.betID.toLowerCase().includes(searchQuery.toLowerCase()))
+            (typeof player.email === 'string' && player.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (typeof player.chapa === 'string' && player.chapa.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (typeof player.kata === 'string' && player.kata.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (typeof player.result === 'string' && player.result.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (typeof player.time === 'string' && player.time.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (typeof player.betID === 'string' && player.betID.toLowerCase().includes(searchQuery.toLowerCase()))
         );
         setPlayerData(filteredData);
       }
@@ -103,7 +60,7 @@ const GameHistory = () => {
     return () => {
       unsubscribe();
     };
-  }, [currentAuthUser, database, searchQuery]);
+  }, [database, searchQuery]);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);

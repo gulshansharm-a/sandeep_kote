@@ -117,6 +117,7 @@ export default function AddUsersForm() {
                         distributorID: agentData.distributorID,
                         balance: 1000,
                         adminID: agentData.adminID,
+                        blocked: false
                     };
                 } else {
                     // Handle the case when the agent node doesn't exist

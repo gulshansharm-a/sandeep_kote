@@ -183,12 +183,6 @@ export default function SideBar() {
                         <li className="text-white mb-5"><p>Welcome,</p>
                             <br></br> {userEmail} <br></br>
                         </li>
-                        <li>
-                            {/* <a href="#" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
-                                <span className="ml-3 text-[30px]">{role}</span>
-                                <span className="ml-3 text-[30px]">{userEmail}</span>
-                            </a> */}
-                        </li>
 
                         {userRole !== "Admin" ?
                             <div></div>
@@ -225,14 +219,6 @@ export default function SideBar() {
                                 <span className="flex-1 ml-3 whitespace-nowrap">Menu users</span>
                             </a>
                         </li>
-                        {/* <li>
-                            <a href="/dashboard/users" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
-                                <svg className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
-                                    <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
-                                </svg>
-                                <span className="flex-1 ml-3 whitespace-nowrap">Users</span>
-                            </a>
-                        </li> */}
                         <li>
                             <a href="/dashboard/coin" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
                                 <svg className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
@@ -264,6 +250,16 @@ export default function SideBar() {
                                 </a>
                             </li>
                         }
+
+                        <li>
+                            <a href="/dashboard/blockUsers" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
+                                <svg className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
+                                    <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
+                                </svg>
+                                <span className="flex-1 ml-3 whitespace-nowrap">Block users</span>
+                            </a>
+                        </li>
+
                         <li>
                             <a href="#" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
                                 <svg className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -272,6 +268,18 @@ export default function SideBar() {
                                     <path d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z" />
                                 </svg>
                                 <span onClick={() => setOpenModal(true)} className="flex-1 ml-3 whitespace-nowrap">Logout</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/dashboard/resetPassword" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
+                                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path opacity="0.5" d="M2 12C2 8.22876 2 6.34315 3.17157 5.17157C4.34315 4 6.22876 4 10 4H14C17.7712 4 19.6569 4 20.8284 5.17157C22 6.34315 22 8.22876 22 12C22 15.7712 22 17.6569 20.8284 18.8284C19.6569 20 17.7712 20 14 20H10C6.22876 20 4.34315 20 3.17157 18.8284C2 17.6569 2 15.7712 2 12Z" stroke="#1C274C" stroke-width="1.5" />
+                                    <path d="M12 10V14M10.2676 11L13.7317 13M13.7314 11L10.2673 13" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" />
+                                    <path d="M6.73241 10V14M4.99999 11L8.46409 13M8.46386 11L4.99976 13" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" />
+                                    <path d="M17.2681 10V14M15.5356 11L18.9997 13M18.9995 11L15.5354 13" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" />
+                                </svg>
+
+                                <span className="flex-1 ml-3 whitespace-nowrap">Reset Password</span>
                             </a>
                         </li>
                     </ul>
@@ -376,6 +384,15 @@ export default function SideBar() {
                                 </a>
                             </li>
                         }
+
+                        <li>
+                            <a href="/dashboard/blockUsers" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
+                                <svg className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
+                                    <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
+                                </svg>
+                                <span className="flex-1 ml-3 whitespace-nowrap">Block users</span>
+                            </a>
+                        </li>
                         <li>
                             <a href="#" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
                                 <svg className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -386,6 +403,19 @@ export default function SideBar() {
                                 <span onClick={() => setOpenModal(true)} className="flex-1 ml-3 whitespace-nowrap">Logout</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="/dashboard/resetPassword" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
+                                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path opacity="0.5" d="M2 12C2 8.22876 2 6.34315 3.17157 5.17157C4.34315 4 6.22876 4 10 4H14C17.7712 4 19.6569 4 20.8284 5.17157C22 6.34315 22 8.22876 22 12C22 15.7712 22 17.6569 20.8284 18.8284C19.6569 20 17.7712 20 14 20H10C6.22876 20 4.34315 20 3.17157 18.8284C2 17.6569 2 15.7712 2 12Z" stroke="#1C274C" stroke-width="1.5" />
+                                    <path d="M12 10V14M10.2676 11L13.7317 13M13.7314 11L10.2673 13" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" />
+                                    <path d="M6.73241 10V14M4.99999 11L8.46409 13M8.46386 11L4.99976 13" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" />
+                                    <path d="M17.2681 10V14M15.5356 11L18.9997 13M18.9995 11L15.5354 13" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" />
+                                </svg>
+
+                                <span className="flex-1 ml-3 whitespace-nowrap">Reset Password</span>
+                            </a>
+                        </li>
+
                     </ul>
                 </div>
             </aside>

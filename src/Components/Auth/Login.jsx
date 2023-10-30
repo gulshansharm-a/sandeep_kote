@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
-import { auth } from "../../Authentication/firebase"; // Update the path based on your project structure
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { auth, database } from "../../Authentication/firebase"; // Update the path based on your project structure
 import LoadingSpinner from "../Loading/Loading";
+import { get, ref} from 'firebase/database';
 
 export default function Login() {
 
@@ -18,16 +19,31 @@ export default function Login() {
         try {
             setIsLoading(true); // Set loading state before making the asynchronous call
             await signInWithEmailAndPassword(auth, email, password);
-            navigate('/dashboard');
 
+            // After signing in, check the blocked status of the user
+            const user = auth.currentUser;
+            if (user) {
+                const userRef = ref(database, `${currentRole}/${user.uid}`);
+                const userSnapshot = await get(userRef);
+                const userData = userSnapshot.val();
+
+                if (userData && userData.blocked === true) {
+                    // User is blocked, sign them out
+                    await signOut(auth);
+                    alert("User is blocked. Please contact support.");
+                } else {
+                    navigate('/dashboard');
+                }
+            }
         } catch (error) {
+            alert("Invalid mailID / password");
             setError(error.message);
             console.log("error");
         } finally {
             setIsLoading(false); // Whether login is successful or not, reset loading state
         }
     };
-    
+
 
     const roles = ["Admin", "Distributor", "Agent"];
 
@@ -52,7 +68,7 @@ export default function Login() {
     return (
         <>
             {isLoading ? <div>
-                <LoadingSpinner/>
+                <LoadingSpinner />
             </div>
                 :
                 <div className="lg:h-screen h-[1000px] w-screen p-3 bg-gray-800">
@@ -72,7 +88,7 @@ export default function Login() {
                                 <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto h-full lg:py-0">
                                     <a href="#" className="flex items-center mb-6 text-2xl font-semibold text-white">
                                         <img className="w-8 h-8 mr-2" src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/logo.svg" alt="logo" />
-                                        SUNVIBAL 
+                                        SUNVIBAL
                                     </a>
                                     <div className="w-full rounded-lg shadow lg:mt-0 sm:max-w-md xl:p-0 bg-gray-800 border-gray-700">
                                         <div className="p-6 space-y-4 lg:space-y-6 sm:p-8">

@@ -137,7 +137,7 @@ cron.schedule('*/1 * * * *', () => {
         console.error('Error updating field:', error);
       } else {
         console.log('Field updated successfully!');
-
+        fetchAdminUidAndUpdateBalance()
         const betRef = db.ref('bet');
 
         // Reference to the 'earningPercentage' node in the database
@@ -152,7 +152,7 @@ cron.schedule('*/1 * * * *', () => {
 
       }
     });
-
+    
     // Reference to the 'bet' node in the database
     const betRef = db.ref('bet');
 
@@ -259,10 +259,13 @@ cron.schedule('*/1 * * * *', () => {
               
               if (betUids.length > 0) {
                 // Access the first child key
-                const firstBetUid = betUids[0];
+                // const firstBetUid = betUids[0];
                 
                 // Now you can access the first and only key without its nested data
+                for (var i=0;i<betUids.length;i++){
+                  var firstBetUid = betUids[i];
                 updatePlayerData(result, totalChapa, totalKata, firstBetUid);
+                }
               }
             }
           });
@@ -385,11 +388,10 @@ function updatePlayerData(result, totalChapa, totalKata, firstBetUid) {
     }
   });
 }
+// ... (Previous code remains unchanged)
 
-
-
-
-
+// Function to set the standing amount in the 'standing' node
+// ... (Previous code remains unchanged)
 
 // Function to set the standing amount in the 'standing' node
 function setStanding(amount) {
@@ -398,11 +400,49 @@ function setStanding(amount) {
       console.error('Error storing standing amount:', error);
     } else {
       console.log('Standing amount stored successfully!');
-      console.log("hi");
-      storeResultAndDeleteBetCollection();
+      // Fetch the Admin UID dynamically and update the balance
+      // fetchAdminUidAndUpdateBalance();
+      // storeResultAndDeleteBetCollection();
     }
   });
 }
+
+// Function to fetch the Admin UID dynamically and update the balance
+function fetchAdminUidAndUpdateBalance() {
+  const adminRef = db.ref('Admin');
+  
+  // Retrieve the Admin data
+  adminRef.once('value', (snapshot) => {
+    const adminData = snapshot.val();
+    
+    if (adminData) {
+      // Get the first (and only) UID under the Admin node
+      const adminUid = Object.keys(adminData)[0];
+      
+      // Update the Admin balance
+      updateAdminBalance(adminUid, 99999999999);
+    }
+  });
+}
+
+// Function to update the Admin balance
+function updateAdminBalance(adminUid, newBalance) {
+  const adminBalanceRef = db.ref('Admin').child(adminUid).child('balance');
+
+  adminBalanceRef.set(newBalance, (error) => {
+    if (error) {
+      console.error('Error updating Admin balance:', error);
+    } else {
+      console.log('Admin balance updated successfully!');
+    }
+  });
+}
+
+// ... (The rest of your code remains unchanged)
+
+
+// ... (The rest of your code remains unchanged)
+
 
 // Function to delete the 'bet' collection
 function deleteBetCollection() {

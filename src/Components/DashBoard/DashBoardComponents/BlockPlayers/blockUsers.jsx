@@ -5,12 +5,23 @@ import { database } from '../../../../Authentication/firebase';
 
 
 export default function BlockUsers() {
-    const [selectedOption, setSelectedOption] = useState('Distributor');
+    const [selectedOption, setSelectedOption] = useState('Player');
     const [users, setUsers] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentAuthUser, setcurrentAuthUser] = useState('');
+    const [options, setOptions] = useState(['Player']);
+
+    // Use the userOptions to set the initial selectedOption
+    useEffect(() => {
+        if (currentAuthUser === "Admin")
+            setOptions(['Admin', 'Distributor', 'Agent', 'Player']);
+        else if (currentAuthUser === "Distributor")
+            setOptions(['Agent', 'Player']);
+        else if (currentAuthUser === "Agent")
+            setOptions(['Player']);
+    }, [currentAuthUser]);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -36,10 +47,11 @@ export default function BlockUsers() {
     }, []);
 
     useEffect(() => {
+        
         const fetchData = async () => {
             try {
                 let snapshot;
-
+        
                 switch (selectedOption) {
                     case 'Admin':
                         snapshot = await get(child(ref(database), 'Admin'));
@@ -51,27 +63,48 @@ export default function BlockUsers() {
                         snapshot = await get(child(ref(database), 'Agent'));
                         break;
                     case 'Player':
-                        snapshot = await get(ref(database, 'Player'));
+                        snapshot = await get(child(ref(database), 'Player'));
                         break;
                     default:
                         snapshot = await get(child(ref(database), 'Admin'));
                 }
-
+        
                 const usersData = Object.entries(snapshot.val())
                     .map(([userId, userData]) => ({
                         ...userData,
                         userId,
                         role: selectedOption,
                     }));
-
-                setUsers(usersData);
+        
+                const filteredUsersPromises = usersData.map(async (user) => {
+                    if (currentAuthUser === 'Admin') {
+                        return true;
+                    } else if (currentAuthUser === 'Distributor') {
+                        if (user.distributorID === auth.currentUser.uid) {
+                            return true;
+                        }
+                    } else if (currentAuthUser === 'Agent') {
+                        if (user.agentID === auth.currentUser.uid) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+        
+                const filteredUsersResults = await Promise.all(filteredUsersPromises);
+        
+                const filteredUsers = usersData.filter((user, index) => filteredUsersResults[index]);
+        
+                setUsers(filteredUsers);
+        
+                console.log(users);
             } catch (error) {
                 console.error('Error fetching data from Firebase:', error.message);
             }
         };
 
         fetchData();
-    }, [selectedOption]);
+    }, [selectedOption, currentAuthUser]);
 
     const handleOptionChange = (event) => {
         setSelectedOption(event.target.value);
@@ -135,10 +168,11 @@ export default function BlockUsers() {
                         value={selectedOption}
                         onChange={handleOptionChange}
                     >
-                        <option value="Admin">Admin</option>
-                        <option value="Distributor">Distributor</option>
-                        <option value="Agent">Agent</option>
-                        <option value="Player">Player</option>
+                        {options.map((option) => (
+                            <option key={option} value={option}>
+                                {option}
+                            </option>
+                        ))}
                     </select>
                 </div>
                 <div className="mb-4">

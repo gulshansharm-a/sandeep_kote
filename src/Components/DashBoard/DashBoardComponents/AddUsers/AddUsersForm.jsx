@@ -131,12 +131,14 @@ export default function AddUsersForm() {
             const successMessage = `${email} is added as ${createUserRole} successfully`;
             alert(successMessage);
 
-            const timer = setTimeout(() => {
-                // Reload the page
-                window.location.reload();
-            }, 2000);
+            if (userRole !== "Agent") {
+                const timer = setTimeout(() => {
+                    // Reload the page
+                    window.location.reload();
+                }, 2000);
+                timer();
+            }
 
-            timer();
 
             setOpenModal(true);
             setSuccess(true);

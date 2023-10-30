@@ -6,8 +6,8 @@ import { getAuth } from 'firebase/auth';
 const CoinCount = () => {
   const [loggedInUserId, setLoggedInUserId] = useState(null);
   const [adminBalance, setAdminBalance] = useState(null);
-  const [standing, setStanding] = useState(null);
-  const [earning, setEarning] = useState(null);
+  const [standing, setStanding] = useState(0);
+  const [earning, setEarning] = useState(0);
   const [earningPercentage, setEarningPercentage] = useState(null);
   const [kata, setKata] = useState(null);
   const [chapa, setChapa] = useState(null);
@@ -16,7 +16,49 @@ const CoinCount = () => {
   const [isCommissionModalOpen, setCommissionModalOpen] = useState(false);
   const [distributorCommission, setDistributorCommission] = useState(0);
   const [agentCommission, setAgentCommission] = useState(0);
+  const [setToZero, setSetToZero] = useState(false);
 
+  // Function to handle set to zero
+  const handleSetToZero = async () => {
+    try {
+      // Update the setToZero field to true
+      await set(ref(database, `admin/${loggedInUserId}/settozero`), true);
+      alert('setToZero updated successfully.');
+    } catch (error) {
+      console.error('Error updating setToZero:', error.message);
+      alert('Error updating setToZero. Please try again.');
+    }
+  };
+
+  // Function to handle adding standing to earning and resetting values
+  const handleAddStandingToEarning = async () => {
+    try {
+      // Fetch the current standing and earning values
+      const adminSnapshot = await get(ref(database, `/`));
+      const adminData = adminSnapshot.val();
+
+      // Update the values in the database
+      await set(ref(database, `standing`), 0);
+      await set(ref(database, `earning`), adminData.standing + adminData.earning);
+
+      alert('Added standing to earning and reset standing successfully.');
+    } catch (error) {
+      console.error('Error updating standing and earning:', error.message);
+      alert('Error updating standing and earning. Please try again.');
+    }
+  };
+
+  // Function to handle setting earning to zero
+  const handleSetEarningToZero = async () => {
+    try {
+      // Update the earning field to zero
+      await set(ref(database, `earning`), 0);
+      alert('Earning set to zero successfully.');
+    } catch (error) {
+      console.error('Error setting earning to zero:', error.message);
+      alert('Error setting earning to zero. Please try again.');
+    }
+  };
   const openCommissionModal = () => {
     fetchCommissionsFromDatabase();
     setCommissionModalOpen(true);
@@ -88,8 +130,11 @@ const CoinCount = () => {
       const adminData = adminSnapshot.val();
       if (adminData) {
         setAdminBalance(adminData.balance || null);
-        setStanding(adminData.standing || null);
-        setEarning(adminData.earning || null);
+       
+        setStanding(adminData.standing || 0);
+      
+          setEarning(adminData.earning || 0);
+        
         setEarningPercentage(adminData.earningPercentage || null);
         setEarningPercentageInput(adminData.earningPercentage || '');
         setKata(adminData.kata || null);
@@ -247,15 +292,34 @@ const handleEarningPercentageChange = async (e) => {
   
   
           </div>
-  
+          <div className="flex flex-row justify-end">
+            <button
+              onClick={handleSetToZero}
+              className="m-10 px-4 py-2 bg-green-500 text-white rounded text-sm lg:text-base"
+            >
+              Set to Min
+            </button>
+            <button
+              onClick={handleAddStandingToEarning}
+              className="m-10 px-4 py-2 bg-yellow-500 text-white rounded text-sm lg:text-base"
+            >
+              Add Standing to Earning
+            </button>
+            <button
+              onClick={handleSetEarningToZero}
+              className="m-10 px-4 py-2 bg-red-500 text-white rounded text-sm lg:text-base"
+            >
+              Set Earning to Zero
+            </button>
+          </div>
   
   
           <div className="flex flex-col lg:flex-row h-[75vh] px-4 lg:px-10 items-center justify-center">
   
             {/* Left Side (Admin Details) */}
             <div className="lg:flex-1 pr-0 lg:pr-10 mb-6 lg:mb-0">
-              <p className="text-2xl lg:text-3xl mb-2 lg:mb-6">Standing: {standing || 'Loading...'}</p>
-              <p className="text-2xl lg:text-3xl mb-2 lg:mb-6">Earning: {earning || 'Loading...'}</p>
+              <p className="text-2xl lg:text-3xl mb-2 lg:mb-6">Standing: {standing || 0}</p>
+              <p className="text-2xl lg:text-3xl mb-2 lg:mb-6">Earning: {earning || 0}</p>
               <p className="text-2xl lg:text-3xl mb-2 lg:mb-6">Earning Percentage: {earningPercentage || 'Loading...'}</p>
               <div className="mb-2 lg:mb-6 flex items-center">
                 <input

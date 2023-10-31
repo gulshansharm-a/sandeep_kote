@@ -16,7 +16,8 @@ import LoadingSpinner from './Components/Loading/Loading';
 import GameHistory from './Components/DashBoard/DashBoardComponents/Game/GameHistory'
 import CommissionHistory from './Components/DashBoard/DashBoardComponents/CommissionHistory/CommissionHistory';
 import ResetPassword from './Components/DashBoard/DashBoardComponents/ResetPassword/ResetPassword';
-import BlockUsers from './Components/DashBoard/DashBoardComponents/BlockPlayers/blockUsers';
+import BlockUsers from './Components/DashBoard/DashBoardComponents/BlockPlayers/BlockUsers';
+import BlockedHistory from './Components/DashBoard/DashBoardComponents/BlockPlayers/BlockedHistory';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -104,6 +105,7 @@ function App() {
                 <Route path="menuUsers/specific" element={<MenuUserSpecific />} />
                 <Route path="resetPassword" element={<ResetPassword />} />
                 <Route path="blockUsers" element={<BlockUsers />} />
+                <Route path="blockUsersHistory" element={<BlockedHistory />} />
                 {/* Add more routes for other choices */}
               </Route>
             ) : (

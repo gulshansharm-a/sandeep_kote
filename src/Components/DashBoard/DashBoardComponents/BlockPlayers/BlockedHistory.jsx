@@ -4,8 +4,9 @@ import { auth } from '../../../../Authentication/firebase';
 import { database } from '../../../../Authentication/firebase';
 
 
-export default function BlockUsers() {
+export default function BlockedHistory() {
     const [selectedOption, setSelectedOption] = useState('Player');
+    const [selectedUserOption, setSelectedUserOption] = useState(null);
     const [users, setUsers] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -110,6 +111,11 @@ export default function BlockUsers() {
         setSelectedOption(event.target.value);
     };
 
+    const handleSelectedUserChange = (event) => {
+        setSelectedUserOption(event.target.value);
+        console.log(event.target.value);
+    };
+
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
     };
@@ -135,60 +141,66 @@ export default function BlockUsers() {
 
     const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
 
-    function getFormattedDate() {
-        const currentTime = new Date();
-        const dd = String(currentTime.getDate()).padStart(2, "0");
-        const mm = String(currentTime.getMonth() + 1).padStart(2, "0"); // Months are 0-based
-        const yyyy = currentTime.getFullYear();
-        const hours = String(currentTime.getHours()).padStart(2, "0");
-        const minutes = String(currentTime.getMinutes()).padStart(2, "0");
-        return `${dd}/${mm}/${yyyy} - ${hours}:${minutes} IST`;
-    }
+    const [selectedUserDetails, setSelectedUserDetails] = useState(null);
 
-    const toggleBlockStatus = async (user) => {
-        console.log("triggered");
-        const userRef = ref(database, `${selectedOption}/${user.userId}`);
-        const currentBlockStatus = user.blocked || false;
-        const timestamp = getFormattedDate();
-        const blockedBy = auth.currentUser.email; // Get the email of the current user
+    // Function to fetch user details
+    const fetchUserDetails = async () => {
+        // Make sure selectedUserOption and selectedOption are not null
+        if (selectedUserOption && selectedOption) {
+            try {
+                console.log(selectedUserOption);
+                console.log(selectedOption);
+                // Replace 'Player' with the role and 'KzmzYIVVpYVdIcHMUijCVO3Hgjv1' with the user ID
+                const userRef = ref(database, selectedOption + '/' + selectedUserOption);
+                const snapshot = await get(userRef);
+                const userDetails = snapshot.val();
 
-        try {
-            // Create or update a unique key in the user's blocked_history
-            const historyRef = child(userRef, 'blocked_history');
-            const newKey = push(historyRef).key;
+                if (userDetails) {
+                    // Access user details including blocked history
+                    const { blocked_history, blocked } = userDetails;
+                    const status = blocked ? 'Blocked' : 'Unblocked';
 
-            const updates = {};
-            updates[newKey] = currentBlockStatus
-                ? { unblocked: { time: timestamp, blockedBy } }
-                : { blocked: { time: timestamp, blockedBy } };
+                    // Initialize arrays to store blocked history details
+                    const blockedHistoryDetails = [];
 
-            await update(historyRef, updates);
+                    if (blocked_history) {
+                        // Iterate through each entry in blocked_history
+                        for (const historyKey in blocked_history) {
+                            const historyEntry = blocked_history[historyKey];
 
-            // Update the user's block status
-            await update(userRef, { blocked: !currentBlockStatus });
+                            // Extract details from the entry
+                            const historyStatus = Object.keys(historyEntry)[0]; // 'blocked' or 'unblocked'
+                            const entryDetails = historyEntry[historyStatus];
 
-            alert(`${user.email} is now ${currentBlockStatus ? 'Unblocked' : 'Blocked'}`);
-            const timer = setTimeout(() => {
-                // Reload the page
-                window.location.reload();
-            }, 500);
+                            // Collect time and blockedBy
+                            const time = entryDetails.time;
+                            const blockedBy = entryDetails.blockedBy;
 
-            timer();
-        } catch (error) {
-            console.error('Error toggling block status:', error.message);
+                            // Add the entry details to the array
+                            blockedHistoryDetails.push({ status: historyStatus, time, blockedBy });
+                        }
+                    }
+
+                    // Set the user details, including all blocked history entries
+                    setSelectedUserDetails({
+                        status,
+                        blockedHistory: blockedHistoryDetails,
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching user details:', error.message);
+            }
         }
     };
+
+    // Fetch user details when selectedUserOption or selectedOption changes
+    useEffect(() => {
+        fetchUserDetails();
+    }, [selectedUserOption, selectedOption]);
 
 
     return (
         <div>
-            <div className='flex flex-row justify-between mt-20 m-5'>
-                <h1 className="text-3xl font-bold text-gray-800">Block Users</h1>
-                <a href='/dashboard/blockUsersHistory' className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center'>
-                    Block Users History
-                </a>
-            </div>
-
             <div className="p-4">
                 <div className="mb-4">
                     <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="userType">
@@ -203,6 +215,23 @@ export default function BlockUsers() {
                         {options.map((option) => (
                             <option key={option} value={option}>
                                 {option}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div className="mb-4">
+                    <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="userType">
+                        Select User :
+                    </label>
+                    <select
+                        id="userType"
+                        className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
+                        value={selectedUserOption}
+                        onChange={handleSelectedUserChange}
+                    >
+                        {currentUsers.map((user) => (
+                            <option key={user.userId} value={user.userId}>
+                                {user.email}
                             </option>
                         ))}
                     </select>
@@ -224,43 +253,35 @@ export default function BlockUsers() {
                     <thead>
                         <tr>
                             <th className="p-3 border">
-                                S.No
+                                Status
                             </th>
                             <th className="p-3 border">
-                                Email
+                                Time
                             </th>
                             <th className="p-3 border">
-                                Username
-                            </th>
-                            <th className="p-3 border">
-                                Blocked/Unblocked
+                                Blocked / Unblocked By
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                        {currentUsers.map((user, index) => (
-                            <tr key={user.userId}>
-                                <td className="p-3 border">
-                                    {indexOfFirstItem + index + 1}
-                                </td>
-                                <td className="p-3 border">
-                                    {user.email}
-                                </td>
-                                <td className="p-3 border">
-                                    {user.userName}
-                                </td>
-                                <td className="p-3 border">
-                                    <button
-                                        onClick={() => toggleBlockStatus(user)}
-                                        className={`bg-${user.blocked ? 'red' : 'green'}-500 text-white p-2 border rounded`}
-                                    >
-                                        {user.blocked ? 'Blocked' : 'unblocked'}
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
+                        {selectedUserDetails &&
+                            selectedUserDetails.blockedHistory.map((historyEntry, index) => (
+                                <tr key={index}>
+                                    <td className="p-3 border">
+                                        {historyEntry.status}
+                                    </td>
+                                    <td className="p-3 border">
+                                        {historyEntry.time}
+                                    </td>
+                                    <td className="p-3 border">
+                                        {historyEntry.blockedBy}
+                                    </td>
+                                </tr>
+                            ))
+                        }
                     </tbody>
                 </table>
+
                 <div className="mt-4">
                     <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="rowsPerPage">
                         Rows per page:

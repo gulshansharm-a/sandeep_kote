@@ -69,14 +69,14 @@ const CoinCount = () => {
   };
 
   const firebaseConfig = {
-  apiKey: "AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4",
-  authDomain: "sandeepkote-c67f5.firebaseapp.com",
-  databaseURL: "https://sandeepkote-c67f5-default-rtdb.firebaseio.com",
-  projectId: "sandeepkote-c67f5",
-  storageBucket: "sandeepkote-c67f5.appspot.com",
-  messagingSenderId: "871561614523",
-  appId: "1:871561614523:web:3b12ae93e7490723ddc59e",
-  measurementId: "G-645LW1SWKT"
+    apiKey: "AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4",
+    authDomain: "sandeepkote-c67f5.firebaseapp.com",
+    databaseURL: "https://sandeepkote-c67f5-default-rtdb.firebaseio.com",
+    projectId: "sandeepkote-c67f5",
+    storageBucket: "sandeepkote-c67f5.appspot.com",
+    messagingSenderId: "871561614523",
+    appId: "1:871561614523:web:3b12ae93e7490723ddc59e",
+    measurementId: "G-645LW1SWKT"
   };
 
   const firebaseApp = initializeApp(firebaseConfig);
@@ -90,7 +90,7 @@ const CoinCount = () => {
       const commissionData = commissionSnapshot.val();
 
       console.log(commissionData);
-      
+
       if (commissionData) {
         // Set the fetched values to the state
         setDistributorCommission(commissionData.dist || 0);
@@ -102,7 +102,7 @@ const CoinCount = () => {
       console.error('Error fetching commission data:', error.message);
     }
   };
-  
+
 
   useEffect(() => {
     const userId = auth.currentUser?.uid;
@@ -114,15 +114,15 @@ const CoinCount = () => {
   }, []);
   const setCustomBet = async (betValue) => {
     try {
-        // Update the database with the chosen bet value
-        await set(ref(database, `customBet`), betValue);
-        console.log(`customBet set to: ${betValue}`);
-        alert(`customBet updated to: ${betValue}`);
+      // Update the database with the chosen bet value
+      await set(ref(database, `customBet`), betValue);
+      console.log(`customBet set to: ${betValue}`);
+      alert(`customBet updated to: ${betValue}`);
     } catch (error) {
-        console.error('Error setting customBet:', error.message);
-        alert('Error updating customBet. Please try again.');
+      console.error('Error setting customBet:', error.message);
+      alert('Error updating customBet. Please try again.');
     }
-};
+  };
 
   const fetchAdminData = async (userId) => {
     try {
@@ -130,11 +130,11 @@ const CoinCount = () => {
       const adminData = adminSnapshot.val();
       if (adminData) {
         setAdminBalance(adminData.balance || null);
-       
+
         setStanding(adminData.standing || 0);
-      
-          setEarning(adminData.earning || 0);
-        
+
+        setEarning(adminData.earning || 0);
+
         setEarningPercentage(adminData.earningPercentage || null);
         setEarningPercentageInput(adminData.earningPercentage || '');
         setKata(adminData.kata || null);
@@ -158,7 +158,7 @@ const CoinCount = () => {
       console.error('Error fetching timer data:', error.message);
     }
   };
-  
+
   useEffect(() => {
     const timerInterval = setInterval(() => {
       setRemainingTime(prevTime => {
@@ -169,26 +169,26 @@ const CoinCount = () => {
         return prevTime - 1000;
       });
     }, 1000);
-    
+
     return () => clearInterval(timerInterval);
   }, []);
 
-const handleEarningPercentageChange = async (e) => {
-  const value = parseFloat(e.target.value);
-  console.log(`Trying to set earning percentage to: ${value}`); // Logging
+  const handleEarningPercentageChange = async (e) => {
+    const value = parseFloat(e.target.value);
+    console.log(`Trying to set earning percentage to: ${value}`); // Logging
 
-  if (value >= 0 && value <= 100) {
+    if (value >= 0 && value <= 100) {
       setEarningPercentageInput(value);
       try {
-          await set(ref(database, `earningPercentage`), value);
-          setEarningPercentage(value);
-          alert('Earning percentage updated successfully.');
+        await set(ref(database, `earningPercentage`), value);
+        setEarningPercentage(value);
+        alert('Earning percentage updated successfully.');
       } catch (error) {
-          console.error('Error updating earning percentage:', error.message); // Enhanced error logging
-          alert('Error updating earning percentage. Please try again.');
+        console.error('Error updating earning percentage:', error.message); // Enhanced error logging
+        alert('Error updating earning percentage. Please try again.');
       }
-  }
-};
+    }
+  };
 
 
   const updateEarningPercentage = async () => {
@@ -229,16 +229,16 @@ const handleEarningPercentageChange = async (e) => {
     await set(ref(database, 'commission/agent'), agentCommission);
 
     alert("commission changed successfully")
-  
+
     // Close the pop-up
     closeCommissionModal();
   };
 
-  
+
   return (
 
     <div>
-  
+
       {isCommissionModalOpen ? (
         // Example modal content
         <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 modal-content p-4 bg-white rounded shadow-md">
@@ -276,46 +276,48 @@ const handleEarningPercentageChange = async (e) => {
             </button>
           </div>
         </div>
-  
-  
+
+
       ) :
         <div>
-          <div className='flex flex-row justify-between'>
-            <div className='flex flex-row justify-end'>
-              <button onClick={openCommissionModal} className="m-10 px-4 py-2 bg-blue-500 text-white rounded text-sm lg:text-base">Commission Percentage Change</button>
+          <div className='flex flex-row justify-between flex-wrap p-4'>
+            <div className='w-full sm:w-1/2 md:w-1/4 lg:w-1/5 xl:w-1/6 p-2'>
+              <button onClick={openCommissionModal} className="w-full h-14 px-4 py-1 bg-gray-800 text-white rounded text-sm lg:text-base">
+                Commission Percentage Change
+              </button>
             </div>
-  
-  
-            <div className='flex flex-row justify-end'>
-              <button onClick={handleCalculateCommissions} className="m-10 px-4 py-2 bg-red-500 text-white rounded text-sm lg:text-base">Commission</button>
+
+            <div className='w-full sm:w-1/2 md:w-1/4 lg:w-1/5 xl:w-1/6 p-2'>
+              <button onClick={handleCalculateCommissions} className="w-full h-14 px-4 py-1 bg-gray-800 text-white rounded text-sm lg:text-base">
+                Commission
+              </button>
             </div>
-  
-  
+
+            <div className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 xl:w-1/6 p-2">
+              <button onClick={handleSetToZero} className="w-full h-14 px-4 py-1 bg-gray-800 text-white rounded text-sm lg:text-base">
+                Set to Min
+              </button>
+            </div>
+
+            <div className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 xl:w-1/6 p-2">
+              <button onClick={handleAddStandingToEarning} className="w-full h-14 px-4 py-1 bg-gray-800 text-white rounded text-sm lg:text-base">
+                Add Standing to Earning
+              </button>
+            </div>
+
+            <div className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 xl:w-1/6 p-2">
+              <button onClick={handleSetEarningToZero} className="w-full h-14 px-4 py-1 bg-gray-800 text-white rounded text-sm lg:text-base">
+                Set Earning to Zero
+              </button>
+            </div>
           </div>
-          <div className="flex flex-row justify-end">
-            <button
-              onClick={handleSetToZero}
-              className="m-10 px-4 py-2 bg-green-500 text-white rounded text-sm lg:text-base"
-            >
-              Set to Min
-            </button>
-            <button
-              onClick={handleAddStandingToEarning}
-              className="m-10 px-4 py-2 bg-yellow-500 text-white rounded text-sm lg:text-base"
-            >
-              Add Standing to Earning
-            </button>
-            <button
-              onClick={handleSetEarningToZero}
-              className="m-10 px-4 py-2 bg-red-500 text-white rounded text-sm lg:text-base"
-            >
-              Set Earning to Zero
-            </button>
-          </div>
-  
-  
+
+
+
+
+
           <div className="flex flex-col lg:flex-row h-[75vh] px-4 lg:px-10 items-center justify-center">
-  
+
             {/* Left Side (Admin Details) */}
             <div className="lg:flex-1 pr-0 lg:pr-10 mb-6 lg:mb-0">
               <p className="text-2xl lg:text-3xl mb-2 lg:mb-6">Standing: {standing || 0}</p>
@@ -333,13 +335,13 @@ const handleEarningPercentageChange = async (e) => {
                 <button onClick={updateEarningPercentage} className="px-4 lg:px-6 py-2 lg:py-3 bg-blue-500 text-white rounded text-sm lg:text-base">Update Percentage</button>
               </div>
             </div>
-  
+
             {/* Spacer */}
             <div className="w-0 lg:w-10"></div>
-  
+
             {/* Right Side */}
             <div className="lg:flex-1 flex flex-col items-center justify-start">
-  
+
               {/* Chapa and Kata circles */}
               <div className="flex flex-row lg:flex-row mb-4 lg:mb-8">
                 <div className="coin h-30 lg:h-48 w-48 lg:w-48 flex flex-col items-center justify-center mb-2 lg:mb-0 lg:mr-4">
@@ -361,26 +363,26 @@ const handleEarningPercentageChange = async (e) => {
                   <p className="text-2xl text-black">Kata {kata || 'Loading...'}</p>
                 </div>
               </div>
-  
+
               {/* Timer */}
               <p className="mb-4 lg:mb-8 text-2xl lg:text-3xl">{remainingTime ? Math.floor(remainingTime / 1000) : 'Loading...'}</p>
-  
+
               {/* Chapa and Kata buttons */}
               <div className="flex">
                 <button onClick={() => setCustomBet("chapa")} className="mr-2 lg:mr-4 px-4 lg:px-6 py-2 lg:py-3 bg-blue-500 text-white rounded text-sm lg:text-base">Chapa</button>
                 <button onClick={() => setCustomBet("kata")} className="ml-2 lg:ml-4 px-4 lg:px-6 py-2 lg:py-3 bg-blue-500 text-white rounded text-sm lg:text-base">Kata</button>
               </div>
-  
+
             </div>
           </div>
         </div>
-  
+
       }
-  
-  
+
+
     </div>
-  
-  
+
+
   );
 
 };

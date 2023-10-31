@@ -5,8 +5,8 @@ import { database } from '../../../../Authentication/firebase';
 
 
 export default function BlockedHistory() {
-    const [selectedOption, setSelectedOption] = useState('Player');
-    const [selectedUserOption, setSelectedUserOption] = useState(null);
+    const [selectedOption, setSelectedOption] = useState('');
+    const [selectedUserOption, setSelectedUserOption] = useState('');
     const [users, setUsers] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -212,6 +212,9 @@ export default function BlockedHistory() {
                         value={selectedOption}
                         onChange={handleOptionChange}
                     >
+                        <option value="" disabled>
+                            Select Role
+                        </option>
                         {options.map((option) => (
                             <option key={option} value={option}>
                                 {option}
@@ -229,6 +232,9 @@ export default function BlockedHistory() {
                         value={selectedUserOption}
                         onChange={handleSelectedUserChange}
                     >
+                        <option value="" disabled>
+                            Select User
+                        </option>
                         {currentUsers.map((user) => (
                             <option key={user.userId} value={user.userId}>
                                 {user.email}
@@ -246,7 +252,7 @@ export default function BlockedHistory() {
                         value={searchTerm}
                         onChange={handleSearch}
                         className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
-                        placeholder="Search by email"
+                        placeholder="Search by status / time / by"
                     />
                 </div>
                 <table className="w-full border mb-10">

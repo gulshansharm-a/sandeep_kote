@@ -4,7 +4,7 @@ import { auth } from '../../../../Authentication/firebase';
 import { database } from '../../../../Authentication/firebase';
 import { updatePassword } from "firebase/auth";
 
-export default function ResetPassword() {
+export default function ResetPasswordAll() {
     const [selectedOption, setSelectedOption] = useState('');
     const [selectedUserOption, setSelectedUserOption] = useState('');
     const [users, setUsers] = useState([]);

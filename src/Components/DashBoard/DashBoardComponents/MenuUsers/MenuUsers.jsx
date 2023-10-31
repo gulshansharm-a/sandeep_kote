@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { child, get, ref, update } from 'firebase/database';
 import { auth } from '../../../../Authentication/firebase';
 import { database } from '../../../../Authentication/firebase';
-
+import MenuUserSpecific from './MenuUserSpecific';
 
 export default function MenuUsers() {
     const [selectedOption, setSelectedOption] = useState('Player');
@@ -142,12 +142,12 @@ export default function MenuUsers() {
         const fetchUserEmails = async () => {
             const emails = {};
             try {
-                console.log('Fetching user emails for:', selectedOption);
+                // console.log('Fetching user emails for:', selectedOption);
                 const role = selectedOption;
-                console.log('Current users:', users);
+                // console.log('Current users:', users);
                 const usersToFetchEmails = users.filter((user) => !userEmails[user.userId]);
-                console.log('Users to fetch emails for:', usersToFetchEmails);
-                
+                // console.log('Users to fetch emails for:', usersToFetchEmails);
+
                 for (const user of usersToFetchEmails) {
                     const uid = user.userId;
                     const userSnapshot = await get(ref(database, `${role}/${uid}`));
@@ -160,148 +160,173 @@ export default function MenuUsers() {
                     }
                 }
 
-                console.log('Fetched user emails:', emails);
+                // console.log('Fetched user emails:', emails);
 
                 setUserEmails((prevUserEmails) => ({
                     ...prevUserEmails,
                     ...emails,
                 }));
             } catch (error) {
-                console.error(`Error fetching user emails:`, error.message);
+                // console.error(`Error fetching user emails:`, error.message);
             }
         };
 
         fetchUserEmails();
-    }, [selectedOption, users, userEmails]);
-    
+    }, [selectedOption, users]);
+
+    const [specific, setSpecific] = useState(false);
+    const [selectedEmail, setSelectedEmail] = useState(null);
+    const [selectedRole, setSelectedRole] = useState(null);
+    const [selectedUID, setSelectedUID] = useState(null);
+
+    function handleEmailClick(email, role, uid) {
+        console.log(role);
+        console.log(email);
+        console.log(uid);
+        setSelectedEmail(email);
+        setSelectedRole(role);
+        setSelectedUID(uid);
+        setSpecific(true);
+    }
+
     return (
         <div>
-            <div className="p-4">
-                <div className="mb-4">
-                    <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="userType">
-                        Select User Type:
-                    </label>
-                    <select
-                        id="userType"
-                        className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
-                        value={selectedOption}
-                        onChange={handleOptionChange}
-                    >
-                        {options.map((option) => (
-                            <option key={option} value={option}>
-                                {option}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="search">
-                        Search:
-                    </label>
-                    <input
-                        type="text"
-                        id="search"
-                        value={searchTerm}
-                        onChange={handleSearch}
-                        className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
-                        placeholder="Search by email"
-                    />
-                </div>
-                <table className="w-full border mb-10">
-                    <thead>
-                        <tr>
-                            <th className="p-3 border">
-                                S.No
-                            </th>
-                            <th className="p-3 border">
-                                Email
-                            </th>
-                            <th className="p-3 border">
-                                Username
-                            </th>
-                            <th className="p-3 border">
-                                Balance
-                            </th>
-
-                            {selectedOption === 'Distributor' && <th className="p-3 border">Admin Email</th>}
-                            {selectedOption === 'Agent' && <th className="p-3 border">Admin Email</th>}
-                            {selectedOption === 'Agent' && <th className="p-3 border">Distributor Email</th>}
-                            {selectedOption === 'Player' && <th className="p-3 border">Admin Email</th>}
-                            {selectedOption === 'Player' && <th className="p-3 border">Distributor Email</th>}
-                            {selectedOption === 'Player' && <th className="p-3 border">Agent Email</th>}
-
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {currentUsers.map((user, index) => (
-                            <tr key={user.userId}>
-                                <td className="p-3 border">
-                                    {indexOfFirstItem + index + 1}
-                                </td>
-                                <td className="p-3 border">
-                                    {user.email}
-                                </td>
-                                <td className="p-3 border">
-                                    {user.userName}
-                                </td>
-                                <td className="p-3 border">
-                                    {user.balance}
-                                </td>
-
-                                {/* Display user emails using userEmails state... */}
-                                {selectedOption === 'Distributor' && (
-                                    <>
-                                        <td className="p-3 border">{userEmails[user.adminID] || 'Loading...'}</td>
-                                    </>
-                                )}
-                                {selectedOption === 'Agent' && (
-                                    <>
-                                        <td className="p-3 border">{userEmails[user.adminID] || 'Loading...'}</td>
-                                        <td className="p-3 border">{userEmails[user.distributorID] || 'Loading...'}</td>
-                                    </>
-                                )}
-                                {selectedOption === 'Player' && (
-                                    <>
-                                        <td className="p-3 border">{userEmails[user.adminID] || 'Loading...'}</td>
-                                        <td className="p-3 border">{userEmails[user.distributorID] || 'Loading...'}</td>
-                                        <td className="p-3 border">{userEmails[user.agentID] || 'Loading...'}</td>
-                                    </>
-                                )}
-
-
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-                <div className="mt-4">
-                    <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="rowsPerPage">
-                        Rows per page:
-                    </label>
-                    <select
-                        id="rowsPerPage"
-                        value={rowsPerPage}
-                        onChange={handleRowsPerPageChange}
-                        className="p-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
-                    >
-                        {[1, 2, 5, 10, 15, 20, 25, 30].map((value) => (
-                            <option key={value} value={value}>
-                                {value}
-                            </option>
-                        ))}
-                    </select>
-                    <div className="mt-2 flex justify-center space-x-2">
-                        {Array.from({ length: Math.ceil(filteredUsers.length / rowsPerPage) }).map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => handlePageChange(index + 1)}
-                                className="bg-gray-900 p-2 text-white border rounded hover:bg-gray-700 focus:outline-none focus:ring focus:border-blue-500"
-                            >
-                                {index + 1}
-                            </button>
-                        ))}
+            {specific ?
+                <div>
+                    <div>
+                        <MenuUserSpecific email={selectedEmail} role={selectedRole} UID = {selectedUID}/>
                     </div>
                 </div>
-            </div>
+                :
+                <div>
+                    <div className="p-4">
+                        <div className="mb-4">
+                            <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="userType">
+                                Select User Type:
+                            </label>
+                            <select
+                                id="userType"
+                                className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
+                                value={selectedOption}
+                                onChange={handleOptionChange}
+                            >
+                                {options.map((option) => (
+                                    <option key={option} value={option}>
+                                        {option}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="search">
+                                Search:
+                            </label>
+                            <input
+                                type="text"
+                                id="search"
+                                value={searchTerm}
+                                onChange={handleSearch}
+                                className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
+                                placeholder="Search by email"
+                            />
+                        </div>
+                        <table className="w-full border mb-10">
+                            <thead>
+                                <tr>
+                                    <th className="p-3 border">
+                                        S.No
+                                    </th>
+                                    <th className="p-3 border">
+                                        Email
+                                    </th>
+                                    <th className="p-3 border">
+                                        Username
+                                    </th>
+                                    <th className="p-3 border">
+                                        Balance
+                                    </th>
+
+                                    {selectedOption === 'Distributor' && <th className="p-3 border">Admin Email</th>}
+                                    {selectedOption === 'Agent' && <th className="p-3 border">Admin Email</th>}
+                                    {selectedOption === 'Agent' && <th className="p-3 border">Distributor Email</th>}
+                                    {selectedOption === 'Player' && <th className="p-3 border">Admin Email</th>}
+                                    {selectedOption === 'Player' && <th className="p-3 border">Distributor Email</th>}
+                                    {selectedOption === 'Player' && <th className="p-3 border">Agent Email</th>}
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {currentUsers.map((user, index) => (
+                                    <tr key={user.userId}>
+                                        <td className="p-3 border">
+                                            {indexOfFirstItem + index + 1}
+                                        </td>
+                                        <td className="p-3 border cursor-pointer" onClick={() => handleEmailClick(user.email, selectedOption, user.userId)}>
+                                            {user.email}
+                                        </td>
+                                        <td className="p-3 border">
+                                            {user.userName}
+                                        </td>
+                                        <td className="p-3 border">
+                                            {user.balance}
+                                        </td>
+
+                                        {/* Display user emails using userEmails state... */}
+                                        {selectedOption === 'Distributor' && (
+                                            <>
+                                                <td className="p-3 border">{userEmails[user.adminID] || 'Loading...'}</td>
+                                            </>
+                                        )}
+                                        {selectedOption === 'Agent' && (
+                                            <>
+                                                <td className="p-3 border">{userEmails[user.adminID] || 'Loading...'}</td>
+                                                <td className="p-3 border">{userEmails[user.distributorID] || 'Loading...'}</td>
+                                            </>
+                                        )}
+                                        {selectedOption === 'Player' && (
+                                            <>
+                                                <td className="p-3 border">{userEmails[user.adminID] || 'Loading...'}</td>
+                                                <td className="p-3 border">{userEmails[user.distributorID] || 'Loading...'}</td>
+                                                <td className="p-3 border">{userEmails[user.agentID] || 'Loading...'}</td>
+                                            </>
+                                        )}
+
+
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        <div className="mt-4">
+                            <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="rowsPerPage">
+                                Rows per page:
+                            </label>
+                            <select
+                                id="rowsPerPage"
+                                value={rowsPerPage}
+                                onChange={handleRowsPerPageChange}
+                                className="p-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
+                            >
+                                {[1, 2, 5, 10, 15, 20, 25, 30].map((value) => (
+                                    <option key={value} value={value}>
+                                        {value}
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="mt-2 flex justify-center space-x-2">
+                                {Array.from({ length: Math.ceil(filteredUsers.length / rowsPerPage) }).map((_, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => handlePageChange(index + 1)}
+                                        className="bg-gray-900 p-2 text-white border rounded hover:bg-gray-700 focus:outline-none focus:ring focus:border-blue-500"
+                                    >
+                                        {index + 1}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     );
 }

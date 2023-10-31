@@ -1,238 +1,271 @@
-import React, { useState, useEffect } from 'react';
-import { ref, get, child } from 'firebase/database';
+import React, { useEffect, useState } from 'react';
+import { child, get, ref, update, push, set } from 'firebase/database';
+import { auth } from '../../../../Authentication/firebase';
 import { database } from '../../../../Authentication/firebase';
 
-const MenuUserSpecific = () => {
-    const [selectedEmail, setSelectedEmail] = useState('');
-    const [selectedRole, setSelectedRole] = useState('');
-    const [selectedSubRole, setSelectedSubRole] = useState('');
-    const [subUsers, setSubUsers] = useState([]);
-    const [isAdminDisabled, setIsAdminDisabled] = useState(false);
-    const [roleOptions, setRoleOptions] = useState([]);
-    const [userOptions, setUserOptions] = useState([]);
 
-    const getSubUserRoles = (role) => {
-        switch (role) {
-            case 'Admin':
-                return ['Distributor', 'Agent', 'Player'];
-            case 'Distributor':
-                return ['Agent', 'Player'];
-            case 'Agent':
-                return ['Player'];
-            default:
-                return [];
-        }
-    };
+export default function MenuUserSpecific({ email, role, UID }) {
 
-    const fetchSubUsers = async () => {
-        try {
-            console.log('Selected Email:', selectedEmail);
-            console.log('Selected Role:', selectedRole);
-            console.log('Selected Sub-Role:', selectedSubRole);
-    
-            if (!selectedEmail || !selectedRole || !selectedSubRole) {
-                console.log('Email, role, or sub-role missing');
-                return;
-            }
-    
-            // Fetch the UID of the selected user email
-            const userRoleSnapshot = await get(child(ref(database), selectedRole));
-            const userRoleID = Object.entries(userRoleSnapshot.val() || {}).find(
-                ([uid, userData]) => userData.email === selectedEmail
-            )?.[0];
-    
-            if (!userRoleID) {
-                console.log(`${selectedRole} ID not found for email:`, selectedEmail);
-                return;
-            }
-    
-            console.log('User Role ID:', userRoleID);
-    
-            // Fetch sub-users based on the selected role
-            const subUsersPath = selectedSubRole; // Assuming sub-users are stored directly under the selected sub-role
-            const snapshot = await get(child(ref(database), subUsersPath));
-    
-            console.log('All Sub-Users Data:', snapshot.val());
-    
-            const idFieldName =
-                selectedRole === 'Distributor' ? 'distributorID' : selectedRole === 'Agent' ? 'agentID' : '';
-    
-            const subUsersData = Object.entries(snapshot.val() || {})
-                .filter(([_, userData]) => {
-                    console.log('User Data:', userData);
-                    console.log(userData[idFieldName]);
-                    console.log(userRoleID);
-                    return userData[idFieldName] === userRoleID;
-                })
-                .map(([subUserId, subUserData]) => ({
-                    ...subUserData,
-                    subUserId,
-                }));
-    
-            console.log('Filtered Sub-Users Data:', subUsersData);
-    
-            setSubUsers(subUsersData);
-        } catch (error) {
-            console.error('Error fetching sub-users from Firebase:', error.message);
-        }
-    };
-    
+    console.log(email);
+    console.log(role);
+    console.log(UID);
+    const [selectedOption, setSelectedOption] = useState('Player');
+    const [users, setUsers] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentAuthUser, setcurrentAuthUser] = useState(role);
+    const [options, setOptions] = useState(['Player']);
 
-    const fetchRoleOptions = async () => {
-        const availableRoles = ['Admin', 'Distributor', 'Agent', 'Player'];
-        setRoleOptions(availableRoles);
-    };
+    // Use the userOptions to set the initial selectedOption
+    useEffect(() => {
+        if (currentAuthUser === "Admin")
+            setOptions(['Admin', 'Distributor', 'Agent', 'Player']);
+        else if (currentAuthUser === "Distributor")
+            setOptions(['Agent', 'Player']);
+        else if (currentAuthUser === "Agent")
+            setOptions(['Player']);
 
-    const fetchUserOptions = async () => {
-        try {
-            // Check if selectedRole is valid before making the request
-            if (!selectedRole) {
-                console.error('Invalid selected role');
-                return;
-            }
+        console.log(options);
+    }, [currentAuthUser]);
 
-            const userOptionsSnapshot = await get(child(ref(database), selectedRole));
+    // useEffect(() => {
+    //     const unsubscribe = auth.onAuthStateChanged(async (user) => {
+    //         if (user) {
+    //             try {
+    //                 const snapshot = await get(ref(database));
 
-            const users = Object.entries(userOptionsSnapshot.val() || {}).map(
-                ([userId, userData]) => ({
-                    userId,
-                    email: userData.email,
-                    // Add other user details as needed
-                })
-            );
+    //                 const data = snapshot.val();
 
-            setUserOptions(users);
-        } catch (error) {
-            console.error('Error fetching user options from Firebase:', error.message);
-        }
-    };
+    //                 for (const role in data) {
+    //                     if (data[role][user.uid]) {
+    //                         setcurrentAuthUser(role);
+    //                         break;
+    //                     }
+    //                 }
+    //             } catch (error) {
+    //                 console.error('Error fetching data from Firebase:', error.message);
+    //             }
+    //         }
+    //     });
+
+    //     return () => unsubscribe();
+    // }, []);
 
     useEffect(() => {
-        setIsAdminDisabled(!!selectedRole);
-        fetchSubUsers();
-    }, [selectedEmail, selectedRole, selectedSubRole]);
 
-    useEffect(() => {
-        fetchRoleOptions();
-    }, []);
+        const fetchData = async () => {
+            try {
+                let snapshot;
 
-    useEffect(() => {
-        if (selectedRole) {
-            fetchUserOptions();
-            setSelectedSubRole('');
-        }
-    }, [selectedRole]);
+                switch (selectedOption) {
+                    case 'Admin':
+                        snapshot = await get(child(ref(database), 'Admin'));
+                        break;
+                    case 'Distributor':
+                        snapshot = await get(child(ref(database), 'Distributor'));
+                        break;
+                    case 'Agent':
+                        snapshot = await get(child(ref(database), 'Agent'));
+                        break;
+                    case 'Player':
+                        snapshot = await get(child(ref(database), 'Player'));
+                        break;
+                    default:
+                        snapshot = await get(child(ref(database), 'Admin'));
+                }
 
-    const handleFetchSubUsers = () => {
-        fetchSubUsers();
+                const usersData = Object.entries(snapshot.val())
+                    .map(([userId, userData]) => ({
+                        ...userData,
+                        userId,
+                        role: selectedOption,
+                    }));
+
+                const filteredUsersPromises = usersData.map(async (user) => {
+                    if (currentAuthUser === 'Admin') {
+                        return true;
+                    } else if (currentAuthUser === 'Distributor') {
+                        if (user.distributorID === UID) {
+                            return true;
+                        }
+                    } else if (currentAuthUser === 'Agent') {
+                        if (user.agentID === UID) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+
+                const filteredUsersResults = await Promise.all(filteredUsersPromises);
+
+                const filteredUsers = usersData.filter((user, index) => filteredUsersResults[index]);
+
+                setUsers(filteredUsers);
+
+                console.log(users);
+            } catch (error) {
+                console.error('Error fetching data from Firebase:', error.message);
+            }
+        };
+
+        fetchData();
+    }, [selectedOption, currentAuthUser]);
+
+    const handleOptionChange = (event) => {
+        setSelectedOption(event.target.value);
     };
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const handleRowsPerPageChange = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setCurrentPage(1);
+    };
+
+    const handleSearch = (event) => {
+        const searchTerm = event.target.value.toLowerCase();
+
+        setSearchTerm(searchTerm);
+        setCurrentPage(1); // Reset to the first page when changing the search term
+    };
+
+    const indexOfLastItem = currentPage * rowsPerPage;
+    const indexOfFirstItem = indexOfLastItem - rowsPerPage;
+
+    const filteredUsers = users.filter((user) =>
+        user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+
+    const [specific, setSpecific] = useState(false);
+    const [selectedEmail, setSelectedEmail] = useState(null);
+    const [selectedRole, setSelectedRole] = useState(null);
+    const [selectedUID, setSelectedUID] = useState(null);
+
+    function handleEmailClick(email, role, uid) {
+        console.log(role);
+        console.log(email);
+        console.log(uid);
+        setSelectedEmail(email);
+        setSelectedRole(role);
+        setSelectedUID(uid);
+        setSpecific(true);
+    }
 
     return (
-        <div className="p-4">
-            <h2 className="text-2xl font-bold mb-4">Sub-Users</h2>
+        <div>
 
-            <div className="mb-4">
-                <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="userRole">
-                    Select Role:
-                </label>
-                <select
-                    id="userRole"
-                    value={selectedRole}
-                    onChange={(e) => setSelectedRole(e.target.value)}
-                    className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
-                >
-                    <option value="" disabled>
-                        Select Role
-                    </option>
-                    {roleOptions.map((role) => (
-                        <option key={role} value={role}>
-                            {role}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            {selectedRole && (
-                <div className="mb-4">
-                    <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="selectedUser">
-                        Select User:
-                    </label>
-                    <select
-                        id="selectedUser"
-                        value={selectedEmail}
-                        onChange={(e) => setSelectedEmail(e.target.value)}
-                        className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
-                    >
-                        <option value="" disabled>
-                            Select User
-                        </option>
-                        {userOptions.map((user) => (
-                            <option key={user.userId} value={user.email}>
-                                {user.email}
-                            </option>
-                        ))}
-                    </select>
+            {specific ?
+                <div>
+                    <MenuUserSpecific email={selectedEmail} role={selectedRole} UID={selectedUID} />
                 </div>
-            )}
+                :
+                <div>
+                    <div className='flex flex-row justify-between mt-20 m-5'>
+                        {role === 'Player' ?
+                            <h1 className="text-3xl font-bold text-gray-800">{email} is a Player</h1>
+                            :
+                            <h1 className="text-3xl font-bold text-gray-800">{selectedOption}(s) under {email}</h1>
+                        }
+                    </div>
 
-            {selectedRole && (
-                <div className="mb-4">
-                    <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="subUserRole">
-                        Sub-User Role:
-                    </label>
-                    <select
-                        id="subUserRole"
-                        value={selectedSubRole}
-                        onChange={(e) => setSelectedSubRole(e.target.value)}
-                        className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
-                    >
-                        <option value="" disabled>
-                            Select Sub-User Role
-                        </option>
-                        {getSubUserRoles(selectedRole).map((subUserRole) => (
-                            <option key={subUserRole} value={subUserRole}>
-                                {subUserRole}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="p-4">
+                        <div className="mb-4">
+                            <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="userType">
+                                Select User Type:
+                            </label>
+                            <select
+                                id="userType"
+                                className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
+                                value={selectedOption}
+                                onChange={handleOptionChange}
+                            >
+                                {options.map((option) => (
+                                    <option key={option} value={option}>
+                                        {option}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="search">
+                                Search:
+                            </label>
+                            <input
+                                type="text"
+                                id="search"
+                                value={searchTerm}
+                                onChange={handleSearch}
+                                className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
+                                placeholder="Search by email"
+                            />
+                        </div>
+                        <table className="w-full border mb-10">
+                            <thead>
+                                <tr>
+                                    <th className="p-3 border">
+                                        S.No
+                                    </th>
+                                    <th className="p-3 border">
+                                        Email
+                                    </th>
+                                    <th className="p-3 border">
+                                        Username
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {currentUsers.map((user, index) => (
+                                    <tr key={user.userId}>
+                                        <td className="p-3 border">
+                                            {indexOfFirstItem + index + 1}
+                                        </td>
+                                        <td className="p-3 border cursor-pointer" onClick={() => handleEmailClick(user.email, selectedOption, user.userId)}>
+                                            {user.email}
+                                        </td>
+                                        <td className="p-3 border">
+                                            {user.userName}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        <div className="mt-4">
+                            <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="rowsPerPage">
+                                Rows per page:
+                            </label>
+                            <select
+                                id="rowsPerPage"
+                                value={rowsPerPage}
+                                onChange={handleRowsPerPageChange}
+                                className="p-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
+                            >
+                                {[1, 2, 5, 10, 15, 20, 25, 30].map((value) => (
+                                    <option key={value} value={value}>
+                                        {value}
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="mt-2 flex justify-center space-x-2">
+                                {Array.from({ length: Math.ceil(filteredUsers.length / rowsPerPage) }).map((_, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => handlePageChange(index + 1)}
+                                        className="bg-gray-900 p-2 text-white border rounded hover:bg-gray-700 focus:outline-none focus:ring focus:border-blue-500"
+                                    >
+                                        {index + 1}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            )}
+            }
 
-            <button
-                onClick={handleFetchSubUsers}
-                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 focus:outline-none focus:ring focus:border-blue-500"
-            >
-                Fetch Sub-Users
-            </button>
-
-            {subUsers.length > 0 ? (
-                <table className="w-full border">
-                    <thead>
-                        <tr>
-                            <th className="p-3 border">S.No</th>
-                            <th className="p-3 border">Email</th>
-                            <th className="p-3 border">Username</th>
-                            <th className="p-3 border">Balance</th> {/* New column for balance */}
-                            {/* Add more columns as needed */}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {subUsers.map((subUser, index) => (
-                            <tr key={subUser.subUserId}>
-                                <td className="p-3 border">{index + 1}</td>
-                                <td className="p-3 border">{subUser.email}</td>
-                                <td className="p-3 border">{subUser.userName}</td>
-                                <td className="p-3 border">{subUser.balance}</td> {/* Display balance */}
-                                {/* Add more columns as needed */}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            ) : (
-                <p>No data found</p>
-            )}
         </div>
     );
-};
-
-export default MenuUserSpecific;
+}

@@ -18,6 +18,7 @@ import CommissionHistory from './Components/DashBoard/DashBoardComponents/Commis
 import ResetPassword from './Components/DashBoard/DashBoardComponents/ResetPassword/ResetPassword';
 import BlockUsers from './Components/DashBoard/DashBoardComponents/BlockPlayers/BlockUsers';
 import BlockedHistory from './Components/DashBoard/DashBoardComponents/BlockPlayers/BlockedHistory';
+import LiveUsers from './Components/DashBoard/DashBoardComponents/LiveUsers/LiveUsers';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -103,9 +104,10 @@ function App() {
                 <Route path="menuUsers" element={<MenuUsers />} />
                 <Route path="gameHistory" element={<GameHistory />} />
                 <Route path="menuUsers/specific" element={<MenuUserSpecific />} />
-                <Route path="resetPassword" element={<ResetPassword />} />
+                {/* <Route path="resetPassword" element={<ResetPassword />} /> */}
                 <Route path="blockUsers" element={<BlockUsers />} />
                 <Route path="blockUsersHistory" element={<BlockedHistory />} />
+                <Route path="liveUsers" element={<LiveUsers />} />
                 {/* Add more routes for other choices */}
               </Route>
             ) : (

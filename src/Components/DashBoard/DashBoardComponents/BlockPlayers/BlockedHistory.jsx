@@ -139,9 +139,13 @@ export default function BlockedHistory() {
         user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+    // const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+    const currentUsers = filteredUsers;
 
-    const [selectedUserDetails, setSelectedUserDetails] = useState(null);
+    // let [selectedUserDetails, setSelectedUserDetails] = useState(null);
+    let [selectedUserDetails, setSelectedUserDetails] = useState({});
+
+    // selectedUserDetails = selectedUserDetails.slice(indexOfFirstItem, indexOfLastItem);
 
     // Function to fetch user details
     const fetchUserDetails = async () => {
@@ -198,9 +202,51 @@ export default function BlockedHistory() {
         fetchUserDetails();
     }, [selectedUserOption, selectedOption]);
 
+    const [currentPageHistory, setCurrentPageHistory] = useState(1);
+    const [rowsPerPageHistory, setRowsPerPageHistory] = useState(5);
+
+    // Function to calculate indices for the current page of history
+    const calculateHistoryIndices = () => {
+        const startIndex = (currentPageHistory - 1) * rowsPerPageHistory;
+        const endIndex = startIndex + rowsPerPageHistory;
+        return { startIndex, endIndex };
+    };
+
+    // Render the current page of blocked history
+    const renderBlockedHistory = () => {
+        if (!selectedUserDetails || !selectedUserDetails.blockedHistory) {
+            return null;
+        }
+
+        const { startIndex, endIndex } = calculateHistoryIndices();
+        const historyEntries = selectedUserDetails.blockedHistory.slice(startIndex, endIndex);
+
+        return historyEntries.map((historyEntry, index) => (
+            <tr key={index}>
+                <td className="p-3 border">{historyEntry.status}</td>
+                <td className="p-3 border">{historyEntry.time}</td>
+                <td className="p-3 border">{historyEntry.blockedBy}</td>
+            </tr>
+        ));
+    };
+
+
+    // Handle page change for selectedUserDetails.blockedHistory
+    const handlePageChangeHistory = (pageNumber) => {
+        setCurrentPageHistory(pageNumber);
+    };
+
+    // Handle rows per page change for selectedUserDetails.blockedHistory
+    const handleRowsPerPageChangeHistory = (event) => {
+        setRowsPerPageHistory(parseInt(event.target.value, 10));
+        setCurrentPageHistory(1);
+    };
 
     return (
         <div>
+            <div className='flex flex-row justify-between mt-20 m-5'>
+                <h1 className="text-3xl font-bold text-gray-800">Block Users History</h1>
+            </div>
             <div className="p-4">
                 <div className="mb-4">
                     <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="userType">
@@ -270,7 +316,8 @@ export default function BlockedHistory() {
                         </tr>
                     </thead>
                     <tbody>
-                        {selectedUserDetails &&
+                        {renderBlockedHistory()}
+                        {/* {selectedUserDetails &&
                             selectedUserDetails.blockedHistory.map((historyEntry, index) => (
                                 <tr key={index}>
                                     <td className="p-3 border">
@@ -284,18 +331,18 @@ export default function BlockedHistory() {
                                     </td>
                                 </tr>
                             ))
-                        }
+                        } */}
                     </tbody>
                 </table>
 
                 <div className="mt-4">
-                    <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="rowsPerPage">
-                        Rows per page:
+                    <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="rowsPerPageHistory">
+                        Rows per page for History:
                     </label>
                     <select
-                        id="rowsPerPage"
-                        value={rowsPerPage}
-                        onChange={handleRowsPerPageChange}
+                        id="rowsPerPageHistory"
+                        value={rowsPerPageHistory}
+                        onChange={handleRowsPerPageChangeHistory}
                         className="p-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
                     >
                         {[1, 2, 5, 10, 15, 20, 25, 30].map((value) => (
@@ -305,11 +352,11 @@ export default function BlockedHistory() {
                         ))}
                     </select>
                     <div className="mt-2 flex justify-center space-x-2">
-                        {Array.from({ length: Math.ceil(filteredUsers.length / rowsPerPage) }).map((_, index) => (
+                        {Array.from({ length: Math.ceil((selectedUserDetails?.blockedHistory?.length || 0) / rowsPerPageHistory) }).map((_, index) => (
                             <button
                                 key={index}
-                                onClick={() => handlePageChange(index + 1)}
-                                className="bg-gray-900 p-2 text-white border rounded hover:bg-gray-700 focus:outline-none focus:ring focus:border-blue-500"
+                                onClick={() => handlePageChangeHistory(index + 1)}
+                                className="bg-gray-900 p-2 text-white border rounded hover-bg-gray-700 focus:outline-none focus:ring focus:border-blue-500"
                             >
                                 {index + 1}
                             </button>

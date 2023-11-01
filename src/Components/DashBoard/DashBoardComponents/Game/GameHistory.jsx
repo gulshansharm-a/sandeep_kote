@@ -1,66 +1,114 @@
-import React, { useState, useEffect } from 'react';
-import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, onValue } from 'firebase/database';
+import React, { useEffect, useState } from 'react';
+import { child, get, ref, update } from 'firebase/database';
+import { auth } from '../../../../Authentication/firebase';
+import { database } from '../../../../Authentication/firebase';
+import MenuUserSpecific from '../MenuUsers/MenuUserSpecific';
 
-const firebaseConfig = {
-  apiKey: 'AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4',
-  authDomain: 'sandeepkote-c67f5.firebaseapp.com',
-  databaseURL: 'https://sandeepkote-c67f5-default-rtdb.firebaseio.com',
-  projectId: 'sandeepkote-c67f5',
-  storageBucket: 'sandeepkote-c67f5.appspot.com',
-  messagingSenderId: '871561614523',
-  appId: '1:871561614523:web:3b12ae93e7490723ddc59e',
-  measurementId: 'G-645LW1SWKT',
-};
-
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
-
-const GameHistory = () => {
-  const [playerData, setPlayerData] = useState([]);
+export default function GameHistory() {
+  const [selectedOption, setSelectedOption] = useState('Player');
+  const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentAuthUser, setcurrentAuthUser] = useState('');
+  const [options, setOptions] = useState(['Player']);
+
+  // Use the userOptions to set the initial selectedOption
+  useEffect(() => {
+    if (currentAuthUser === "Admin")
+      setOptions(['Player']);
+    else if (currentAuthUser === "Distributor")
+      setOptions(['Player']);
+    else if (currentAuthUser === "Agent")
+      setOptions(['Player']);
+  }, [currentAuthUser]);
 
   useEffect(() => {
-    const playerRef = ref(database, 'Player');
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        try {
+          const snapshot = await get(ref(database));
 
-    const unsubscribe = onValue(playerRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const dataArray = Object.keys(data).map((uid) => {
-          const player = data[uid];
-          const betKey = Object.keys(player?.bet || {})[0];
-          const betData = player?.bet?.[betKey] || {};
+          const data = snapshot.val();
 
-          return {
-            email: player.email || '-',
-            chapa: betData?.chapa || '-',
-            kata: betData?.kata || '-',
-            result: betData?.result || '-',
-            time: betData?.time || '-',
-            betID: betKey || '-',
-          };
-        });
-
-        // Filter playerData based on searchQuery
-        const filteredData = dataArray.filter(
-          (player) =>
-            (typeof player.email === 'string' && player.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (typeof player.chapa === 'string' && player.chapa.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (typeof player.kata === 'string' && player.kata.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (typeof player.result === 'string' && player.result.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (typeof player.time === 'string' && player.time.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (typeof player.betID === 'string' && player.betID.toLowerCase().includes(searchQuery.toLowerCase()))
-        );
-        setPlayerData(filteredData);
+          for (const role in data) {
+            if (data[role][user.uid]) {
+              setcurrentAuthUser(role);
+              break;
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching data from Firebase:', error.message);
+        }
       }
     });
 
-    return () => {
-      unsubscribe();
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+
+    const fetchData = async () => {
+      try {
+        let snapshot;
+
+        switch (selectedOption) {
+          case 'Admin':
+            snapshot = await get(child(ref(database), 'Admin'));
+            break;
+          case 'Distributor':
+            snapshot = await get(child(ref(database), 'Distributor'));
+            break;
+          case 'Agent':
+            snapshot = await get(child(ref(database), 'Agent'));
+            break;
+          case 'Player':
+            snapshot = await get(child(ref(database), 'Player'));
+            break;
+          default:
+            snapshot = await get(child(ref(database), 'Admin'));
+        }
+
+        const usersData = Object.entries(snapshot.val())
+          .map(([userId, userData]) => ({
+            ...userData,
+            userId,
+            role: selectedOption,
+          }));
+
+        const filteredUsersPromises = usersData.map(async (user) => {
+          if (currentAuthUser === 'Admin') {
+            return user.bet !== undefined;
+          } else if (currentAuthUser === 'Distributor') {
+            if (user.distributorID === auth.currentUser.uid) {
+              return user.bet !== undefined;
+            }
+          } else if (currentAuthUser === 'Agent') {
+            if (user.agentID === auth.currentUser.uid) {
+              return user.bet !== undefined;
+            }
+          }
+          return false;
+        });
+
+        const filteredUsersResults = await Promise.all(filteredUsersPromises);
+
+        const filteredUsers = usersData.filter((user, index) => filteredUsersResults[index]);
+
+        setUsers(filteredUsers);
+
+        console.log(users);
+      } catch (error) {
+        console.error('Error fetching data from Firebase:', error.message);
+      }
     };
-  }, [database, searchQuery]);
+
+    fetchData();
+  }, [selectedOption, currentAuthUser]);
+
+  const handleOptionChange = (event) => {
+    setSelectedOption(event.target.value);
+  };
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -71,96 +119,174 @@ const GameHistory = () => {
     setCurrentPage(1);
   };
 
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
-    setCurrentPage(1);
-  };
+  const handleSearch = (event) => {
+    const searchTerm = event.target.value.toLowerCase();
 
-  const calculateSerialNumber = (index) => {
-    return (currentPage - 1) * rowsPerPage + index + 1;
+    setSearchTerm(searchTerm);
+    setCurrentPage(1); // Reset to the first page when changing the search term
   };
 
   const indexOfLastItem = currentPage * rowsPerPage;
   const indexOfFirstItem = indexOfLastItem - rowsPerPage;
 
-  const currentPlayers = playerData.slice(indexOfFirstItem, indexOfLastItem);
+  const filteredUsers = users.filter((user) =>
+    user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+
+  const [userEmails, setUserEmails] = useState({});
+
+  useEffect(() => {
+    // Fetch user emails when the component mounts
+    const fetchUserEmails = async () => {
+      const emails = {};
+      try {
+        // console.log('Fetching user emails for:', selectedOption);
+        const role = selectedOption;
+        // console.log('Current users:', users);
+        const usersToFetchEmails = users.filter((user) => !userEmails[user.userId]);
+        // console.log('Users to fetch emails for:', usersToFetchEmails);
+
+        for (const user of usersToFetchEmails) {
+          const uid = user.userId;
+          const userSnapshot = await get(ref(database, `${role}/${uid}`));
+
+          if (userSnapshot.exists()) {
+            const userData = userSnapshot.val();
+            emails[uid] = userData.email;
+          } else {
+            console.error(`${role} not found with UID:`, uid);
+          }
+        }
+
+        // console.log('Fetched user emails:', emails);
+
+        setUserEmails((prevUserEmails) => ({
+          ...prevUserEmails,
+          ...emails,
+        }));
+      } catch (error) {
+        // console.error(`Error fetching user emails:`, error.message);
+      }
+    };
+
+    fetchUserEmails();
+  }, [selectedOption, users]);
+
+  const [specific, setSpecific] = useState(false);
+  const [selectedEmail, setSelectedEmail] = useState(null);
+  const [selectedRole, setSelectedRole] = useState(null);
+  const [selectedUID, setSelectedUID] = useState(null);
+
+  function handleEmailClick(email, role, uid) {
+    console.log(role);
+    console.log(email);
+    console.log(uid);
+    setSelectedEmail(email);
+    setSelectedRole(role);
+    setSelectedUID(uid);
+    setSpecific(true);
+  }
+
+  console.log(currentUsers);
 
   return (
-    <div className="mt-2 p-4">
-      <h2 className='font-bold text-xl mt-10'>Game History Players</h2>
-
-      {/* Add search input */}
-      <input
-        type="text"
-        value={searchQuery}
-        onChange={handleSearchChange}
-        placeholder="Search by email, chapa, kata, result, time, or Bet ID"
-        className="p-2 border rounded focus:outline-none focus:ring focus:border-blue-500 mt-4"
-      />
-
-      {playerData.length === 0 ? (
-        <p className="mt-4 text-red-500">No matching data found</p>
-      ) : (
-        <table className="mt-4 w-full border">
-          <thead>
-            <tr>
-              <th className="p-3 border">S.No</th>
-              <th className="p-3 border">Email</th>
-              <th className="p-3 border">Chapa</th>
-              <th className="p-3 border">Kata</th>
-              <th className="p-3 border">Result</th>
-              <th className="p-3 border">Time</th>
-              <th className="p-3 border">Bet ID</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentPlayers.map((player, index) => (
-              <tr key={index}>
-                <td className="p-3 border">{calculateSerialNumber(index)}</td>
-                <td className="p-3 border">{player.email}</td>
-                <td className="p-3 border">{player.chapa}</td>
-                <td className="p-3 border">{player.kata}</td>
-                <td className="p-3 border">{player.result}</td>
-                <td className="p-3 border">{player.time}</td>
-                <td className="p-3 border">{player.betID}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
-      <div className="mt-4">
-        <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="rowsPerPage">
-          Rows per page:
-        </label>
-        <select
-          id="rowsPerPage"
-          value={rowsPerPage}
-          onChange={handleRowsPerPageChange}
-          className="p-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
-        >
-          {[5, 10, 15, 20, 25].map((value) => (
-            <option key={value} value={value}>
-              {value}
-            </option>
-          ))}
-        </select>
-
-        <div className="mt-2 flex justify-center space-x-2">
-          {Array.from({ length: Math.ceil(playerData.length / rowsPerPage) }).map((_, index) => (
-            <button
-              key={index + 1}
-              onClick={() => handlePageChange(index + 1)}
-              className={`${currentPage === index + 1 ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'
-                } p-2 border rounded hover:bg-gray-200 focus:outline-none focus:ring focus:border-blue-500`}
-            >
-              {index + 1}
-            </button>
-          ))}
+    <div>
+      {specific ?
+        <div>
+          <div>
+            <MenuUserSpecific email={selectedEmail} role={selectedRole} UID={selectedUID} />
+          </div>
         </div>
-      </div>
+        :
+        <div>
+          <div className="p-4">
+            <div className="mb-4">
+              <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="search">
+                Search:
+              </label>
+              <input
+                type="text"
+                id="search"
+                value={searchTerm}
+                onChange={handleSearch}
+                className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
+                placeholder="Search by email"
+              />
+            </div>
+            <table className="mt-4 w-full border">
+              <thead>
+                <tr>
+                  <th className="p-3 border">S.No</th>
+                  <th className="p-3 border">Email</th>
+                  <th className="p-3 border">Chapa</th>
+                  <th className="p-3 border">Kata</th>
+                  <th className="p-3 border">Result</th>
+                  <th className="p-3 border">Time</th>
+                  <th className="p-3 border">Bet ID</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentUsers.map((user, index) => (
+                  <React.Fragment key={user.userId}>
+                    {Object.keys(user.bet || {}).length > 0 && (
+                      <tr>
+                        <td className="p-3 border" rowSpan={Object.keys(user.bet || {}).length + 1}>{indexOfFirstItem + index + 1}</td>
+                        <td className="p-3 border email-cell" rowSpan={Object.keys(user.bet || {}).length + 1}>
+                          {user.email}
+                        </td>
+                      </tr>
+                    )}
+                    {Object.keys(user.bet || {}).map((betId) => {
+                      const bet = user.bet[betId];
+                      return (
+                        <tr key={betId}>
+                          <td className="p-3 border">{bet.chapa || '-'}</td>
+                          <td className="p-3 border">{bet.kata || '-'}</td>
+                          <td className="p-3 border">{bet.result || '-'}</td>
+                          <td className="p-3 border">{bet.time || '-'}</td>
+                          <td className="p-3 border">{betId}</td>
+                        </tr>
+                      );
+                    })}
+                  </React.Fragment>
+                ))}
+
+
+              </tbody>
+            </table>
+            <div className="mt-4">
+              <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="rowsPerPage">
+                Rows per page:
+              </label>
+              <select
+                id="rowsPerPage"
+                value={rowsPerPage}
+                onChange={handleRowsPerPageChange}
+                className="p-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
+              >
+                {[1, 2, 5, 10, 15, 20, 25, 30].map((value) => (
+                  <option key={value} value={value}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+              <div className="mt-2 flex justify-center space-x-2">
+                {Array.from({ length: Math.ceil(filteredUsers.length / rowsPerPage) }).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handlePageChange(index + 1)}
+                    className="bg-gray-900 p-2 text-white border rounded hover:bg-gray-700 focus:outline-none focus:ring focus:border-blue-500"
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   );
-};
-
-export default GameHistory;
+}

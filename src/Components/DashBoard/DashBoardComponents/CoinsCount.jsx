@@ -214,6 +214,8 @@ const CoinCount = () => {
       if (response.ok) {
         // The request was successful, you can add any further handling here.
         console.log('Commissions calculated and updated successfully.');
+
+        alert("Commissions are calculated")
       } else {
         // Handle any errors here.
         console.error('Error calculating commissions.');

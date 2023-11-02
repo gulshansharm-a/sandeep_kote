@@ -147,11 +147,18 @@ export default function BlockUsers() {
 
     const toggleBlockStatus = async (user) => {
         console.log("triggered");
+
+
         const userRef = ref(database, `${selectedOption}/${user.userId}`);
         const currentBlockStatus = user.blocked || false;
         const timestamp = getFormattedDate();
         const blockedBy = auth.currentUser.email; // Get the email of the current user
 
+        const confirmation = window.confirm(`Are you sure you want to ${currentBlockStatus ? 'unblock' : 'block'} ${user.email}?`);
+        if (!confirmation) {
+            // User canceled the action, do nothing
+            return;
+        }
         try {
             // Create or update a unique key in the user's blocked_history
             const historyRef = child(userRef, 'blocked_history');
@@ -217,7 +224,7 @@ export default function BlockUsers() {
                         value={searchTerm}
                         onChange={handleSearch}
                         className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
-                        placeholder="Search by email"
+                        placeholder={`Search ${selectedOption}`}
                     />
                 </div>
                 <table className="w-full border mb-10">
@@ -227,7 +234,7 @@ export default function BlockUsers() {
                                 S.No
                             </th>
                             <th className="p-3 border">
-                                Email
+                                {selectedOption} Email
                             </th>
                             <th className="p-3 border">
                                 Username
@@ -252,7 +259,7 @@ export default function BlockUsers() {
                                 <td className="p-3 border">
                                     <button
                                         onClick={() => toggleBlockStatus(user)}
-                                        className={`bg-${user.blocked ? 'red' : 'green'}-500 text-white p-2 border rounded`}
+                                        className={`bg-${user.blocked ? 'red-600' : 'green-500'} text-white p-2 border rounded`}
                                     >
                                         {user.blocked ? 'Blocked' : 'unblocked'}
                                     </button>

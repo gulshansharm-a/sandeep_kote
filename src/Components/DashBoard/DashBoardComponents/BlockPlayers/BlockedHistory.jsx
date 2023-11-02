@@ -5,7 +5,7 @@ import { database } from '../../../../Authentication/firebase';
 
 
 export default function BlockedHistory() {
-    const [selectedOption, setSelectedOption] = useState('');
+    const [selectedOption, setSelectedOption] = useState('Player');
     const [selectedUserOption, setSelectedUserOption] = useState('');
     const [users, setUsers] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -214,13 +214,19 @@ export default function BlockedHistory() {
 
     // Render the current page of blocked history
     const renderBlockedHistory = () => {
-        if (!selectedUserDetails || !selectedUserDetails.blockedHistory) {
-            return null;
+        if (!selectedUserDetails || !selectedUserDetails.blockedHistory || selectedUserDetails.blockedHistory.length === 0) {
+            return (
+                <tr>
+                    <td className="p-3 border" colSpan="3">
+                        This Player hasn't been blocked 
+                    </td>
+                </tr>
+            );
         }
-
+    
         const { startIndex, endIndex } = calculateHistoryIndices();
         const historyEntries = selectedUserDetails.blockedHistory.slice(startIndex, endIndex);
-
+    
         return historyEntries.map((historyEntry, index) => (
             <tr key={index}>
                 <td className="p-3 border">{historyEntry.status}</td>
@@ -250,7 +256,7 @@ export default function BlockedHistory() {
             <div className="p-4">
                 <div className="mb-4">
                     <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="userType">
-                        Select User Type:
+                        Select Role 
                     </label>
                     <select
                         id="userType"
@@ -270,7 +276,7 @@ export default function BlockedHistory() {
                 </div>
                 <div className="mb-4">
                     <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="userType">
-                        Select User :
+                        Select {selectedOption} :
                     </label>
                     <select
                         id="userType"
@@ -279,7 +285,7 @@ export default function BlockedHistory() {
                         onChange={handleSelectedUserChange}
                     >
                         <option value="" disabled>
-                            Select User
+                            Select {selectedOption}
                         </option>
                         {currentUsers.map((user) => (
                             <option key={user.userId} value={user.userId}>
@@ -298,7 +304,7 @@ export default function BlockedHistory() {
                         value={searchTerm}
                         onChange={handleSearch}
                         className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
-                        placeholder="Search by status / time / by"
+                        placeholder="Search"
                     />
                 </div>
                 <table className="w-full border mb-10">
@@ -317,21 +323,6 @@ export default function BlockedHistory() {
                     </thead>
                     <tbody>
                         {renderBlockedHistory()}
-                        {/* {selectedUserDetails &&
-                            selectedUserDetails.blockedHistory.map((historyEntry, index) => (
-                                <tr key={index}>
-                                    <td className="p-3 border">
-                                        {historyEntry.status}
-                                    </td>
-                                    <td className="p-3 border">
-                                        {historyEntry.time}
-                                    </td>
-                                    <td className="p-3 border">
-                                        {historyEntry.blockedBy}
-                                    </td>
-                                </tr>
-                            ))
-                        } */}
                     </tbody>
                 </table>
 

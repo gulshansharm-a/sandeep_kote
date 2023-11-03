@@ -20,6 +20,9 @@ const CoinCount = () => {
 
   // Function to handle set to zero
   const handleSetToZero = async () => {
+    const confirmCalculateCommissions = window.confirm('Are you sure you want to calculate commissions?');
+
+    if (confirmCalculateCommissions) {
     try {
       // Update the setToZero field to true
       await set(ref(database, `admin/${loggedInUserId}/settozero`), true);
@@ -28,10 +31,15 @@ const CoinCount = () => {
       console.error('Error updating setToZero:', error.message);
       alert('Error updating setToZero. Please try again.');
     }
-  };
+  }
+};
 
   // Function to handle adding standing to earning and resetting values
-  const handleAddStandingToEarning = async () => {
+  const handleAddStandingToEarning = async () => 
+  {
+    const confirmCalculateCommissions = window.confirm('Are you sure you want to calculate commissions?');
+
+    if (confirmCalculateCommissions) {
     try {
       // Fetch the current standing and earning values
       const adminSnapshot = await get(ref(database, `/`));
@@ -46,10 +54,14 @@ const CoinCount = () => {
       console.error('Error updating standing and earning:', error.message);
       alert('Error updating standing and earning. Please try again.');
     }
-  };
+  }
+};
 
   // Function to handle setting earning to zero
   const handleSetEarningToZero = async () => {
+    const confirmCalculateCommissions = window.confirm('Are you sure you want to calculate commissions?');
+
+    if (confirmCalculateCommissions) {
     try {
       // Update the earning field to zero
       await set(ref(database, `earning`), 0);
@@ -58,10 +70,15 @@ const CoinCount = () => {
       console.error('Error setting earning to zero:', error.message);
       alert('Error setting earning to zero. Please try again.');
     }
-  };
+  }
+};
   const openCommissionModal = () => {
+    const confirmCalculateCommissions = window.confirm('Are you sure you want to calculate commissions?');
+
+    if (confirmCalculateCommissions) {
     fetchCommissionsFromDatabase();
     setCommissionModalOpen(true);
+    }
   };
 
   const closeCommissionModal = () => {
@@ -200,6 +217,9 @@ const CoinCount = () => {
     }
   };
   const handleCalculateCommissions = async () => {
+    const confirmCalculateCommissions = window.confirm('Are you sure you want to calculate commissions?');
+
+    if (confirmCalculateCommissions) {
     console.log("clickeddd");
     try {
       const response = await fetch('http://localhost:3000/calculate-commissions', {
@@ -223,7 +243,8 @@ const CoinCount = () => {
     } catch (error) {
       console.error('An error occurred while sending the request:', error);
     }
-  };
+  }
+};
 
   const saveCommissionChanges = async () => {
     // Update the commission values in Firebase
@@ -321,7 +342,7 @@ const CoinCount = () => {
           <div className="flex flex-col lg:flex-row h-[75vh] px-4 lg:px-10 items-center justify-center">
 
             {/* Left Side (Admin Details) */}
-            <div className="lg:flex-1 pr-0 lg:pr-10 mb-6 lg:mb-0">
+            <div className="lg:flex-1 pr-0 lg:pr-10 mb-6 lg:mb-0 mt-32">
               <p className="text-2xl lg:text-3xl mb-2 lg:mb-6">Standing: {standing || 0}</p>
               <p className="text-2xl lg:text-3xl mb-2 lg:mb-6">Earning: {earning || 0}</p>
               <p className="text-2xl lg:text-3xl mb-2 lg:mb-6">Earning Percentage: {earningPercentage || 'Loading...'}</p>
@@ -386,6 +407,7 @@ const CoinCount = () => {
 
 
   );
+
 
 };
 

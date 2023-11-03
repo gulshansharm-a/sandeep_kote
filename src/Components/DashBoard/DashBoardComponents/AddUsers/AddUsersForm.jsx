@@ -91,6 +91,7 @@ export default function AddUsersForm() {
                     pass: password,
                     balance: 1000,
                     adminID: currentUserID,
+                    endpoint:0,
                 };
             } else if (createUserRole === "Agent") {
                 const distRef = ref(database, `Distributor/${currentUserID}`);
@@ -102,6 +103,7 @@ export default function AddUsersForm() {
                         ...userData,
                         distributorID: currentUserID,
                         balance: 1000,
+                        endpoint:0,
                         adminID: disData.adminID,
                     };
                 }
@@ -116,6 +118,8 @@ export default function AddUsersForm() {
                         agentID: currentUserID,
                         distributorID: agentData.distributorID,
                         balance: 1000,
+                        endpoint:0,
+                        win:0,
                         adminID: agentData.adminID,
                         blocked: false
                     };

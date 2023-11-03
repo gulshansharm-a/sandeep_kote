@@ -19,7 +19,7 @@ import ResetPassword from './Components/DashBoard/DashBoardComponents/ResetPassw
 import BlockUsers from './Components/DashBoard/DashBoardComponents/BlockPlayers/BlockUsers';
 import BlockedHistory from './Components/DashBoard/DashBoardComponents/BlockPlayers/BlockedHistory';
 import LiveUsers from './Components/DashBoard/DashBoardComponents/LiveUsers/LiveUsers';
-
+import AdminBalanceSetting from './Components/DashBoard/DashBoardComponents/SetAdminBalance/SetAdminBalance';
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -107,6 +107,7 @@ function App() {
                 {/* <Route path="resetPassword" element={<ResetPassword />} /> */}
                 <Route path="blockUsers" element={<BlockUsers />} />
                 <Route path="blockUsersHistory" element={<BlockedHistory />} />
+                <Route path="setBalance" element={<AdminBalanceSetting />} />
                 <Route path="liveUsers" element={<LiveUsers />} />
                 {/* Add more routes for other choices */}
               </Route>

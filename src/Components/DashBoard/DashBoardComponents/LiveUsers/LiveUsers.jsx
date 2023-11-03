@@ -141,29 +141,35 @@ export default function LiveUsers() {
                         value={searchTerm}
                         onChange={handleSearch}
                         className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
-                        placeholder="Search by email"
+                        placeholder="Search Players"
                     />
                 </div>
-                <table className="w-full border mb-10">
-                    <thead>
-                        <tr>
-                            <th className="p-3 border">S.No</th>
-                            <th className="p-3 border">Email</th>
-                            <th className="p-3 border">Username</th>
-                            <th className="p-3 border">Balance</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {currentUsers.map((user, index) => (
-                            <tr key={user.userId}>
-                                <td className="p-3 border">{indexOfFirstItem + index + 1}</td>
-                                <td className="p-3 border">{user.email}</td>
-                                <td className="p-3 border">{user.userName}</td>
-                                <td className="p-3 border">{user.balance}</td>
+                {filteredUsers.length === 0 ? (
+                    <div className="bg-gray-800 p-5 rounded-lg">
+                        <p className="text-white">No Live Users</p>
+                    </div>
+                ) : (
+                    <table className="w-full border mb-10">
+                        <thead className='text-white bg-gray-800'>
+                            <tr>
+                                <th className="p-3 border">S.No</th>
+                                <th className="p-3 border">Email</th>
+                                <th className="p-3 border">Username</th>
+                                <th className="p-3 border">Balance</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {currentUsers.map((user, index) => (
+                                <tr key={user.userId}>
+                                    <td className="p-3 border">{indexOfFirstItem + index + 1}</td>
+                                    <td className="p-3 border">{user.email}</td>
+                                    <td className="p-3 border">{user.userName}</td>
+                                    <td className="p-3 border">{user.balance}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
                 <div className="mt-4">
                     <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="rowsPerPage">
                         Rows per page:

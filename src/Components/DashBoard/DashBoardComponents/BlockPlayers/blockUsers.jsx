@@ -228,7 +228,7 @@ export default function BlockUsers() {
                     />
                 </div>
                 <table className="w-full border mb-10">
-                    <thead>
+                    <thead className='text-white bg-gray-800'>
                         <tr>
                             <th className="p-3 border">
                                 S.No

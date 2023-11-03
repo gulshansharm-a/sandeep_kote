@@ -312,7 +312,7 @@ const CoinCount = () => {
 
             <div className='w-full sm:w-1/2 md:w-1/4 lg:w-1/5 xl:w-1/6 p-2'>
               <button onClick={handleCalculateCommissions} className="w-full h-14 px-4 py-1 bg-gray-800 text-white rounded text-sm lg:text-base">
-                Commission
+                Release Commission
               </button>
             </div>
 

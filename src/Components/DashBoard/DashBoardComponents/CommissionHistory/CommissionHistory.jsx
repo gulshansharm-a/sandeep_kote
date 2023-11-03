@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { getDatabase, ref, get } from 'firebase/database';
+import SelectOption from '@material-tailwind/react/components/Select/SelectOption';
 
 const CommissionHistory = () => {
-    const [selectedRole, setSelectedRole] = useState('');
+    const [selectedRole, setSelectedRole] = useState('Agent');
     const [selectedUser, setSelectedUser] = useState('');
     const [roles, setRoles] = useState(["Distributor", "Agent"]);
     const [users, setUsers] = useState([]);
@@ -10,7 +11,15 @@ const CommissionHistory = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [searchTerm, setSearchTerm] = useState('');
+    const [pageTotals, setPageTotals] = useState([]); // Initialize pageTotals with an empty array
+    const [grandTotal, setGrandTotal] = useState(0);
     const database = getDatabase(); // Initialize your Firebase Realtime Database instance
+
+    const calculatePageTotal = (currentPageHistory) => {
+        return currentPageHistory.reduce((total, historyItem) => {
+            return total + parseFloat(historyItem.com);
+        }, 0);
+    };
 
     useEffect(() => {
         fetchUsersForRole(selectedRole);
@@ -19,6 +28,25 @@ const CommissionHistory = () => {
     useEffect(() => {
         fetchCommissionHistory(selectedUser);
     }, [selectedUser]);
+
+    useEffect(() => {
+        // Calculate and update page totals whenever currentCommissionHistory or rowsPerPage changes
+        const pageTotalsArray = Array.from({ length: Math.ceil(commissionHistory.length / rowsPerPage) }).map((_, index) => {
+            const pageStartIndex = index * rowsPerPage;
+            const pageEndIndex = pageStartIndex + rowsPerPage;
+            const currentPageHistory = commissionHistory.slice(pageStartIndex, pageEndIndex);
+            return calculatePageTotal(currentPageHistory);
+        });
+        setPageTotals(pageTotalsArray);
+    }, [commissionHistory, rowsPerPage]);
+
+    useEffect(() => {
+        // Calculate and update grand total whenever page totals change
+        const calculatedGrandTotal = pageTotals.reduce((total, pageTotal) => {
+            return total + pageTotal;
+        }, 0);
+        setGrandTotal(calculatedGrandTotal);
+    }, [pageTotals]);
 
     const fetchUsersForRole = (role) => {
         if (role) {
@@ -29,7 +57,7 @@ const CommissionHistory = () => {
                         const userData = snapshot.val();
                         const userArray = Object.keys(userData).map((uid) => ({
                             uid,
-                            email: userData[uid].email, // Assuming the user data has an 'email' field
+                            email: userData[uid].email,
                         }));
                         setUsers(userArray);
                     } else {
@@ -88,7 +116,6 @@ const CommissionHistory = () => {
                         }}
                         className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
                     >
-                        <option value="">Select a role</option>
                         {roles.map((role) => (
                             <option key={role} value={role}>
                                 {role}
@@ -98,7 +125,7 @@ const CommissionHistory = () => {
                 </div>
                 <div className="mb-4">
                     <label htmlFor="userSelect" className="block text-gray-900 font-bold text-lg">
-                        Select User:
+                        Select {selectedRole}:
                     </label>
                     <select
                         id="userSelect"
@@ -108,7 +135,6 @@ const CommissionHistory = () => {
                         }}
                         className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
                     >
-                        <option value="">Select a user</option>
                         {users.map((user) => (
                             <option key={user.uid} value={user.uid}>
                                 {user.email}
@@ -128,28 +154,48 @@ const CommissionHistory = () => {
                             setSearchTerm(e.target.value);
                         }}
                         className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
-                        placeholder="Search by endpoint, commission, or timestamp"
+                        placeholder="Search"
                     />
                 </div>
                 <h2 className="text-2xl font-bold mb-4">Commission History</h2>
-                <table className="w-full border">
-                    <thead>
-                        <tr>
-                            <th className="p-3 border">Endpoint</th>
-                            <th className="p-3 border">Commission</th>
-                            <th className="p-3 border">Timestamp</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {currentCommissionHistory.map((historyItem, index) => (
-                            <tr key={index}>
-                                <td className="p-3 border">{historyItem.Endpoint}</td>
-                                <td className="p-3 border">{historyItem.com}</td>
-                                <td className="p-3 border">{historyItem.t_s}</td>
+                {filteredCommissionHistory.length > 0 ? (
+                    <table className="w-full border">
+                        <thead>
+                            <tr className='text-white bg-gray-800'>
+                                <th className="p-3 border">Endpoint</th>
+                                <th className="p-3 border">Commission</th>
+                                <th className="p-3 border">Timestamp</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {currentCommissionHistory.map((historyItem, index) => (
+                                <tr key={index}>
+                                    <td className="p-3 border">{historyItem.Endpoint}</td>
+                                    <td className="p-3 border">{historyItem.com}</td>
+                                    <td className="p-3 border">{historyItem.t_s}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                        {grandTotal > 0 && (
+                            <tfoot>
+                                <tr className='text-white bg-gray-800'>
+                                    <td className="p-3 border">Page Total:</td>
+                                    <td className="p-3 border">{pageTotals[currentPage - 1]?.toFixed(2)}</td>
+                                    <td className="p-3 border"></td>
+                                </tr>
+                                <tr className='text-white'>
+                                    <td className="p-3 border bg-gray-800">Grand Total:</td>
+                                    <td className="p-3 border bg-gray-800">{grandTotal.toFixed(2)}</td>
+                                    <td className="p-3 border bg-gray-800"></td>
+                                </tr>
+                            </tfoot>
+                        )}
+                    </table>
+                ) : (
+                    <div className='bg-gray-800 p-5 rounded-lg'>
+                        <p className='text-white'>No commision history</p>
+                    </div>
+                )}
                 <div className="mt-4">
                     <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="rowsPerPage">
                         Rows per page:
@@ -169,24 +215,27 @@ const CommissionHistory = () => {
                             </option>
                         ))}
                     </select>
-                    <div className="mt-2 flex justify-center space-x-2">
-                        {Array.from({ length: Math.ceil(filteredCommissionHistory.length / rowsPerPage) }).map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => setCurrentPage(index + 1)}
-                                className={`${currentPage === index + 1
+                    {filteredCommissionHistory.length > rowsPerPage && (
+                        <div className="mt-2 flex justify-center space-x-2">
+                            {Array.from({ length: Math.ceil(filteredCommissionHistory.length / rowsPerPage) }).map((_, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => setCurrentPage(index + 1)}
+                                    className={`${currentPage === index + 1
                                         ? 'bg-gray-900 text-white'
-                                        : 'bg-gray-200 hover:bg-gray-300'
-                                    } p-2 border rounded focus:outline-none focus:ring focus:border-blue-500`}
-                            >
-                                {index + 1}
-                            </button>
-                        ))}
-                    </div>
+                                        : 'bg-gray-200 hover-bg-gray-300'
+                                        } p-2 border rounded focus:outline-none focus:ring focus:border-blue-500`}
+                                >
+                                    {index + 1}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
     );
+
 };
 
 export default CommissionHistory;

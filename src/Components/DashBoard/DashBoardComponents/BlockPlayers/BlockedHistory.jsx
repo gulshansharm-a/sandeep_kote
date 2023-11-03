@@ -216,26 +216,44 @@ export default function BlockedHistory() {
     const renderBlockedHistory = () => {
         if (!selectedUserDetails || !selectedUserDetails.blockedHistory || selectedUserDetails.blockedHistory.length === 0) {
             return (
-                <tr>
-                    <td className="p-3 border" colSpan="3">
-                        This Player hasn't been blocked 
-                    </td>
-                </tr>
+
+                <div className="bg-gray-800 p-5 rounded-lg">
+                    <p className="text-white">This players has no block history</p>
+                </div>
+
             );
         }
-    
+
         const { startIndex, endIndex } = calculateHistoryIndices();
         const historyEntries = selectedUserDetails.blockedHistory.slice(startIndex, endIndex);
-    
-        return historyEntries.map((historyEntry, index) => (
-            <tr key={index}>
-                <td className="p-3 border">{historyEntry.status}</td>
-                <td className="p-3 border">{historyEntry.time}</td>
-                <td className="p-3 border">{historyEntry.blockedBy}</td>
-            </tr>
-        ));
-    };
 
+        return (
+            <>
+                <thead className='text-white bg-gray-800'>
+                    <tr>
+                        <th className="p-3 border">
+                            Status
+                        </th>
+                        <th className="p-3 border">
+                            Date / Time
+                        </th>
+                        <th className="p-3 border">
+                            Blocked / Unblocked By
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {historyEntries.map((historyEntry, index) => (
+                        <tr key={index}>
+                            <td className="p-3 border">{historyEntry.status}</td>
+                            <td className="p-3 border">{historyEntry.time}</td>
+                            <td className="p-3 border">{historyEntry.blockedBy}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </>
+        );
+    };
 
     // Handle page change for selectedUserDetails.blockedHistory
     const handlePageChangeHistory = (pageNumber) => {
@@ -256,7 +274,7 @@ export default function BlockedHistory() {
             <div className="p-4">
                 <div className="mb-4">
                     <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="userType">
-                        Select Role 
+                        Select Role
                     </label>
                     <select
                         id="userType"
@@ -308,22 +326,7 @@ export default function BlockedHistory() {
                     />
                 </div>
                 <table className="w-full border mb-10">
-                    <thead>
-                        <tr>
-                            <th className="p-3 border">
-                                Status
-                            </th>
-                            <th className="p-3 border">
-                                Time
-                            </th>
-                            <th className="p-3 border">
-                                Blocked / Unblocked By
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {renderBlockedHistory()}
-                    </tbody>
+                    {renderBlockedHistory()}
                 </table>
 
                 <div className="mt-4">

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { child, get, ref, update } from 'firebase/database';
+import { child, get, ref } from 'firebase/database';
 import { auth } from '../../../../Authentication/firebase';
 import { database } from '../../../../Authentication/firebase';
 import MenuUserSpecific from '../MenuUsers/MenuUserSpecific';
@@ -201,6 +201,9 @@ export default function GameHistory() {
         </div>
         :
         <div>
+          <div className='flex flex-row justify-between mt-20 m-5'>
+            <h1 className="text-3xl font-bold text-gray-800">Game History</h1>
+          </div>
           <div className="p-4">
             <div className="mb-4">
               <label className="block text-gray-900 font-bold text-lg mb-2" htmlFor="search">
@@ -212,18 +215,18 @@ export default function GameHistory() {
                 value={searchTerm}
                 onChange={handleSearch}
                 className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
-                placeholder="Search by email"
+                placeholder={`Search ${selectedOption}`}
               />
             </div>
             <table className="mt-4 w-full border">
-              <thead>
+              <thead className='text-white bg-gray-800'>
                 <tr>
                   <th className="p-3 border">S.No</th>
                   <th className="p-3 border">Email</th>
                   <th className="p-3 border">Chapa</th>
                   <th className="p-3 border">Kata</th>
                   <th className="p-3 border">Result</th>
-                  <th className="p-3 border">Time</th>
+                  <th className="p-3 border">Date / Time</th>
                   <th className="p-3 border">Bet ID</th>
                 </tr>
               </thead>

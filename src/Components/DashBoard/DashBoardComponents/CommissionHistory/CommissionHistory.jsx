@@ -63,22 +63,6 @@ const CommissionHistory = () => {
         }
     }, [selectedUser, selectedTimeRange]);
 
-    useEffect(() => {
-        const pageTotalsArray = Array.from({ length: Math.ceil(commissionHistory.length / rowsPerPage) }).map((_, index) => {
-            const pageStartIndex = index * rowsPerPage;
-            const pageEndIndex = pageStartIndex + rowsPerPage;
-            const currentPageHistory = commissionHistory.slice(pageStartIndex, pageEndIndex);
-            return calculatePageTotal(currentPageHistory);
-        });
-        setPageTotals(pageTotalsArray);
-    }, [commissionHistory, rowsPerPage]);
-
-    useEffect(() => {
-        const calculatedGrandTotal = pageTotals.reduce((total, pageTotal) => {
-            return total + pageTotal;
-        }, 0);
-        setGrandTotal(calculatedGrandTotal);
-    }, [pageTotals]);
 
     const fetchUsersForRole = (role) => {
         if (role) {
@@ -186,6 +170,24 @@ const CommissionHistory = () => {
     });
 
     const currentCommissionHistory = sortedCommissionHistory.slice(indexOfFirstItem, indexOfLastItem);
+
+    useEffect(() => {
+        const pageTotalsArray = Array.from({ length: Math.ceil(sortedCommissionHistory.length / rowsPerPage) }).map((_, index) => {
+            const pageStartIndex = index * rowsPerPage;
+            const pageEndIndex = pageStartIndex + rowsPerPage;
+            const currentPageHistory = sortedCommissionHistory.slice(pageStartIndex, pageEndIndex);
+            return calculatePageTotal(currentPageHistory);
+        });
+    
+        setPageTotals(pageTotalsArray);
+    }, [sortedCommissionHistory, rowsPerPage]);       
+    
+    useEffect(() => {
+        const calculatedGrandTotal = pageTotals.reduce((total, pageTotal) => {
+            return total + pageTotal;
+        }, 0);
+        setGrandTotal(calculatedGrandTotal);
+    }, [pageTotals]);
 
     return (
         <div className="">

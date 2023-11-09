@@ -13,6 +13,7 @@ const CommissionHistory = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [pageTotals, setPageTotals] = useState([]); // Initialize pageTotals with an empty array
     const [grandTotal, setGrandTotal] = useState(0);
+    const [selectedTimeRange, setSelectedTimeRange] = useState(''); // New state variable for the selected time range
     const database = getDatabase(); // Initialize your Firebase Realtime Database instance
 
     const calculatePageTotal = (currentPageHistory) => {
@@ -26,8 +27,11 @@ const CommissionHistory = () => {
     }, [selectedRole]);
 
     useEffect(() => {
-        fetchCommissionHistory(selectedUser);
-    }, [selectedUser]);
+        if (selectedUser) {
+            fetchCommissionHistory(selectedUser, selectedTimeRange);
+        }
+    }, [selectedUser, selectedTimeRange]);
+
 
     useEffect(() => {
         // Calculate and update page totals whenever currentCommissionHistory or rowsPerPage changes
@@ -70,13 +74,18 @@ const CommissionHistory = () => {
         }
     };
 
-    const fetchCommissionHistory = (uid) => {
+    const fetchCommissionHistory = (uid, timeRange) => {
         if (uid) {
             const userRef = ref(database, `${selectedRole}/${uid}/commissionHistory`);
             get(userRef)
                 .then((snapshot) => {
                     if (snapshot.exists()) {
-                        setCommissionHistory(Object.values(snapshot.val()));
+                        const historyData = Object.values(snapshot.val());
+
+                        // Filter the history based on the selected time range
+                        const filteredHistory = filterHistoryByTimeRange(historyData, timeRange);
+
+                        setCommissionHistory(filteredHistory);
                     } else {
                         setCommissionHistory([]);
                     }
@@ -86,6 +95,105 @@ const CommissionHistory = () => {
                 });
         }
     };
+
+
+    const filterHistoryByTimeRange = (historyData, timeRange) => {
+        const currentDate = new Date();
+
+        const parseTimestamp = (timestamp) => {
+            console.log("timestamp king: ", timeRange);
+            if (!timestamp) {
+                console.log("baddd");
+                return null;
+            }
+        
+            try {
+                const [datePart, timePart] = timestamp.split(' - ');
+                const [day, month, year] = datePart.split('/');
+                const [hoursMinutes, timeZone] = timePart.split(' ');
+        
+                const [hours, minutes] = hoursMinutes.split(':');
+        
+                // Replace IST with the actual offset +5:30
+                const adjustedTimeZone = timeZone.replace('IST', '+5:30');
+        
+                console.log("Debugging Timestamp Components:", {
+                    datePart,
+                    timePart,
+                    day,
+                    month,
+                    year,
+                    hoursMinutes,
+                    timeZone: adjustedTimeZone, // Use the adjusted timezone
+                    hours,
+                    minutes
+                });
+        
+                // Adjust the format to "MM/DD/YYYY HH:mm TZ"
+                const parsedDate = new Date(`${month}/${day}/${year} ${hours}:${minutes} ${adjustedTimeZone}`);
+                console.log("Parsed Date:", parsedDate);
+        
+                if (isNaN(parsedDate.getTime())) {
+                    console.error("Invalid Date Format:", timestamp);
+                    return null;
+                }
+        
+                return parsedDate;
+            } catch (error) {
+                console.error("Error parsing timestamp:", error.message);
+                return null;
+            }
+        };                   
+
+
+        console.log("currentDate:", currentDate);
+        console.log("timeRange:", timeRange);
+
+        switch (timeRange) {
+            case 'today':
+                console.log("Filtering for today");
+                return historyData.filter((historyItem) => {
+                    console.log("historyItem :",historyItem);
+                    const itemDate = parseTimestamp(historyItem.t_s);
+                    console.log("Item Date:", itemDate);
+                    return isSameDay(itemDate, currentDate);
+                });
+            case 'yesterday':
+                const yesterday = new Date(currentDate);
+                yesterday.setDate(currentDate.getDate() - 1);
+                return historyData.filter((historyItem) => isSameDay(parseTimestamp(historyItem.t_s), yesterday));
+            case 'thisWeek':
+                const startOfWeek = new Date(currentDate);
+                startOfWeek.setDate(currentDate.getDate() - currentDate.getDay()); // Move to the first day of the week
+                return historyData.filter((historyItem) => parseTimestamp(historyItem.t_s) >= startOfWeek);
+            case 'lastTwoWeeks':
+                const startOfLastTwoWeeks = new Date(currentDate);
+                startOfLastTwoWeeks.setDate(currentDate.getDate() - 14); // Move to the first day of the last two weeks
+                return historyData.filter((historyItem) => parseTimestamp(historyItem.t_s) >= startOfLastTwoWeeks);
+            case 'thisMonth':
+                const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                return historyData.filter((historyItem) => parseTimestamp(historyItem.t_s) >= startOfMonth);
+            case 'lastTwoMonths':
+                const startOfLastTwoMonths = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+                return historyData.filter((historyItem) => parseTimestamp(historyItem.t_s) >= startOfLastTwoMonths);
+            default:
+                return historyData;
+        }
+    };
+
+
+    const isSameDay = (date1, date2) => {
+        if (!date1 || !date2) {
+            return false; // If either date is null, they are not the same day
+        }
+    
+        return (
+            date1.getDate() === date2.getDate() &&
+            date1.getMonth() === date2.getMonth() &&
+            date1.getFullYear() === date2.getFullYear()
+        );
+    };
+    
 
     const indexOfLastItem = currentPage * rowsPerPage;
     const indexOfFirstItem = indexOfLastItem - rowsPerPage;
@@ -157,6 +265,29 @@ const CommissionHistory = () => {
                         placeholder="Search"
                     />
                 </div>
+                <div className="mb-4">
+                    <label htmlFor="timeRangeSelect" className="block text-gray-900 font-bold text-lg">
+                        Select Time Range:
+                    </label>
+                    <select
+                        id="timeRangeSelect"
+                        value={selectedTimeRange}
+                        onChange={(e) => {
+                            setSelectedTimeRange(e.target.value);
+                        }}
+                        className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
+                    >
+                        <option value="">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="thisWeek">This Week</option>
+                        <option value="lastTwoWeeks">Last 2 weeks</option>
+                        <option value="thisMonth">This month</option>
+                        <option value="lastTwoMonths">Last 2 month</option>
+                        {/* Add other time range options */}
+                    </select>
+                </div>
+
                 <h2 className="text-2xl font-bold mb-4">Commission History</h2>
                 {filteredCommissionHistory.length > 0 ? (
                     <table className="w-full border">

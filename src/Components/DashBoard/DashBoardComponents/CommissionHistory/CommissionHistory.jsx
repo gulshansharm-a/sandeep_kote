@@ -2,6 +2,37 @@ import React, { useState, useEffect } from 'react';
 import { getDatabase, ref, get } from 'firebase/database';
 import SelectOption from '@material-tailwind/react/components/Select/SelectOption';
 
+// Utility function to parse timestamp
+const parseTimestamp = (timestamp) => {
+    if (!timestamp) {
+        return null;
+    }
+
+    try {
+        const [datePart, timePart] = timestamp.split(' - ');
+        const [day, month, year] = datePart.split('/');
+        const [hoursMinutes, timeZone] = timePart.split(' ');
+
+        const [hours, minutes] = hoursMinutes.split(':');
+
+        // Replace IST with the actual offset +5:30
+        const adjustedTimeZone = timeZone.replace('IST', '+5:30');
+
+        // Adjust the format to "MM/DD/YYYY HH:mm TZ"
+        const parsedDate = new Date(`${month}/${day}/${year} ${hours}:${minutes} ${adjustedTimeZone}`);
+
+        if (isNaN(parsedDate.getTime())) {
+            console.error("Invalid Date Format:", timestamp);
+            return null;
+        }
+
+        return parsedDate;
+    } catch (error) {
+        console.error("Error parsing timestamp:", error.message);
+        return null;
+    }
+};
+
 const CommissionHistory = () => {
     const [selectedRole, setSelectedRole] = useState('Agent');
     const [selectedUser, setSelectedUser] = useState('');
@@ -11,10 +42,10 @@ const CommissionHistory = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [searchTerm, setSearchTerm] = useState('');
-    const [pageTotals, setPageTotals] = useState([]); // Initialize pageTotals with an empty array
+    const [pageTotals, setPageTotals] = useState([]);
     const [grandTotal, setGrandTotal] = useState(0);
-    const [selectedTimeRange, setSelectedTimeRange] = useState(''); // New state variable for the selected time range
-    const database = getDatabase(); // Initialize your Firebase Realtime Database instance
+    const [selectedTimeRange, setSelectedTimeRange] = useState('');
+    const database = getDatabase();
 
     const calculatePageTotal = (currentPageHistory) => {
         return currentPageHistory.reduce((total, historyItem) => {
@@ -32,9 +63,7 @@ const CommissionHistory = () => {
         }
     }, [selectedUser, selectedTimeRange]);
 
-
     useEffect(() => {
-        // Calculate and update page totals whenever currentCommissionHistory or rowsPerPage changes
         const pageTotalsArray = Array.from({ length: Math.ceil(commissionHistory.length / rowsPerPage) }).map((_, index) => {
             const pageStartIndex = index * rowsPerPage;
             const pageEndIndex = pageStartIndex + rowsPerPage;
@@ -45,7 +74,6 @@ const CommissionHistory = () => {
     }, [commissionHistory, rowsPerPage]);
 
     useEffect(() => {
-        // Calculate and update grand total whenever page totals change
         const calculatedGrandTotal = pageTotals.reduce((total, pageTotal) => {
             return total + pageTotal;
         }, 0);
@@ -81,10 +109,7 @@ const CommissionHistory = () => {
                 .then((snapshot) => {
                     if (snapshot.exists()) {
                         const historyData = Object.values(snapshot.val());
-
-                        // Filter the history based on the selected time range
                         const filteredHistory = filterHistoryByTimeRange(historyData, timeRange);
-
                         setCommissionHistory(filteredHistory);
                     } else {
                         setCommissionHistory([]);
@@ -96,66 +121,13 @@ const CommissionHistory = () => {
         }
     };
 
-
     const filterHistoryByTimeRange = (historyData, timeRange) => {
         const currentDate = new Date();
 
-        const parseTimestamp = (timestamp) => {
-            console.log("timestamp king: ", timeRange);
-            if (!timestamp) {
-                console.log("baddd");
-                return null;
-            }
-        
-            try {
-                const [datePart, timePart] = timestamp.split(' - ');
-                const [day, month, year] = datePart.split('/');
-                const [hoursMinutes, timeZone] = timePart.split(' ');
-        
-                const [hours, minutes] = hoursMinutes.split(':');
-        
-                // Replace IST with the actual offset +5:30
-                const adjustedTimeZone = timeZone.replace('IST', '+5:30');
-        
-                console.log("Debugging Timestamp Components:", {
-                    datePart,
-                    timePart,
-                    day,
-                    month,
-                    year,
-                    hoursMinutes,
-                    timeZone: adjustedTimeZone, // Use the adjusted timezone
-                    hours,
-                    minutes
-                });
-        
-                // Adjust the format to "MM/DD/YYYY HH:mm TZ"
-                const parsedDate = new Date(`${month}/${day}/${year} ${hours}:${minutes} ${adjustedTimeZone}`);
-                console.log("Parsed Date:", parsedDate);
-        
-                if (isNaN(parsedDate.getTime())) {
-                    console.error("Invalid Date Format:", timestamp);
-                    return null;
-                }
-        
-                return parsedDate;
-            } catch (error) {
-                console.error("Error parsing timestamp:", error.message);
-                return null;
-            }
-        };                   
-
-
-        console.log("currentDate:", currentDate);
-        console.log("timeRange:", timeRange);
-
         switch (timeRange) {
             case 'today':
-                console.log("Filtering for today");
                 return historyData.filter((historyItem) => {
-                    console.log("historyItem :",historyItem);
                     const itemDate = parseTimestamp(historyItem.t_s);
-                    console.log("Item Date:", itemDate);
                     return isSameDay(itemDate, currentDate);
                 });
             case 'yesterday':
@@ -164,11 +136,11 @@ const CommissionHistory = () => {
                 return historyData.filter((historyItem) => isSameDay(parseTimestamp(historyItem.t_s), yesterday));
             case 'thisWeek':
                 const startOfWeek = new Date(currentDate);
-                startOfWeek.setDate(currentDate.getDate() - currentDate.getDay()); // Move to the first day of the week
+                startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
                 return historyData.filter((historyItem) => parseTimestamp(historyItem.t_s) >= startOfWeek);
             case 'lastTwoWeeks':
                 const startOfLastTwoWeeks = new Date(currentDate);
-                startOfLastTwoWeeks.setDate(currentDate.getDate() - 14); // Move to the first day of the last two weeks
+                startOfLastTwoWeeks.setDate(currentDate.getDate() - 14);
                 return historyData.filter((historyItem) => parseTimestamp(historyItem.t_s) >= startOfLastTwoWeeks);
             case 'thisMonth':
                 const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
@@ -181,19 +153,17 @@ const CommissionHistory = () => {
         }
     };
 
-
     const isSameDay = (date1, date2) => {
         if (!date1 || !date2) {
-            return false; // If either date is null, they are not the same day
+            return false;
         }
-    
+
         return (
             date1.getDate() === date2.getDate() &&
             date1.getMonth() === date2.getMonth() &&
             date1.getFullYear() === date2.getFullYear()
         );
     };
-    
 
     const indexOfLastItem = currentPage * rowsPerPage;
     const indexOfFirstItem = indexOfLastItem - rowsPerPage;
@@ -204,7 +174,18 @@ const CommissionHistory = () => {
         (typeof historyItem.t_s === 'string' && historyItem.t_s.toLowerCase().includes(searchTerm.toLowerCase()))
     ));
 
-    const currentCommissionHistory = filteredCommissionHistory.slice(indexOfFirstItem, indexOfLastItem);
+    const sortedCommissionHistory = filteredCommissionHistory.sort((a, b) => {
+        const timestampA = parseTimestamp(a.t_s);
+        const timestampB = parseTimestamp(b.t_s);
+
+        if (timestampA && timestampB) {
+            return timestampB - timestampA;
+        } else {
+            return 0;
+        }
+    });
+
+    const currentCommissionHistory = sortedCommissionHistory.slice(indexOfFirstItem, indexOfLastItem);
 
     return (
         <div className="">

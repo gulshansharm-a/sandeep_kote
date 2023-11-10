@@ -176,7 +176,11 @@ const CoinTransfer = () => {
 
       // Determine the sender's balance path based on the role
       if (userRole === 'Admin') {
-        senderBalancePath = 'Admin/admin/balance';
+        const adminSnapshot = await get(ref(database, 'Admin'));
+        const uids = Object.keys(adminSnapshot.val()); // Get an array of UIDs
+        const firstUid = uids[0]; // Get the first UID
+        const balanceSnapshot = await get(ref(database, `Admin/${firstUid}/balance`));
+        senderBalancePath = `Admin/${firstUid}/balance`;
       } else if (userRole === 'Distributor') {
         senderBalancePath = `Distributor/${currentUserId}/balance`;
       } else if (userRole === 'Agent') {

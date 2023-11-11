@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { ref, onValue } from 'firebase/database';
-import { database } from '../../../Authentication/firebase'; // Update this path
+import { database } from '../../../Authentication/firebase';
 
 const TransactionHistory = () => {
   const [transactions, setTransactions] = useState([]);
   const [searchUserRole, setSearchUserRole] = useState('');
   const [sortOption, setSortOption] = useState('latest');
+  const [timeRange, setTimeRange] = useState('all');
 
   useEffect(() => {
     const transactionsRef = ref(database, 'TransactionHistory');
@@ -14,7 +15,8 @@ const TransactionHistory = () => {
       const data = snapshot.val();
       if (data) {
         const transactionsArray = Object.values(data);
-        const sortedTransactions = sortTransactions(transactionsArray, sortOption);
+        const filteredTransactions = filterTransactionsByTime(transactionsArray, timeRange);
+        const sortedTransactions = sortTransactions(filteredTransactions, sortOption);
         setTransactions(sortedTransactions);
       }
     });
@@ -22,7 +24,7 @@ const TransactionHistory = () => {
     return () => {
       unsubscribe();
     };
-  }, [sortOption]);
+  }, [sortOption, timeRange]);
 
   const sortTransactions = (data, option) => {
     return [...data].sort((a, b) => {
@@ -31,6 +33,50 @@ const TransactionHistory = () => {
 
       return option === 'latest' ? dateB - dateA : dateA - dateB;
     });
+  };
+
+  const filterTransactionsByTime = (data, range) => {
+    const currentDate = new Date();
+
+    switch (range) {
+      case 'today':
+        return data.filter((transaction) => isSameDay(new Date(transaction.timestamp), currentDate));
+
+      case 'yesterday':
+        const yesterday = new Date();
+        yesterday.setDate(currentDate.getDate() - 1);
+        return data.filter((transaction) => isSameDay(new Date(transaction.timestamp), yesterday));
+
+      case 'lastWeek':
+        const lastWeek = new Date();
+        lastWeek.setDate(currentDate.getDate() - 7);
+        return data.filter((transaction) => new Date(transaction.timestamp) > lastWeek);
+
+      case 'last2Weeks':
+        const last2Weeks = new Date();
+        last2Weeks.setDate(currentDate.getDate() - 14);
+        return data.filter((transaction) => new Date(transaction.timestamp) > last2Weeks);
+
+      case 'thisMonth':
+        const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        return data.filter((transaction) => new Date(transaction.timestamp) > startOfMonth);
+
+      case 'last2Months':
+        const last2Months = new Date();
+        last2Months.setMonth(currentDate.getMonth() - 2);
+        return data.filter((transaction) => new Date(transaction.timestamp) > last2Months);
+
+      default:
+        return data;
+    }
+  };
+
+  const isSameDay = (date1, date2) => {
+    return (
+      date1.getFullYear() === date2.getFullYear() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate()
+    );
   };
 
   const searchRecipient = (recipientEmail) => {
@@ -70,7 +116,8 @@ const TransactionHistory = () => {
       const data = snapshot.val();
       if (data) {
         const transactionsArray = Object.values(data);
-        const sortedTransactions = sortTransactions(transactionsArray, sortOption);
+        const filteredTransactions = filterTransactionsByTime(transactionsArray, timeRange);
+        const sortedTransactions = sortTransactions(filteredTransactions, sortOption);
         setTransactions(sortedTransactions);
       }
     });
@@ -88,6 +135,19 @@ const TransactionHistory = () => {
           <option value="latest">Latest Date</option>
           <option value="oldest">Oldest Date</option>
         </select>
+        <select
+          className="text-white text-xs ml-2 bb bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          value={timeRange}
+          onChange={(e) => setTimeRange(e.target.value)}
+        >
+          <option value="all">All Time</option>
+          <option value="today">Today</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="lastWeek">Last Week</option>
+          <option value="last2Weeks">Last 2 Weeks</option>
+          <option value="thisMonth">This Month</option>
+          <option value="last2Months">Last 2 Months</option>
+        </select>
         <button
           className="text-white text-xs ml-2 bb bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           onClick={() => resetTransactions()}
@@ -100,7 +160,6 @@ const TransactionHistory = () => {
           onChange={(e) => searchRecipient(e.target.value)}
           className="px-2 py-1 mr-2 ml-2"
         />
-       
       </div>
       <table className="table-auto">
         <thead>

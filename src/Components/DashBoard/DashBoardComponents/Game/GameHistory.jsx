@@ -12,6 +12,7 @@ export default function GameHistory() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentAuthUser, setcurrentAuthUser] = useState('');
   const [options, setOptions] = useState(['Player']);
+  const [timeFilter, setTimeFilter] = useState('All Time');
 
   // Use the userOptions to set the initial selectedOption
   useEffect(() => {
@@ -191,6 +192,69 @@ export default function GameHistory() {
 
   console.log(currentUsers);
 
+  const filterByTime = (betTime, timeFilter) => {
+    const today = new Date();
+    const betDateArray = betTime.split(' - '); // Split the date and time parts
+    const dateString = betDateArray[0]; // Extract the date part
+    const timeString = betDateArray[1]; // Extract the time part
+
+    const [day, month, year] = dateString.split('/').map(Number); // Extract day, month, year
+    const [time, timezone] = timeString.split(' '); // Extract time and timezone
+    const [hour, minute] = time.split(':').map(Number); // Extract hour and minute
+
+    const betDate = new Date(year, month - 1, day, hour, minute);
+
+    switch (timeFilter) {
+      case 'All Time':
+        return true;
+
+      case 'today':
+        return (
+          betDate.getDate() === today.getDate() &&
+          betDate.getMonth() === today.getMonth() &&
+          betDate.getFullYear() === today.getFullYear()
+        );
+
+      case 'yesterday':
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        return (
+          betDate.getDate() === yesterday.getDate() &&
+          betDate.getMonth() === yesterday.getMonth() &&
+          betDate.getFullYear() === yesterday.getFullYear()
+        );
+
+      case 'thisWeek':
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 7);
+        return betDate >= startOfWeek && betDate < endOfWeek;
+
+      case 'lastTwoWeeks':
+        const twoWeeksAgo = new Date(today);
+        twoWeeksAgo.setDate(today.getDate() - 14);
+        return betDate >= twoWeeksAgo && betDate <= today;
+
+      case 'thisMonth':
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        return betDate >= startOfMonth && betDate <= endOfMonth;
+
+      case 'lastTwoMonths':
+        const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 1);
+        const endOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 0);
+        return betDate >= twoMonthsAgo && betDate <= endOfLastMonth;
+
+      // Add more cases for other time filters as needed
+
+      default:
+        return true;
+    }
+  };
+
+
   return (
     <div>
       {specific ?
@@ -218,10 +282,31 @@ export default function GameHistory() {
                 placeholder={`Search ${selectedOption}`}
               />
             </div>
+            <div className="mb-4">
+              <label htmlFor="timeRangeSelect" className="block text-gray-900 font-bold text-lg">
+                Select Time Range:
+              </label>
+              <select
+                id="timeRangeSelect"
+                value={timeFilter}
+                onChange={(e) => {
+                  setTimeFilter(e.target.value);
+                }}
+                className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
+              >
+                <option value="All Time">All Time</option>
+                <option value="today">Today</option>
+                <option value="yesterday">Yesterday</option>
+                <option value="thisWeek">This Week</option>
+                <option value="lastTwoWeeks">Last 2 weeks</option>
+                <option value="thisMonth">This month</option>
+                <option value="lastTwoMonths">Last 2 month</option>
+                {/* Add other time range options */}
+              </select>
+            </div>
             <table className="mt-4 w-full border">
               <thead className='text-white bg-gray-800'>
                 <tr>
-                  <th className="p-3 border">S.No</th>
                   <th className="p-3 border">Email</th>
                   <th className="p-3 border">Chapa</th>
                   <th className="p-3 border">Kata</th>
@@ -233,30 +318,26 @@ export default function GameHistory() {
               <tbody>
                 {currentUsers.map((user, index) => (
                   <React.Fragment key={user.userId}>
-                    {Object.keys(user.bet || {}).length > 0 && (
-                      <tr>
-                        <td className="p-3 border" rowSpan={Object.keys(user.bet || {}).length + 1}>{indexOfFirstItem + index + 1}</td>
-                        <td className="p-3 border email-cell" rowSpan={Object.keys(user.bet || {}).length + 1}>
-                          {user.email}
-                        </td>
-                      </tr>
-                    )}
                     {Object.keys(user.bet || {}).map((betId) => {
                       const bet = user.bet[betId];
-                      return (
-                        <tr key={betId}>
-                          <td className="p-3 border">{bet.chapa || '-'}</td>
-                          <td className="p-3 border">{bet.kata || '-'}</td>
-                          <td className="p-3 border">{bet.result || '-'}</td>
-                          <td className="p-3 border">{bet.time || '-'}</td>
-                          <td className="p-3 border">{betId}</td>
-                        </tr>
-                      );
+                      if (bet.time) {
+                        if (filterByTime(bet.time, timeFilter)) {
+                          return (
+                            <tr key={betId}>
+                              <td>{user.email}</td>
+                              <td className="p-3 border">{bet.chapa || '-'}</td>
+                              <td className="p-3 border">{bet.kata || '-'}</td>
+                              <td className="p-3 border">{bet.result || '-'}</td>
+                              <td className="p-3 border">{bet.time || '-'}</td>
+                              <td className="p-3 border">{betId}</td>
+                            </tr>
+                          );
+                        }
+                      }
+                      return null;
                     })}
                   </React.Fragment>
                 ))}
-
-
               </tbody>
             </table>
             <div className="mt-4">

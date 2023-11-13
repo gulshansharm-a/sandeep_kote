@@ -56,6 +56,7 @@ const CoinTransfer = () => {
   }, []);
 
   useEffect(() => {
+    
     if (userRole === 'Admin') {
       fetchAdminBalance();
     } else if (userRole === 'Distributor') {
@@ -166,19 +167,15 @@ const CoinTransfer = () => {
   const transferMoney = async (recipientRole) => {
     try {
       const transferAmountNumber = parseFloat(transferAmount);
-      if (isNaN(transferAmountNumber) || transferAmountNumber <= 0) {
-        console.error('Invalid transfer amount');
-        return;
-      }
 
       let senderBalancePath = null;
       let senderBalance = null;
-
+      const adminSnapshot = await get(ref(database, 'Admin'));
+      const uids = Object.keys(adminSnapshot.val()); // Get an array of UIDs
+      const firstUid = uids[0]; // Get the first UID
       // Determine the sender's balance path based on the role
       if (userRole === 'Admin') {
-        const adminSnapshot = await get(ref(database, 'Admin'));
-        const uids = Object.keys(adminSnapshot.val()); // Get an array of UIDs
-        const firstUid = uids[0]; // Get the first UID
+     
         const balanceSnapshot = await get(ref(database, `Admin/${firstUid}/balance`));
         senderBalancePath = `Admin/${firstUid}/balance`;
       } else if (userRole === 'Distributor') {
@@ -203,14 +200,23 @@ const CoinTransfer = () => {
       const updatedSenderBalance = senderBalance - transferAmountNumber;
       await set(ref(database, senderBalancePath), updatedSenderBalance);
 
+      // Fetch admin email separately
+      let adminEmail = '';
+      if (recipientRole === 'Admin') {
+        const adminEmailSnapshot = await get(ref(database, `Admin/${firstUid}/email`));
+        adminEmail = adminEmailSnapshot.val();
+      }
+
       // Update transactions state with the new transaction
       const transactionDetails = {
         amount: transferAmountNumber,
         userRole: userRole,
         recipientRole: recipientRole,
-        recipientEmail: targetEmail,
+        recipientEmail: recipientRole === 'Admin' ? adminEmail : targetEmail,
+        currentUserEmail: auth.currentUser.email,
         timestamp: new Date().toISOString(),
       };
+
       setTransactions((prevTransactions) => [...prevTransactions, transactionDetails]);
 
       // Update recipient's balance
@@ -227,8 +233,10 @@ const CoinTransfer = () => {
         recipientUid = await findUserUid('Player', targetEmail);
         recipientBalancePath = `Player/${recipientUid}/balance`;
       } else if (recipientRole === 'Admin') {
-        recipientUid = 'admin'; // Admin has a fixed UID in this example
-        recipientBalancePath = 'Admin/admin/balance';
+        const adminSnapshot = await get(ref(database, 'Admin'));
+        const uids = Object.keys(adminSnapshot.val()); // Get an array of UIDs
+        const firstUid = uids[0];
+        recipientBalancePath = `Admin/${firstUid}/balance`;
       }
 
       const recipientSnapshot = await get(ref(database, recipientBalancePath));
@@ -261,7 +269,11 @@ const CoinTransfer = () => {
         recipientBalancePath = `Player/${recipientUid}/balance`;
       } else if (recipientRole === 'Admin') {
         recipientUid = 'admin'; // Admin has a fixed UID in this example
-        recipientBalancePath = 'Admin/admin/balance';
+        const adminSnapshot = await get(ref(database, 'Admin'));
+        const uids = Object.keys(adminSnapshot.val()); // Get an array of UIDs
+        const firstUid = uids[0];
+       
+        recipientBalancePath = `Admin/${firstUid}/balance`;
       }
 
       const recipientSnapshot = await get(ref(database, recipientBalancePath));
@@ -493,7 +505,7 @@ const CoinTransfer = () => {
         </div>
       )}
 
-      <TransactionHistory transactions={transactions}  />
+<TransactionHistory currentUserEmail={auth.currentUser} />
     </div>
   );
 };

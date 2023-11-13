@@ -1,14 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import { ref, onValue } from 'firebase/database';
 import { database } from '../../../Authentication/firebase';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 const TransactionHistory = () => {
   const [transactions, setTransactions] = useState([]);
   const [searchUserRole, setSearchUserRole] = useState('');
   const [sortOption, setSortOption] = useState('latest');
   const [timeRange, setTimeRange] = useState('all');
+  const [currentUserEmail, setCurrentUserEmail] = useState('');
+
+  const getCurrentUserEmail = () => {
+    const auth = getAuth();
+
+    return new Promise((resolve, reject) => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          resolve(user.email);
+        } else {
+          reject(new Error('User not authenticated'));
+        }
+      });
+
+      return unsubscribe;
+    });
+  };
 
   useEffect(() => {
+    getCurrentUserEmail()
+      .then((email) => setCurrentUserEmail(email))
+      .catch((error) => console.error(error));
+
     const transactionsRef = ref(database, 'TransactionHistory');
 
     const unsubscribe = onValue(transactionsRef, (snapshot) => {
@@ -16,7 +38,7 @@ const TransactionHistory = () => {
       if (data) {
         const transactionsArray = Object.values(data);
         const filteredTransactions = filterTransactionsByTime(transactionsArray, timeRange);
-        const sortedTransactions = sortTransactions(filteredTransactions, sortOption);
+        const sortedTransactions = sortTransactions(filteredTransactions, sortOption, currentUserEmail);
         setTransactions(sortedTransactions);
       }
     });
@@ -24,10 +46,14 @@ const TransactionHistory = () => {
     return () => {
       unsubscribe();
     };
-  }, [sortOption, timeRange]);
+  }, [sortOption, timeRange, currentUserEmail]);
 
-  const sortTransactions = (data, option) => {
-    return [...data].sort((a, b) => {
+  const sortTransactions = (data, option, currentUserEmail) => {
+    return [...data].filter(
+      (transaction) =>
+        transaction.currentUserEmail === currentUserEmail ||
+        transaction.recipientEmail === currentUserEmail
+    ).sort((a, b) => {
       const dateA = new Date(a.timestamp);
       const dateB = new Date(b.timestamp);
 
@@ -81,7 +107,7 @@ const TransactionHistory = () => {
 
   const searchRecipient = (recipientEmail) => {
     const filteredTransactions = transactions.filter((transaction) =>
-      transaction.recipientEmail.includes(recipientEmail)
+      transaction.recipientEmail.includes(recipientEmail) || transaction.currentUserEmail.includes(recipientEmail)
     );
 
     setTransactions(filteredTransactions);
@@ -117,7 +143,7 @@ const TransactionHistory = () => {
       if (data) {
         const transactionsArray = Object.values(data);
         const filteredTransactions = filterTransactionsByTime(transactionsArray, timeRange);
-        const sortedTransactions = sortTransactions(filteredTransactions, sortOption);
+        const sortedTransactions = sortTransactions(filteredTransactions, sortOption, currentUserEmail);
         setTransactions(sortedTransactions);
       }
     });
@@ -168,6 +194,7 @@ const TransactionHistory = () => {
             <th className="p-3 border">Recipient Role</th>
             <th className="p-3 border">Recipient Email</th>
             <th className="p-3 border">User Role</th>
+            <th className="p-3 border">Sent by</th>
             <th className="p-3 border">Date</th>
             <th className="p-3 border">Time</th>
           </tr>
@@ -179,6 +206,7 @@ const TransactionHistory = () => {
               <td className="p-3 border">{transaction.recipientRole},</td>
               <td className="p-3 border">{transaction.recipientEmail},</td>
               <td className="p-3 border">{transaction.userRole},</td>
+              <td className="p-3 border">{transaction.currentUserEmail},</td>
               <td className="p-3 border">{new Date(transaction.timestamp).toLocaleDateString()},</td>
               <td className="p-3 border">{new Date(transaction.timestamp).toLocaleTimeString()}</td>
             </tr>

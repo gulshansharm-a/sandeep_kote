@@ -1,0 +1,6 @@
+::-webkit-scrollbar {
+    width: 0 !important;
+  }
+  /* Optional: Ensure scrollbar is hidden for Firefox */
+  /* Please note: This may not work in newer versions of Firefox */
+  scrollbar-width: none;

@@ -11,7 +11,7 @@ const CoinCount = () => {
   const [earningPercentage, setEarningPercentage] = useState(null);
   const [kata, setKata] = useState(null);
   const [chapa, setChapa] = useState(null);
-  const [earningPercentageInput, setEarningPercentageInput] = useState('');
+  const [earningPercentageInput, setEarningPercentageInput] = useState(0);
   const [remainingTime, setRemainingTime] = useState(null);
   const [isCommissionModalOpen, setCommissionModalOpen] = useState(false);
   const [distributorCommission, setDistributorCommission] = useState(0);
@@ -23,61 +23,60 @@ const CoinCount = () => {
     const confirmCalculateCommissions = window.confirm('Are you sure you want to calculate commissions?');
 
     if (confirmCalculateCommissions) {
-    try {
-      // Update the setToZero field to true
-      await set(ref(database, `admin/${loggedInUserId}/settozero`), true);
-      alert('setToZero updated successfully.');
-    } catch (error) {
-      console.error('Error updating setToZero:', error.message);
-      alert('Error updating setToZero. Please try again.');
+      try {
+        // Update the setToZero field to true
+        await set(ref(database, `admin/${loggedInUserId}/settozero`), true);
+        alert('setToZero updated successfully.');
+      } catch (error) {
+        console.error('Error updating setToZero:', error.message);
+        alert('Error updating setToZero. Please try again.');
+      }
     }
-  }
-};
+  };
 
   // Function to handle adding standing to earning and resetting values
-  const handleAddStandingToEarning = async () => 
-  {
+  const handleAddStandingToEarning = async () => {
     const confirmCalculateCommissions = window.confirm('Are you sure you want to calculate commissions?');
 
     if (confirmCalculateCommissions) {
-    try {
-      // Fetch the current standing and earning values
-      const adminSnapshot = await get(ref(database, `/`));
-      const adminData = adminSnapshot.val();
+      try {
+        // Fetch the current standing and earning values
+        const adminSnapshot = await get(ref(database, `/`));
+        const adminData = adminSnapshot.val();
 
-      // Update the values in the database
-      await set(ref(database, `standing`), 0);
-      await set(ref(database, `earning`), adminData.standing + adminData.earning);
+        // Update the values in the database
+        await set(ref(database, `standing`), 0);
+        await set(ref(database, `earning`), adminData.standing + adminData.earning);
 
-      alert('Added standing to earning and reset standing successfully.');
-    } catch (error) {
-      console.error('Error updating standing and earning:', error.message);
-      alert('Error updating standing and earning. Please try again.');
+        alert('Added standing to earning and reset standing successfully.');
+      } catch (error) {
+        console.error('Error updating standing and earning:', error.message);
+        alert('Error updating standing and earning. Please try again.');
+      }
     }
-  }
-};
+  };
 
   // Function to handle setting earning to zero
   const handleSetEarningToZero = async () => {
     const confirmCalculateCommissions = window.confirm('Are you sure you want to calculate commissions?');
 
     if (confirmCalculateCommissions) {
-    try {
-      // Update the earning field to zero
-      await set(ref(database, `earning`), 0);
-      alert('Earning set to zero successfully.');
-    } catch (error) {
-      console.error('Error setting earning to zero:', error.message);
-      alert('Error setting earning to zero. Please try again.');
+      try {
+        // Update the earning field to zero
+        await set(ref(database, `earning`), 0);
+        alert('Earning set to zero successfully.');
+      } catch (error) {
+        console.error('Error setting earning to zero:', error.message);
+        alert('Error setting earning to zero. Please try again.');
+      }
     }
-  }
-};
+  };
   const openCommissionModal = () => {
     const confirmCalculateCommissions = window.confirm('Are you sure you want to calculate commissions?');
 
     if (confirmCalculateCommissions) {
-    fetchCommissionsFromDatabase();
-    setCommissionModalOpen(true);
+      fetchCommissionsFromDatabase();
+      setCommissionModalOpen(true);
     }
   };
 
@@ -191,10 +190,15 @@ const CoinCount = () => {
   }, []);
 
   const handleEarningPercentageChange = async (e) => {
-    const value = parseFloat(e.target.value);
+
+  };
+
+
+  const updateEarningPercentage = async (e) => {
+    const value = parseFloat(earningPercentageInput);
     console.log(`Trying to set earning percentage to: ${value}`); // Logging
 
-    if (value >= 0 && value <= 100) {
+    if (value >= 10 && value <= 100) {
       setEarningPercentageInput(value);
       try {
         await set(ref(database, `earningPercentage`), value);
@@ -205,10 +209,11 @@ const CoinCount = () => {
         alert('Error updating earning percentage. Please try again.');
       }
     }
-  };
+    else {
+      alert(`${value} is invalid`)
+      return;
+    }
 
-
-  const updateEarningPercentage = async () => {
     try {
       await set(ref(database, `admin/${loggedInUserId}/earningPercentage`), parseFloat(earningPercentageInput));
       setEarningPercentage(earningPercentageInput);
@@ -220,31 +225,31 @@ const CoinCount = () => {
     const confirmCalculateCommissions = window.confirm('Are you sure you want to calculate commissions?');
 
     if (confirmCalculateCommissions) {
-    console.log("clickeddd");
-    try {
-      const response = await fetch('http://localhost:3000/calculate-commissions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // You can include a request body if needed
-        // body: JSON.stringify({ /* your data here */ }),
-      });
+      console.log("clickeddd");
+      try {
+        const response = await fetch('http://localhost:3000/calculate-commissions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // You can include a request body if needed
+          // body: JSON.stringify({ /* your data here */ }),
+        });
 
-      if (response.ok) {
-        // The request was successful, you can add any further handling here.
-        console.log('Commissions calculated and updated successfully.');
+        if (response.ok) {
+          // The request was successful, you can add any further handling here.
+          console.log('Commissions calculated and updated successfully.');
 
-        alert("Commissions are calculated")
-      } else {
-        // Handle any errors here.
-        console.error('Error calculating commissions.');
+          alert("Commissions are calculated")
+        } else {
+          // Handle any errors here.
+          console.error('Error calculating commissions.');
+        }
+      } catch (error) {
+        console.error('An error occurred while sending the request:', error);
       }
-    } catch (error) {
-      console.error('An error occurred while sending the request:', error);
     }
-  }
-};
+  };
 
   const saveCommissionChanges = async () => {
     // Update the commission values in Firebase
@@ -352,10 +357,12 @@ const CoinCount = () => {
                   min="0"
                   max="100"
                   value={earningPercentageInput}
-                  onChange={handleEarningPercentageChange}
+                  onChange={(e) => setEarningPercentageInput(e.target.value)}
                   className="mr-2 lg:mr-4 px-4 py-2 border border-gray-300 rounded focus:outline-none text-sm lg:text-base"
                 />
-                <button onClick={updateEarningPercentage} className="px-4 lg:px-6 py-2 lg:py-3 bg-blue-500 text-white rounded text-sm lg:text-base">Update Percentage</button>
+                <button onClick={(e) => updateEarningPercentage(e)} className="px-4 lg:px-6 py-2 lg:py-3 bg-blue-500 text-white rounded text-sm lg:text-base">
+                  Update Percentage
+                </button>
               </div>
             </div>
 

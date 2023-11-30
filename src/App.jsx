@@ -105,8 +105,8 @@ function App() {
                 <Route path="menuUsers" element={<MenuUsers />} />
                 <Route path="gameHistory" element={<GameHistory />} />
                 <Route path="menuUsers/specific" element={<MenuUserSpecific />} />
-                {/* <Route path="resetPassword" element={<ResetPassword />} /> */}
-                <Route path="blockUsers" element={<BlockUsers />} />
+                <Route path="resetPassword" element={<ResetPassword />} />
+                {/* <Route path="blockUsers" element={<BlockUsers />} /> */}
                 <Route path="blockUsersHistory" element={<BlockedHistory />} />
                 <Route path="setBalance" element={<AdminBalanceSetting />} />
                 <Route path="liveUsers" element={<LiveUsers />} />

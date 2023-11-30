@@ -178,10 +178,10 @@ const CommissionHistory = () => {
             const currentPageHistory = sortedCommissionHistory.slice(pageStartIndex, pageEndIndex);
             return calculatePageTotal(currentPageHistory);
         });
-    
+
         setPageTotals(pageTotalsArray);
-    }, [sortedCommissionHistory, rowsPerPage]);       
-    
+    }, [sortedCommissionHistory, rowsPerPage]);
+
     useEffect(() => {
         const calculatedGrandTotal = pageTotals.reduce((total, pageTotal) => {
             return total + pageTotal;
@@ -226,6 +226,9 @@ const CommissionHistory = () => {
                         }}
                         className="mt-1 p-2 border rounded w-full focus:outline-none focus:ring focus:border-blue-500"
                     >
+                        <option value="">
+                            select
+                        </option>
                         {users.map((user) => (
                             <option key={user.uid} value={user.uid}>
                                 {user.email}

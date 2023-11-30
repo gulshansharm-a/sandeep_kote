@@ -73,6 +73,8 @@ export default function SideBar() {
                 const user = auth.currentUser;
                 const currentPassword = prompt("Please enter your current password:");
                 const credential = EmailAuthProvider.credential(user.email, currentPassword);
+
+                setOpenModalReset(false);
     
                 await reauthenticateWithCredential(user, credential);
     
@@ -185,7 +187,7 @@ export default function SideBar() {
                         <h3 className="text-xl font-medium text-gray-900 dark:text-white">Enter the new password</h3>
                         <div>
                             <div className="mb-2 block">
-                                <Label htmlFor="password" value="Your password" />
+                                <Label htmlFor="password" value="Enter new password" />
                             </div>
                             <TextInput id="password" type="password" required />
                             <div className="mb-2 mt-2 block">

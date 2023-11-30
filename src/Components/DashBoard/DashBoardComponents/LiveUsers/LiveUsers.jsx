@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { child, get, ref } from 'firebase/database';
+import { child, get, ref , onValue, off} from 'firebase/database';
 import { auth } from '../../../../Authentication/firebase';
 import { database } from '../../../../Authentication/firebase';
 
@@ -48,7 +48,7 @@ export default function LiveUsers() {
         const fetchData = async () => {
             try {
                 let snapshot;
-
+    
                 switch (selectedOption) {
                     case 'Admin':
                         snapshot = await get(child(ref(database), 'Admin'));
@@ -65,26 +65,44 @@ export default function LiveUsers() {
                     default:
                         snapshot = await get(child(ref(database), 'Admin'));
                 }
-
+    
                 const usersData = Object.entries(snapshot.val() || {}).map(([userId, userData]) => ({
                     ...userData,
                     userId,
                     role: selectedOption,
                 }));
-
+    
                 const playerUIDs = await fetchPlayerUIDs();
-
+    
                 const filteredUsers = usersData.filter((user) => {
                     return playerUIDs.includes(user.userId);
                 });
-
+    
                 setUsers(filteredUsers);
             } catch (error) {
                 console.error('Error fetching data from Firebase:', error.message);
             }
         };
-
-        fetchData();
+    
+        fetchData(); // Initial fetch when the component mounts or when selectedOption changes
+    
+        const betDatabaseRef = child(ref(database), 'bet');
+        const betDatabaseListener = onValue(betDatabaseRef, (snapshot) => {
+            // When 'bet' node data changes, refetch the player UIDs and update the component
+            fetchPlayerUIDs().then((playerUIDs) => {
+                // Re-fetch data based on the updated player UIDs
+                fetchData();
+            }).catch((error) => {
+                console.error('Error fetching player UIDs from Firebase:', error.message);
+            });
+        });
+    
+        // Clean up the listener when the component unmounts or when the dependencies change
+        return () => {
+            if (betDatabaseListener) {
+                off(betDatabaseRef, 'value', betDatabaseListener);
+            }
+        };
     }, [selectedOption, currentAuthUser]);
 
     const fetchPlayerUIDs = async () => {

@@ -41,10 +41,10 @@ export default function GameHistorySpecific({ emailProp, UID }) {
   const indexOfLastItem = currentPage * rowsPerPage;
   const indexOfFirstItem = indexOfLastItem - rowsPerPage;
   const userHistorySlice = userHistory
-    ? Object.keys(userHistory).slice(indexOfFirstItem, indexOfLastItem)
-    : [];
+  ? Object.keys(userHistory).slice(indexOfFirstItem, indexOfLastItem)
+  : [];
 
-  const totalPages = Math.ceil(Object.keys(userHistory).length / rowsPerPage);
+const totalPages = userHistory ? Math.ceil(Object.keys(userHistory).length / rowsPerPage) : 0;
 
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));

@@ -1,6 +1,18 @@
 ::-webkit-scrollbar {
-    width: 0 !important;
-  }
-  /* Optional: Ensure scrollbar is hidden for Firefox */
-  /* Please note: This may not work in newer versions of Firefox */
-  scrollbar-width: none;
+  width: 0 !important;
+}
+/* Optional: Ensure scrollbar is hidden for Firefox */
+/* Please note: This may not work in newer versions of Firefox */
+scrollbar-width: none;
+
+/* CSS code */
+table {
+  border-collapse: collapse;
+  border: 1px solid #e5e7eb;
+}
+
+th,
+td {
+  border: 1px solid #e5e7eb;
+  padding: 8px; /* Adjust padding as needed */
+}

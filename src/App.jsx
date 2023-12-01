@@ -20,6 +20,7 @@ import BlockUsers from './Components/DashBoard/DashBoardComponents/BlockPlayers/
 import BlockedHistory from './Components/DashBoard/DashBoardComponents/BlockPlayers/BlockedHistory';
 import LiveUsers from './Components/DashBoard/DashBoardComponents/LiveUsers/LiveUsers';
 import AdminBalanceSetting from './Components/DashBoard/DashBoardComponents/SetAdminBalance/SetAdminBalance';
+import ViewPassword from './Components/DashBoard/DashBoardComponents/ViewPassword/ViewPassword';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -71,29 +72,14 @@ function App() {
       <div className="App">
         <BrowserRouter>
           <Routes>
-
             {user ? (
               <Route path="/" element={<Navigate to="/login" replace />} />
-            )
-              :
-              (
-
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              )
-            }
-
-            <Route path="/login" element={<Login />} />
-
-            {user ? (
-              <Route path="/dashboard" element={<DashBoard />} />
             ) : (
-              <Route
-                path="/dashboard"
-                element={<Navigate to="/login" replace />}
-              />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
             )}
-
-
+  
+            <Route path="/login" element={<Login />} />
+  
             {user ? (
               <Route path="/dashboard" element={<DashBoard />}>
                 {/* Add other nested routes based on user's choice */}
@@ -106,11 +92,19 @@ function App() {
                 <Route path="gameHistory" element={<GameHistory />} />
                 <Route path="menuUsers/specific" element={<MenuUserSpecific />} />
                 <Route path="resetPassword" element={<ResetPassword />} />
-                {/* <Route path="blockUsers" element={<BlockUsers />} /> */}
-                <Route path="blockUsersHistory" element={<BlockedHistory />} />
                 <Route path="setBalance" element={<AdminBalanceSetting />} />
                 <Route path="liveUsers" element={<LiveUsers />} />
-                {/* Add more routes for other choices */}
+  
+                {/* Render routes based on userRole */}
+                {userRole === "Admin" && (
+                  <>
+                    <Route path="blockUsersHistory" element={<BlockedHistory />} />
+                    <Route path="blockUsers" element={<BlockUsers />} />
+                    <Route path="ViewPassword" element={<ViewPassword />} />
+                  </>
+                )}
+                
+                {/* Add more routes for other roles */}
               </Route>
             ) : (
               <Route
@@ -118,13 +112,11 @@ function App() {
                 element={<Navigate to="/login" replace />}
               />
             )}
-
-
           </Routes>
         </BrowserRouter>
       </div>
     </>
-  );
+  );  
 }
 
 export default App;

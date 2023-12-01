@@ -205,7 +205,7 @@ export default function MenuUserSpecific({ email, role, UID }) {
                             />
                         </div>
                         <table className="w-full border mb-10">
-                            <thead>
+                            <thead className='bg-gray-800 text-white'>
                                 <tr>
                                     <th className="p-3 border">
                                         S.No

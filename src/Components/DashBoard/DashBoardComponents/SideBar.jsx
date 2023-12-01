@@ -1,12 +1,24 @@
-import { signOut, updatePassword } from "firebase/auth";
-import { reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
-import { get, ref } from 'firebase/database';
-import { Button, Modal, TextInput, Label } from 'flowbite-react';
+import { EmailAuthProvider, reauthenticateWithCredential, signOut, updatePassword } from "firebase/auth";
+import { get, ref, update } from 'firebase/database';
+import { Button, Label, Modal, TextInput } from 'flowbite-react';
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, database } from "../../../Authentication/firebase";
+import { initializeApp } from 'firebase/app';
+import { getDatabase } from 'firebase/database';
 
 export default function SideBar() {
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4",
+        authDomain: "sandeepkote-c67f5.firebaseapp.com",
+        databaseURL: "https://sandeepkote-c67f5-default-rtdb.firebaseio.com",
+        projectId: "sandeepkote-c67f5",
+        storageBucket: "sandeepkote-c67f5.appspot.com",
+        messagingSenderId: "871561614523",
+        appId: "1:871561614523:web:3b12ae93e7490723ddc59e",
+        measurementId: "G-645LW1SWKT"
+    };
 
     // for logout popup
     const [openModal, setOpenModal] = useState(false);
@@ -55,6 +67,40 @@ export default function SideBar() {
         }
     };
 
+    const [userRole, setUserRole] = useState(null);
+    const [currentUserID, setCurrentUserID] = useState(null);
+
+    const firebaseApp = initializeApp(firebaseConfig);
+
+    // Get a reference to the Firebase Realtime Database
+    const database = getDatabase(firebaseApp);
+
+    // Your React component
+    // ... (useEffect and other code)
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                try {
+                    const snapshot = await get(ref(database)); // Use get() instead of once('value')
+                    const data = snapshot.val();
+
+                    for (const role in data) {
+                        if (data[role][user.uid]) {
+                            setUserRole(role);
+                            setCurrentUserID(user.uid);
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching data from Firebase:', error.message);
+                }
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
+
     const handleResetPassword = async () => {
         const passwordInput = document.getElementById("password");
         const confirmPasswordInput = document.getElementById("confirmPassword");
@@ -69,21 +115,30 @@ export default function SideBar() {
 
         if (auth.currentUser) {
             try {
-                // Reauthenticate the user with their current email and password
                 const user = auth.currentUser;
                 const currentPassword = prompt("Please enter your current password:");
+                console.log(currentPassword);
                 const credential = EmailAuthProvider.credential(user.email, currentPassword);
 
                 setOpenModalReset(false);
 
                 await reauthenticateWithCredential(user, credential);
-
-                // If reauthentication succeeds, update the password
                 await updatePassword(user, newPassword);
+
+                // If reauthentication and password update are successful, update the 'pass' field in the database
+                if (userRole && currentUserID) {
+                    const userRef = ref(database, `${userRole}/${currentUserID}`); // Use ref() to create a database reference
+                    await update(userRef, { pass: newPassword }); // Use update() to update data
+                }
+
                 alert("Password reset successfully. Please log in with your new password.");
             } catch (error) {
-                console.error("Error resetting password:", error.message);
-                alert("Password reset failed.");
+                if (error.code === 'auth/wrong-password') {
+                    alert('The current password you entered is incorrect. Please enter the correct password.');
+                } else {
+                    console.error("Error resetting password:", error.message);
+                    alert("Password reset failed.");
+                }
             }
         } else {
             alert("User not found.");
@@ -93,12 +148,6 @@ export default function SideBar() {
         passwordInput.value = "";
         confirmPasswordInput.value = "";
     };
-
-
-    const [currentUserID, setCurrentUserID] = useState(null);
-
-    // the role of the user
-    const [userRole, setUserRole] = useState(null);
 
 
     useEffect(() => {
@@ -329,9 +378,9 @@ export default function SideBar() {
                             :
                             <li>
                                 <a href="/dashboard/ViewPassword" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
-                                <svg className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
-                                    <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
-                                </svg>
+                                    <svg className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
+                                        <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
+                                    </svg>
 
 
                                     <span className="flex-1 ml-3 whitespace-nowrap">View Password</span>
@@ -495,6 +544,20 @@ export default function SideBar() {
 
 
                                     <span className="flex-1 ml-3 whitespace-nowrap">Set Balance </span>
+                                </a>
+                            </li>
+                        }
+                        {userRole !== "Admin" ?
+                            <div></div>
+                            :
+                            <li>
+                                <a href="/dashboard/setBalance" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
+                                    <svg className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
+                                        <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
+                                    </svg>
+
+
+                                    <span className="flex-1 ml-3 whitespace-nowrap">View Password </span>
                                 </a>
                             </li>
                         }

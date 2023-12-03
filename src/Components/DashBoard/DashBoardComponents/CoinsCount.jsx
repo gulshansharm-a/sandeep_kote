@@ -227,7 +227,7 @@ const CoinCount = () => {
     if (confirmCalculateCommissions) {
       console.log("clickeddd");
       try {
-        const response = await fetch('http://localhost:3000/calculate-commissions', {
+        const response = await fetch('http://sunvibal.onrender.com/calculate-commissions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -7,6 +7,9 @@ const AdminBalanceSetting = () => {
   const [adminBalance, setAdminBalance] = useState(null);
   const [newBalance, setNewBalance] = useState('');
 
+  const [isPasswordValid, setIsPasswordValid] = useState(true);
+
+
   const firebaseConfig = {
     apiKey: 'AIzaSyA-lRLBHee1IISE8t5pJywkP-YrHPKIvk4',
     authDomain: 'sandeepkote-c67f5.firebaseapp.com',
@@ -40,14 +43,32 @@ const AdminBalanceSetting = () => {
   }, []);
 
   const handleSetBalance = async () => {
+    // Prompt the user for a password
+    const enteredPassword = window.prompt('Enter the admin password:');
+
+    // Check if the password is valid
     try {
       const adminSnapshot = await get(ref(database, 'Admin'));
       const uids = Object.keys(adminSnapshot.val());
       const firstUid = uids[0];
-      await set(ref(database, `Admin/${firstUid}/balance`), parseFloat(newBalance));
-      setAdminBalance(parseFloat(newBalance));
-      setNewBalance('');
-      alert('Admin balance updated successfully.');
+
+      // Assuming you have a 'password' field in your Admin node
+      const passwordSnapshot = await get(ref(database, `Admin/${firstUid}/pass`));
+      const storedPassword = passwordSnapshot.val();
+
+      if (enteredPassword === storedPassword) {
+        // Password is correct, proceed to set the balance
+        const newBalanceValue = parseFloat(newBalance);
+
+        await set(ref(database, `Admin/${firstUid}/balance`), newBalanceValue);
+        setAdminBalance(newBalanceValue);
+        setNewBalance('');
+        setIsPasswordValid(true);
+        alert('Admin balance updated successfully.');
+      } else {
+        // Incorrect password
+        setIsPasswordValid(false);
+      }
     } catch (error) {
       console.error('Error setting admin balance:', error.message);
       alert('Error setting admin balance. Please try again.');
@@ -58,6 +79,10 @@ const AdminBalanceSetting = () => {
     <div className="lg:ml-40 mt-40 font-serif text-2xl">
       <h1>Admin Balance Setting</h1>
       <p>Current Admin Balance: {adminBalance}</p>
+
+      {/* Display error message if password is invalid */}
+      {!isPasswordValid && <p className="text-red-500">Incorrect password. Please try again.</p>}
+
       <label>
         New Balance:
         <input
@@ -68,7 +93,12 @@ const AdminBalanceSetting = () => {
           className="lg:ml-40 mt-27 px-2 py-1"
         />
       </label>
-      <button className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={handleSetBalance}>Set Balance</button>
+      <button
+        className="lg:ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        onClick={handleSetBalance}
+      >
+        Set Balance
+      </button>
     </div>
   );
 };

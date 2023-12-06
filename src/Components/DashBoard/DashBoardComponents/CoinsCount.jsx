@@ -20,7 +20,7 @@ const CoinCount = () => {
 
   // Function to handle set to zero
   const handleSetToZero = async () => {
-    const confirmCalculateCommissions = window.confirm('Are you sure you want to calculate commissions?');
+    const confirmCalculateCommissions = window.confirm('Are you sure you want to set to zero?');
 
     if (confirmCalculateCommissions) {
       try {
@@ -36,7 +36,7 @@ const CoinCount = () => {
 
   // Function to handle adding standing to earning and resetting values
   const handleAddStandingToEarning = async () => {
-    const confirmCalculateCommissions = window.confirm('Are you sure you want to calculate commissions?');
+    const confirmCalculateCommissions = window.confirm('Are you sure you want to add Standing to Earning?');
 
     if (confirmCalculateCommissions) {
       try {
@@ -58,7 +58,7 @@ const CoinCount = () => {
 
   // Function to handle setting earning to zero
   const handleSetEarningToZero = async () => {
-    const confirmCalculateCommissions = window.confirm('Are you sure you want to calculate commissions?');
+    const confirmCalculateCommissions = window.confirm('Are you sure you want to set Earning to zero?');
 
     if (confirmCalculateCommissions) {
       try {

@@ -190,11 +190,12 @@ const TransactionHistory = () => {
       <table className="table-auto">
         <thead>
           <tr>
+          <th className="p-3 border">Sent by</th>
+          <th className="p-3 border">User Role</th>
+          <th className="p-3 border">Recipient Email</th>
+          <th className="p-3 border">Recipient Role</th>
             <th className="p-2 border">Amount</th>
-            <th className="p-3 border">Recipient Role</th>
-            <th className="p-3 border">Recipient Email</th>
-            <th className="p-3 border">User Role</th>
-            <th className="p-3 border">Sent by</th>
+         
             <th className="p-3 border">Date</th>
             <th className="p-3 border">Time</th>
           </tr>
@@ -202,11 +203,12 @@ const TransactionHistory = () => {
         <tbody>
           {transactions.map((transaction, index) => (
             <tr key={index}>
-              <td className="p-3 border">{transaction.amount},</td>
-              <td className="p-3 border">{transaction.recipientRole},</td>
-              <td className="p-3 border">{transaction.recipientEmail},</td>
-              <td className="p-3 border">{transaction.userRole},</td>
               <td className="p-3 border">{transaction.currentUserEmail},</td>
+              <td className="p-3 border">{transaction.userRole},</td>
+              <td className="p-3 border">{transaction.recipientEmail},</td>
+              <td className="p-3 border">{transaction.recipientRole},</td>
+              <td className="p-3 border">{transaction.amount},</td>
+              
               <td className="p-3 border">{new Date(transaction.timestamp).toLocaleDateString()},</td>
               <td className="p-3 border">{new Date(transaction.timestamp).toLocaleTimeString()}</td>
             </tr>

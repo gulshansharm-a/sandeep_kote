@@ -6,7 +6,7 @@ import MenuUserSpecific from './MenuUserSpecific';
 import GameHistorySpecific from '../Game/GameHistorySpecific';
 
 export default function MenuUsers() {
-    const [selectedOption, setSelectedOption] = useState('Player');
+    const [selectedOption, setSelectedOption] = useState('');
     const [users, setUsers] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -177,7 +177,7 @@ export default function MenuUsers() {
 
     const [specific, setSpecific] = useState(false);
     const [selectedEmail, setSelectedEmail] = useState(null);
-    const [selectedRole, setSelectedRole] = useState(null);
+    const [selectedRole, setSelectedRole] = useState("Player");
     const [selectedUID, setSelectedUID] = useState(null);
 
     function handleEmailClick(email, role, uid) {
@@ -245,40 +245,40 @@ export default function MenuUsers() {
                                 <thead className='bg-gray-800 text-white'>
                                     <tr>
                                         <th className="p-3 border">S.No</th>
-                                        <th className="p-3 border">Email</th>
-                                        <th className="p-3 border">Username</th>
-                                        <th className="p-3 border">Balance</th>
-                                        {selectedOption === 'Distributor' && <th className="p-3 border">Admin Email</th>}
-                                        {selectedOption === 'Agent' && <th className="p-3 border">Admin Email</th>}
+                                        {/* {selectedOption === 'Distributor' && <th className="p-3 border">Admin Email</th>} */}
+                                        {/* {selectedOption === 'Agent' && <th className="p-3 border">Admin Email</th>} */}
                                         {selectedOption === 'Agent' && <th className="p-3 border">Distributor Email</th>}
-                                        {selectedOption === 'Player' && <th className="p-3 border">Admin Email</th>}
+                                        {/* {selectedOption === 'Player' && <th className="p-3 border">Admin Email</th>} */}
                                         {selectedOption === 'Player' && <th className="p-3 border">Distributor Email</th>}
                                         {selectedOption === 'Player' && <th className="p-3 border">Agent Email</th>}
+                                        <th className="p-3 border">{selectedOption} Email</th>
+                                        <th className="p-3 border">Username</th>
+                                        <th className="p-3 border">Balance</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {currentUsers.map((user, index) => (
                                         <tr key={user.userId}>
                                             <td className="p-3 border">{indexOfFirstItem + index + 1}</td>
-                                            <td className="p-3 border cursor-pointer" onClick={() => handleEmailClick(user.email, selectedOption, user.userId)}>
-                                                {user.email}
-                                            </td>
-                                            <td className="p-3 border">{user.userName}</td>
-                                            <td className="p-3 border">{user.balance}</td>
-                                            {selectedOption === 'Distributor' && <td className="p-3 border">{userEmails[user.adminID] || 'Loading...'}</td>}
+                                            {/* {selectedOption === 'Distributor' && <td className="p-3 border">{userEmails[user.adminID] || 'Loading...'}</td>} */}
                                             {selectedOption === 'Agent' && (
                                                 <>
-                                                    <td className="p-3 border">{userEmails[user.adminID] || 'Loading...'}</td>
+                                                    {/* <td className="p-3 border">{userEmails[user.adminID] || 'Loading...'}</td> */}
                                                     <td className="p-3 border">{userEmails[user.distributorID] || 'Loading...'}</td>
                                                 </>
                                             )}
                                             {selectedOption === 'Player' && (
                                                 <>
-                                                    <td className="p-3 border">{userEmails[user.adminID] || 'Loading...'}</td>
+                                                    {/* <td className="p-3 border">{userEmails[user.adminID] || 'Loading...'}</td> */}
                                                     <td className="p-3 border">{userEmails[user.distributorID] || 'Loading...'}</td>
                                                     <td className="p-3 border">{userEmails[user.agentID] || 'Loading...'}</td>
                                                 </>
                                             )}
+                                            <td className="p-3 border cursor-pointer" onClick={() => handleEmailClick(user.email, selectedOption, user.userId)}>
+                                                {user.email}
+                                            </td>
+                                            <td className="p-3 border">{user.userName}</td>
+                                            <td className="p-3 border">{user.balance}</td>
                                         </tr>
                                     ))}
                                 </tbody>

@@ -77,9 +77,9 @@ function App() {
             ) : (
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
             )}
-  
+
             <Route path="/login" element={<Login />} />
-  
+
             {user ? (
               <Route path="/dashboard" element={<DashBoard />}>
                 {/* Add other nested routes based on user's choice */}
@@ -92,18 +92,23 @@ function App() {
                 <Route path="gameHistory" element={<GameHistory />} />
                 <Route path="menuUsers/specific" element={<MenuUserSpecific />} />
                 <Route path="resetPassword" element={<ResetPassword />} />
-                <Route path="setBalance" element={<AdminBalanceSetting />} />
                 <Route path="liveUsers" element={<LiveUsers />} />
-  
+
                 {/* Render routes based on userRole */}
                 {userRole === "Admin" && (
                   <>
-                    <Route path="blockUsersHistory" element={<BlockedHistory />} />
-                    <Route path="blockUsers" element={<BlockUsers />} />
+                    <Route path="setBalance" element={<AdminBalanceSetting />} />
                     <Route path="ViewPassword" element={<ViewPassword />} />
                   </>
                 )}
-                
+
+                {userRole !== "Player" && (
+                  <>
+                    <Route path="blockUsersHistory" element={<BlockedHistory />} />
+                    <Route path="blockUsers" element={<BlockUsers />} />
+                  </>
+                )}
+
                 {/* Add more routes for other roles */}
               </Route>
             ) : (
@@ -116,7 +121,7 @@ function App() {
         </BrowserRouter>
       </div>
     </>
-  );  
+  );
 }
 
 export default App;

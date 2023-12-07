@@ -134,7 +134,7 @@ const TransactionHistory = () => {
 
     setTransactions(filteredTransactions);
   };
-
+ 
   const resetTransactions = () => {
     const transactionsRef = ref(database, 'TransactionHistory');
 
@@ -148,6 +148,7 @@ const TransactionHistory = () => {
       }
     });
   };
+
 
   return (
     <div className="lg:ml-20 mt-5 font-serif">
@@ -202,6 +203,7 @@ const TransactionHistory = () => {
         </thead>
         <tbody>
           {transactions.map((transaction, index) => (
+             
             <tr key={index}>
               <td className="p-3 border">{transaction.currentUserEmail},</td>
               <td className="p-3 border">{transaction.userRole},</td>
@@ -209,8 +211,9 @@ const TransactionHistory = () => {
               <td className="p-3 border">{transaction.recipientRole},</td>
               <td className="p-3 border">{transaction.amount},</td>
               
-              <td className="p-3 border">{new Date(transaction.timestamp).toLocaleDateString()},</td>
-              <td className="p-3 border">{new Date(transaction.timestamp).toLocaleTimeString()}</td>
+              <td className="p-3 border">{new Date(transaction.timestamp).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })},</td>
+<td className="p-3 border">{new Date(transaction.timestamp).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
+
             </tr>
           ))}
         </tbody>

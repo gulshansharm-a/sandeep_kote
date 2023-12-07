@@ -24,6 +24,7 @@ const CoinTransfer = () => {
   const [verifyPasswordCallback, setVerifyPasswordCallback] = useState(null);
   const [distributorEmails, setDistributorEmails] = useState([]);
 const [agentEmails, setAgentEmails] = useState([]);
+const [adminEmails, setAdminEmails] = useState([]);
 const [playerEmails, setPlayerEmails] = useState([]);
 
   const firebaseConfig = {
@@ -154,6 +155,16 @@ const [playerEmails, setPlayerEmails] = useState([]);
           }
         }
       }
+      else if (recipientRole === 'Admin') {
+        const recipientSnapshot = await get(ref(database, 'Admin'));
+        const recipientData = recipientSnapshot.val();
+        for (const recipientUid in recipientData) {
+          if (recipientData[recipientUid]?.email === targetEmail) {
+            recipientBalance = recipientData[recipientUid]?.balance;
+            break;
+          }
+        }
+      } 
 
       if (recipientBalance !== null) {
         setRecipientBalance(recipientBalance);
@@ -218,11 +229,11 @@ const [playerEmails, setPlayerEmails] = useState([]);
       const uids = Object.keys(adminSnapshot.val()); // Get an array of UIDs
       const firstUid = uids[0]; // Get the first UID
       console.log(1);
-      let adminEmail = '';
-      if (recipientRole === 'Admin') {
-        const adminEmailSnapshot = await get(ref(database, `Admin/${firstUid}/email`));
-        adminEmail = adminEmailSnapshot.val();
-      }
+       let adminEmail = '';
+      // if (recipientRole === 'Admin') {
+      //   const adminEmailSnapshot = await get(ref(database, `Admin/${firstUid}/email`));
+      //   adminEmail = adminEmailSnapshot.val();
+      // }
       const transactionDetails = {
         amount: transferAmountNumber,
         userRole: userRole,
@@ -294,6 +305,16 @@ const [playerEmails, setPlayerEmails] = useState([]);
     }
   };
 
+  const fetchAdminEmails = async () => {
+    try {
+      const adminSnapshot = await get(ref(database, 'Admin'));
+      const emails = Object.values(adminSnapshot.val()).map(admin => admin.email);
+      setAdminEmails(emails);
+    } catch (error) {
+      console.error('Error fetching agent emails:', error.message);
+    }
+  };
+
   // UseEffect to fetch distributor emails when the user role is Admin
   useEffect(() => {
     if (userRole === 'Admin' ||userRole === 'Agent' ) {
@@ -305,6 +326,12 @@ const [playerEmails, setPlayerEmails] = useState([]);
   useEffect(() => {
     if (userRole === 'Distributor' || userRole === 'Player') {
       fetchAgentEmails();
+    }
+  }, [userRole]);
+
+  useEffect(() => {
+    if (userRole === 'Distributor' ) {
+      fetchAdminEmails();
     }
   }, [userRole]);
 
@@ -443,6 +470,27 @@ const [playerEmails, setPlayerEmails] = useState([]);
       {userRole === 'Distributor' && (
         <div>
           <p className="ml-40 mt-27 font-serif text-2xl">Distributor Balance: {distributorBalance !== null ? distributorBalance : 'Loading...'}</p>
+          <br></br>
+          <select
+            value={targetEmail}
+            onChange={handleTargetEmailChange}
+            className="ml-40 mt-27 px-2 py-1"
+          >
+            <option value="" disabled>Select recipient email</option>
+            {adminEmails.map((email) => (
+              <option key={email} value={email}>{email}</option>
+            ))}
+          </select>
+          <br></br>
+          <button
+            className="ml-40 mt-27 mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            onClick={() => fetchRecipientBalance('Admin')}
+          >
+            Fetch Admin Balance
+          </button>
+          <br></br>
+          <p className="ml-40 mt-27 font-serif text-2xl">Recipient Balance: {recipientBalance !== null ? recipientBalance : 'Loading...'}</p>
+       
           <br></br>
           <input
             type="number"
